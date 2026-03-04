@@ -12,6 +12,7 @@ class DashboardController extends Controller
         $user = Auth::user();
         $totalUsers = \App\Models\User::count();
         $totalRoles = \Spatie\Permission\Models\Role::count();
+        
 
         return view('dashboard', compact('user', 'totalUsers', 'totalRoles'));
     }
