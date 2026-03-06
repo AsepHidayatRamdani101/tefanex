@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -41,4 +42,10 @@ Route::get('users-data', [UserController::class, 'data'])->name('users.data');
 Route::resource('roles', RoleController::class)
     ->middleware('role:super_admin');
 Route::get('roles-data', [RoleController::class, 'data'])->name('roles.data');
+
+Route::resource('projects', ProjectController::class)
+    ->middleware('role:guru|super_admin');
+Route::get('projects-data', [ProjectController::class, 'data'])->name('projects.data');
+
+
 require __DIR__ . '/auth.php';

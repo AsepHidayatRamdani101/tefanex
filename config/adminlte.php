@@ -300,16 +300,40 @@ return [
 
     'menu' => [
         [
+            'text' => 'Dashboard',
+            'url' => 'dashboard',
+            'icon' => 'fas fa-tachometer-alt',
+        ],
+        [
             'text' => 'Project TEFA',
             'url' => 'projects',
             'icon' => 'fas fa-project-diagram',
             'can' => 'guru'
         ],
         [
+            'text' => 'Materi',
+            'url' => 'materi',
+            'icon' => 'fas fa-book',
+            'can' => 'guru'
+           
+        ],
+        [
+            'text' => 'Pretest/Posttest',
+            'url' => 'pretest',
+            'icon' => 'fas fa-file-alt',
+            'can' => 'guru'
+        ],
+        [
+            'text' => 'Absensi',
+            'url' => 'absensi',
+            'icon' => 'fas fa-calendar-check',
+            'can' => 'guru|siswa'
+        ],
+        [
             'text' => 'User',
             'url' => 'users',
             'icon' => 'fas fa-user',
-            'can' => 'super_admin'
+            'can' => 'super_admin|guru'
         ],
         [
             'text' => 'Role',
@@ -323,6 +347,28 @@ return [
             'url' => 'produksi',
             'icon' => 'fas fa-industry',
             'can' => 'kepala_produksi'
+        ],
+        [
+            'text' => 'Laporan',
+            'url' => 'laporan',
+            'icon' => 'fas fa-chart-bar',
+            'can' => 'kepala_produksi'
+        ],
+        [
+            'text' => 'Pengaturan',
+            'url' => 'pengaturan',
+            'icon' => 'fas fa-cogs',
+            'can' => 'super_admin'
+        ],
+        [
+            'text' => 'Profil',
+            'url' => 'profile',
+            'icon' => 'fas fa-user-cog',
+        ],
+        [
+            'text' => 'Logout',
+            'url' => 'logout',
+            'icon' => 'fas fa-sign-out-alt',
         ],
     ],
 

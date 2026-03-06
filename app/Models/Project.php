@@ -10,9 +10,11 @@ class Project extends Model
     use HasFactory;
 
     protected $fillable = [
+        'judul',
         'guru_id',
-        'name',
-        'description',
+        'client',
+        'status',
+        'deskripsi',
     ];
 
     public function guru()
