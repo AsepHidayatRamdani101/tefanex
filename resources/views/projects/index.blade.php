@@ -32,9 +32,14 @@
             </div>
         </div>
 
+
     </div>
 
     @include('projects.modal')
+    @include('projects.lihatanggota')
+    @include('project_members.modal')
+
+
 
 @stop
 @section('footer')
@@ -42,7 +47,7 @@
         Versi 1.0
     </div>
     <strong>
-        Copyright &copy; {{ date('Y') }} 
+        Copyright &copy; {{ date('Y') }}
         <a href="#">TEFANEX</a>.
     </strong> All rights reserved.
 @endsection
@@ -52,6 +57,7 @@
 
 @section('js')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ asset('vendor/adminlte/dist/js/jquery.js') }}"></script>
     <script>
         $(function() {
 
@@ -60,18 +66,45 @@
                 serverSide: true,
                 responsive: true,
                 ajax: "{{ route('projects.data') }}",
-                columns: 
-                [
-                    { data: 'judul', name: 'judul' },
-                    { data: 'deskripsi', name: 'deskripsi' },
-                    { data: 'client', name: 'client' },
-                    { data: 'status', name: 'status', render: function(data, type, row) {
-                        return '<span class="badge badge-' + (data === 'design_brief' ? 'info' : data === 'timeline' ? 'warning' : data === 'design' ? 'primary' : data === 'produksi' ? 'success' : data === 'qc' ? 'danger' : data === 'mass_production' ? 'dark' : 'light') + '">' + data + '</span>';
-                    } },
-                    { data: 'guru', name: 'guru' },
-                    { data: 'action', name: 'action', orderable: false, searchable: false }
+                columns: [{
+                        data: 'judul',
+                        name: 'judul'
+                    },
+                    {
+                        data: 'deskripsi',
+                        name: 'deskripsi'
+                    },
+                    {
+                        data: 'client',
+                        name: 'client'
+                    },
+                    {
+                        data: 'status',
+                        name: 'status',
+                        render: function(data, type, row) {
+                            return '<span class="badge badge-' + (data === 'awal' ? 'light' :
+                                    data === 'design_brief' ? 'info' :
+                                    data === 'timeline' ? 'warning' : data === 'design' ?
+                                    'primary' : data === 'produksi' ? 'success' : data === 'qc' ?
+                                    'danger' : data === 'mass_production' ? 'dark' : 'light') +
+                                '">' + data + '</span>';
+                        }
+                    },
+                    {
+                        data: 'guru',
+                        name: 'guru'
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false
+                    }
                 ]
             });
+
+            let projectId;
+
 
             $('#addProjectBtn').click(function() {
                 $('#projectForm')[0].reset();
@@ -85,16 +118,19 @@
                 let url = id ? '/projects/' + id : '/projects';
                 let method = id ? 'PUT' : 'POST';
 
+                console.log(id, url, method);
+
+
                 $.ajax({
                     url: url,
                     type: method,
                     data: {
                         _token: "{{ csrf_token() }}",
-                        judul:$('#judul').val(),
-                        deskripsi:$('#deskripsi').val(),
-                        client:$('#client').val(),
-                        status:$('#status').val(),
-                        guru_id:$('#guru_id').val(),
+                        judul: $('#judul').val(),
+                        deskripsi: $('#deskripsi').val(),
+                        client: $('#client').val(),
+                        status: $('#status').val(),
+                        guru_id: $('#guru_id').val(),
 
                     },
                     success: function() {
@@ -103,7 +139,8 @@
                         Swal.fire('Berhasil!', 'Data tersimpan', 'success');
                     },
                     error: function(xhr, status, error) {
-                        Swal.fire('Gagal!', 'Terjadi kesalahan saat mengirimkan request ke server');
+                        Swal.fire('Gagal!',
+                            'Terjadi kesalahan saat mengirimkan request ke server');
                         console.log(xhr.responseText);
                     }
                 });
@@ -119,6 +156,44 @@
                     $('#guru_id').val(data.guru_id);
                     $('#project_id').val(data.id);
                     $('#projectModal').modal('show');
+                });
+            });
+
+
+            //lihat anggota
+            $(document).on('click', '.lihatAnggota', function() {
+                let id = $(this).data('id');
+                console.log(id);
+                projectId = id;
+
+                $('#lihatAnggotaModal').modal('show');
+                $('#tableAnggota').DataTable().destroy();
+                
+                let tableAnggota = $('#tableAnggota').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    responsive: true,
+                    ajax: {
+                        url: "{{ route('projects.members.data', ':projectId') }}".replace(
+                            ':projectId',
+                            id),
+                        type: 'GET',
+                    },
+                    columns: [{
+                            data: 'anggota',
+                            name: 'anggota'
+                        },
+                        {
+                            data: 'tugas',
+                            name: 'tugas'
+                        },
+                        {
+                            data: 'action',
+                            name: 'action',
+                            orderable: false,
+                            searchable: false
+                        }
+                    ]
                 });
             });
 
@@ -139,6 +214,94 @@
                             },
                             success: function() {
                                 table.ajax.reload();
+                                Swal.fire('Terhapus!', '', 'success');
+                            }
+                        });
+                    }
+                });
+            });
+
+            $('#projectMemberForm').submit(function(e) {
+                e.preventDefault();
+                let projectId = $('#project_id').val();
+
+                let id = $('#projectMember_id').val();
+                let url = id ? '/project-members/' + id : '/project-members';
+                let method = id ? 'PUT' : 'POST';
+                console.log(projectId);
+
+                $.ajax({
+                    url: url,
+                    type: method,
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        anggota_id: $('#anggota_id').val(),
+                        project_id: $('#project_id_member').val(),
+                        tugas: $('#tugas').val()
+
+                    },
+                    success: function() {
+                        $('#projectMemberModal').modal('hide');
+                        // tableAnggota.ajax.reload();
+                        Swal.fire('Berhasil!', 'Data tersimpan', 'success');
+                    },
+                    error: function(xhr, status, error) {
+                        Swal.fire('Gagal!',
+                            'Terjadi kesalahan saat mengirimkan request ke server');
+                        console.log(xhr.responseText);
+                    }
+                });
+            });
+
+
+
+            $(document).on('click', '.editBtnMember', function() {
+                let id = $(this).data('id');
+
+
+                $.get('/project-members/' + id + '/edit', function(data) {
+                    console.log(data);
+
+                    $('#anggota_id').val(data.user_id);
+                    $('#project_id_member').val(data.project_id);
+                    $('#tugas').val(data.role_in_project);
+                    $('#projectMember_id').val(data.id);
+                    tableAnggota.ajax.reload();
+                    $('#lihatAnggotaModal').modal('hide');
+                    $('#projectMemberModal').modal('show');
+                    // console.log(data);
+
+                });
+            });
+
+            $('#tambahAnggota').click(function() {
+                console.log(projectId);
+
+                $('#projectMemberForm')[0].reset();
+                $('#project_id_member').val(projectId);
+                $('#lihatAnggotaModal').modal('hide');
+                $('#projectMemberModal').modal('show');
+            });
+
+            $(document).on('click', '.deleteBtnMember', function() {
+                let id = $(this).data('id');
+
+                Swal.fire({
+                    title: 'Yakin hapus?',
+                    icon: 'warning',
+                    showCancelButton: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/project-members/' + id,
+                            type: 'DELETE',
+                            data: {
+                                _token: "{{ csrf_token() }}"
+                            },
+                            success: function() {
+
+                                $('#lihatAnggotaModal').modal('hide');
+                                tableAnggota.ajax.reload();
                                 Swal.fire('Terhapus!', '', 'success');
                             }
                         });

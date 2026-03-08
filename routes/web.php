@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DesignBriefController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectMemberController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -47,5 +49,13 @@ Route::resource('projects', ProjectController::class)
     ->middleware('role:guru|super_admin');
 Route::get('projects-data', [ProjectController::class, 'data'])->name('projects.data');
 
+Route::resource('project-members', ProjectMemberController::class)
+    ->middleware('role:guru|super_admin');
+Route::get('projects/{project}/members', 
+    [ProjectMemberController::class, 'data']
+)->name('projects.members.data');
+Route::resource('design-brief', DesignBriefController::class)
+    ->middleware('role:siswa|guru|super_admin');
+Route::get('design-brief-data', [DesignBriefController::class, 'data'])->name('design-brief.data');
 
 require __DIR__ . '/auth.php';

@@ -20,7 +20,9 @@ class ProjectController extends Controller
     public function index()
     {
         $gurus = User::role('guru')->get();
-        return view('projects.index', compact('gurus'));
+        $users = User::all();
+        $projects = Project::all();
+        return view('projects.index', compact('gurus', 'users', 'projects'));
     }
 
     public function data()
@@ -35,7 +37,8 @@ class ProjectController extends Controller
                 return '
                 <button class="btn btn-sm btn-warning editBtn" data-id="' . $project->id . '">Edit</button>
                 <button class="btn btn-sm btn-danger deleteBtn" data-id="' . $project->id . '">Delete</button>
-            ';
+                <button class="btn btn-sm btn-primary lihatAnggota" data-id="' . $project->id . '">Lihat Anggota</button>
+                ';
             })
             ->rawColumns(['action'])
             ->make(true);   
@@ -83,7 +86,8 @@ class ProjectController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $project = Project::with('guru')->findOrFail($id);
+        return response()->json($project);
     }
 
     /**
@@ -106,14 +110,17 @@ class ProjectController extends Controller
             'deskripsi' => 'required|string',
             'guru_id' => 'required|exists:users,id',
             'client' => 'required|string|max:255',
+            'status' => 'required|string|max:255',
         ]);
 
         // Update data project
         $project = Project::findOrFail($id);
         $project->update([
-            'name' => $request->judul,
-            'description' => $request->deskripsi,
+            'judul' => $request->judul,
+            'deskripsi' => $request->deskripsi,
             'guru_id' => $request->guru_id,
+            'client' => $request->client,
+            'status' => $request->status,
         ]);
 
         return response()->json(['message' => 'Project berhasil diupdate', 'project' => $project]);

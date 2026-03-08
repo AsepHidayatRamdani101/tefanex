@@ -21,4 +21,14 @@ class Project extends Model
     {
         return $this->belongsTo(User::class, 'guru_id');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function project_members()
+    {
+        return $this->hasMany(Project_Member::class);
+    }
 }

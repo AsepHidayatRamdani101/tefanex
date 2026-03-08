@@ -306,9 +306,29 @@ return [
         ],
         [
             'text' => 'Project TEFA',
-            'url' => 'projects',
             'icon' => 'fas fa-project-diagram',
-            'can' => 'guru'
+            'submenu' => [
+                [
+                    'text' => 'Project',
+                    'url' => 'projects',
+                    'icon' => 'fas fa-project-diagram',
+                    'can' => 'guru'
+                ],
+                [
+                    'text' => 'Anggota Project',
+                    'url' => 'project-members',
+                    'icon' => 'fas fa-users',
+                    'can' => 'guru'
+                ],
+                [
+                    'text' => 'Design Brief',
+                    'url' => 'design-brief',
+                    'icon' => 'fas fa-file-alt',
+                    'can' => 'guru|siswa'
+                ]
+                
+                
+            ],
         ],
         [
             'text' => 'Materi',

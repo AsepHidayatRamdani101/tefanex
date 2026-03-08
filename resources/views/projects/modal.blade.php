@@ -4,7 +4,9 @@
             <form id="projectForm">
                 <div class="modal-header">
                     <h5 class="modal-title" id="projectModalLabel">Tambah Project</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="id" id="project_id">
@@ -24,6 +26,7 @@
                         <label>Status</label>
                         <select name="status" id="status" class="form-control">
                             <option value="">Pilih Status</option>
+                             <option value="awal">Awal</option>
                             <option value="design_brief">Design Brief</option>
                             <option value="timeline">Timeline</option>
                             <option value="design">Design</option>
@@ -45,6 +48,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     <button type="submit" class="btn btn-primary">Simpan</button>
                 </div>
             </form>
