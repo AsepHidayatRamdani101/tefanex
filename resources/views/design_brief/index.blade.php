@@ -21,6 +21,7 @@
                             <th>Nama Project</th>
                             <th>Deskripsi</th>
                             <th>Klien</th>
+                            <th>Status</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -68,6 +69,10 @@
                         data: 'klien',
                         name: 'klien'
                     },
+                      {
+                        data: 'status',
+                        name: 'status'
+                    },
                     {
                         data: 'action',
                         name: 'action',
@@ -80,6 +85,7 @@
 
             $('#designBriefForm').submit(function(e) {
                 e.preventDefault();
+                console.log($('#project_id').val());
                 
 
                 let formData = new FormData();
@@ -112,7 +118,7 @@
                     formData.append('reference_file', file);
                 }
 
-               
+               let id = $('#designBrief_id').val();
                 
                 let url = '/design-brief';
                 let method = 'POST';
@@ -164,7 +170,9 @@
                     $('#designBriefForm')[0].reset();
                     $('#name').val(data.judul);
                     $('#client').val(data.client);
-                    $('#project_id').val(data.project_id);
+                    $('#gambardetail').attr('src', '');
+                    $('#designBrief_id').val(data.design_brief_id);
+                    $('#project_id').val(data.id);
 
                     $('#designBriefModal').modal('show');
                 });
@@ -174,6 +182,11 @@
                 let id = $(this).data('id');
                 console.log(id);
                 $.get('/design-brief/' + id, function(data) {
+                    console.log(data);
+                    if (!data.project) {
+                        Swal.fire('Error', 'Design Brief belum di isi', 'error');
+                        return;
+                    }
                     let description = data.description.split('\n');
 
                     $('#name').val(data.project.judul);
@@ -207,6 +220,52 @@
                     $('#designBriefModal').modal('show');
                 });
             });
+
+            $(document).on('click', '.approveBtn', function() {
+                let id = $(this).data('id');
+                console.log(id);
+                $.ajax({
+                    url: '/design-brief/' + id + '/status',
+                    type: 'PUT',
+                    data: {
+                        _token: $('meta[name="csrf-token"]').attr('content'),
+                        id: id,
+                        status: 'approved'
+                    },
+                    success: function() {
+                        table.ajax.reload();
+                        Swal.fire('Berhasil!', 'Design Brief disetujui', 'success');
+                    },
+                    error: function(xhr) {
+                        console.log(xhr.responseText);
+                        Swal.fire('Gagal!', 'Terjadi kesalahan saat mengirim request');
+                    }
+                })
+            })
+
+            $(document).on('click', '.rejectBtn', function() {
+                // let id = $(this).data('id');
+                // console.log(id);
+                // $.ajax({
+                //     url: '/design-brief/' + id + '/status',
+                //     type: 'PUT',
+                //     data: {
+                //         _token: $('meta[name="csrf-token"]').attr('content'),
+                //         id: id,
+                //         status: 'rejected',
+                //         description: 'Design Brief ditolak, silakan perbaiki dan ajukan kembali.'
+                //     },
+                //     success: function() {
+                //         table.ajax.reload();
+                //         Swal.fire('Berhasil!', 'Design Brief ditolak', 'success');
+                //     },
+                //     error: function(xhr) {
+                //         console.log(xhr.responseText);
+                //         Swal.fire('Gagal!', 'Terjadi kesalahan saat mengirim request');
+                //     }
+                // })
+                
+            })
 
             $(document).on('click', '.editBtn', function() {
                 let id = $(this).data('id');

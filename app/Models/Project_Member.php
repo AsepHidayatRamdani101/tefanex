@@ -31,6 +31,6 @@ class Project_Member extends Model
 
     public function design_briefs()
     {
-        return $this->hasMany(Design_Brief::class, 'project_member_id');
+        return $this->hasMany(Design_Brief::class, 'project_id', 'project_id');
     }
 }

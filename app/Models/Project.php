@@ -31,4 +31,9 @@ class Project extends Model
     {
         return $this->hasMany(Project_Member::class);
     }
+
+    public function designBrief()
+    {
+        return $this->hasOne(Design_Brief::class);
+    }
 }

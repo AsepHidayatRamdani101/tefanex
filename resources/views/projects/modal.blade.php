@@ -9,7 +9,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <input type="hidden" name="id" id="project_id">
+                    <input type="text" name="id" id="project_id">
                     <div class="form-group">
                         <label>Judul</label>
                         <input type="text" name="judul" id="judul" class="form-control">

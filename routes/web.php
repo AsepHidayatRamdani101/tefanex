@@ -6,6 +6,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectMemberController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -46,16 +47,21 @@ Route::resource('roles', RoleController::class)
 Route::get('roles-data', [RoleController::class, 'data'])->name('roles.data');
 
 Route::resource('projects', ProjectController::class)
-    ->middleware('role:guru|super_admin');
+    ->middleware('role:guru|super_admin|kepala_tefa|siswa');
 Route::get('projects-data', [ProjectController::class, 'data'])->name('projects.data');
+Route::get('projects-get-id', [ProjectController::class, 'getProjectId'])->name('projects.getProjectId');
 
 Route::resource('project-members', ProjectMemberController::class)
-    ->middleware('role:guru|super_admin');
+    ->middleware('role:guru|super_admin|kepala_tefa');
 Route::get('projects/{project}/members', 
     [ProjectMemberController::class, 'data']
 )->name('projects.members.data');
 Route::resource('design-brief', DesignBriefController::class)
-    ->middleware('role:siswa|guru|super_admin');
+    ->middleware('role:siswa|guru|super_admin|kepala_tefa');
 Route::get('design-brief-data', [DesignBriefController::class, 'data'])->name('design-brief.data');
+Route::put('design-brief/{id}/status', [DesignBriefController::class, 'updateStatus'])->name('design-brief.status')->middleware('role:kepala_tefa');
+Route::resource('timeline', TimelineController::class)
+    ->middleware('role:siswa|guru|super_admin|kepala_tefa');
+Route::get('timeline-data', [TimelineController::class, 'data'])->name('timeline.data');
 
 require __DIR__ . '/auth.php';

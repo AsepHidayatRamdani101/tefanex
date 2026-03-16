@@ -6,6 +6,7 @@ use App\Models\Design_Brief;
 use App\Models\Project;
 use App\Models\Project_Member;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
 use Yajra\DataTables\Facades\DataTables;
 
 class DesignBriefController extends Controller
@@ -29,29 +30,54 @@ class DesignBriefController extends Controller
 
     public function data(Request $request)
     {
-        $projectMember = Project_Member::where('user_id', auth()->id())
-        ->with(['user','project','design_briefs'])
-        ->select('project_members.*');
-        return DataTables::of($projectMember )
-            ->addColumn('project_name', function ($project) {
-                return $project->project ? $project->project->judul : '-';
+        $projectMember = Design_Brief::with(['project', 'user','project.project_members'])
+            ->whereHas('project.project_members', function($query) {
+                $query->where('project_members.user_id', auth()->id());
+            })->select('design_briefs.*');
+
+        if (auth()->user()->hasRole('guru|super_admin|kepala_tefa')) {
+             $projectMember = Design_Brief::with(['project', 'user'])->select('design_briefs.*');
+           
+        
+        }
+
+        return DataTables::of($projectMember)
+            ->addColumn('project_name', function ($projectMember) {
+                return $projectMember->project ? $projectMember->project->judul : '-';
             })
-            ->addColumn('deskripsi', function ($project) {
-                return $project->project ? $project->project->deskripsi : '-';
+            ->addColumn('deskripsi', function ($projectMember) {
+                return $projectMember->project ? $projectMember->project->deskripsi : '-';
             })
-            ->addColumn('klien', function ($project) {
-                return $project->project ? $project->project->client : '-';
+            ->addColumn('klien', function ($projectMember) {
+                return $projectMember->project ? $projectMember->project->client : '-';
             })
-            ->addColumn('user_name', function ($project) {
-                return $project->user ? $project->user->name : '-';
+            ->addColumn('user_name', function ($projectMember) {
+                return $projectMember->user ? $projectMember->user->name : '-';
             })
-            ->addColumn('action', function ($project) {
-                
-                return '
-                    <button class="btn btn-sm btn-primary tambahBtn" data-id="' . $project->id . '">Tambah</button>
-                    <button class="btn btn-sm btn-secondary lihatBtn" data-id="' . $project->id . '">Lihat</button>
-                    <button class="btn btn-sm btn-warning editBtn" data-id="' . $project->id . '">Edit</button>
-                ';
+
+            ->addColumn('status', function ($projectMember) {
+
+                return $projectMember->approval_status;
+
+            })
+
+            ->addColumn('action', function ($projectMember) {
+                if (auth()->user()->hasRole('guru')) {
+                    $btn = '<button class="btn btn-sm btn-primary tambahBtn" data-id="' . $projectMember->project->id . '">Tambah</button>';
+                    $btn .= ' <button class="btn btn-sm btn-secondary lihatBtn" data-id="' . $projectMember->project->id . '">Lihat</button>';
+                    $btn .= ' <button class="btn btn-sm btn-warning editBtn" data-id="' . $projectMember->project->id . '">Edit</button>';
+                    return $btn;
+                } else if (auth()->user()->hasRole('siswa')) {
+                    $btn = '<button class="btn btn-sm btn-primary tambahBtn" data-id="' . $projectMember->project->id . '">Tambah</button>';
+                    $btn .= ' <button class="btn btn-sm btn-secondary lihatBtn" data-id="' . $projectMember->project->id . '">Lihat</button>';
+                    $btn .= ' <button class="btn btn-sm btn-warning editBtn" data-id="' . $projectMember->project->id . '">Edit</button>';
+                    return $btn;
+                } else if (auth()->user()->hasRole('kepala_tefa')) {
+                    $btn = '<button class="btn btn-sm btn-secondary lihatBtn" data-id="' . $projectMember->project->id . '">Lihat</button>';
+                    $btn .= ' <button class="btn btn-sm btn-success approveBtn" data-id="' . $projectMember->id . '">Aprove</button>';
+                    $btn .= ' <button class="btn btn-sm btn-danger rejectBtn" data-id="' . $projectMember->id . '">Reject</button>';
+                    return $btn;
+                }
             })
             ->addIndexColumn('id')
             ->rawColumns(['action'])
@@ -63,7 +89,34 @@ class DesignBriefController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        //validasi data
+        $request->validate([
+            'project_id' => 'required|exists:projects,id',
+            'description' => 'required|string',
+            'target_market' => 'required|string',
+            'budget' => 'required|numeric',
+            'reference_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx',
+        ]);
+
+        $designBrief = new Design_Brief();
+        $designBrief->project_id = $request->project_id;
+        $designBrief->description = $request->description;
+        $designBrief->target_market = $request->target_market;
+        $designBrief->budget = $request->budget;
+        if ($request->hasFile('reference_file')) {
+            $file = $request->file('reference_file');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->storeAs('public/reference_files', $filename);
+            $designBrief->reference_file = 'storage/reference_files/' . $filename;
+        }
+        $designBrief->save();
+
+        //update status di project
+        $project = Project::findOrFail($designBrief->project_id);
+        $project->status = "design_brief";
+        $project->save();
+
+        return response()->json(['message' => 'Design Brief created successfully']);
     }
 
     /**
@@ -72,7 +125,7 @@ class DesignBriefController extends Controller
     public function show(string $id)
     {
         //tampil detail design brief
-        $designBrief = Design_Brief::with(['project', 'user'])->findOrFail($id);
+        $designBrief = Design_Brief::with(['project'])->where('project_id', $id)->first();
         return response()->json($designBrief);
     }
 
@@ -82,7 +135,7 @@ class DesignBriefController extends Controller
     public function edit(string $id)
     {
         //tampil data design brief untuk edit
-        $designBrief = Design_Brief::with(['project', 'user'])->findOrFail($id);
+        $designBrief = Design_Brief::with(['project'])->where('project_id', $id)->first();
         return response()->json($designBrief);
     }
 
@@ -119,6 +172,16 @@ class DesignBriefController extends Controller
         $project->save();
 
         return response()->json(['message' => 'Design Brief updated successfully']);
+    }
+
+    /**
+     * Update status project
+     */
+    public function updateStatus(Request $request, string $id)
+    {
+        $designBrief = Design_Brief::findOrFail($id);
+        $designBrief->approval_status = $request->status;
+        $designBrief->save();
     }
 
     /**

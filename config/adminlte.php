@@ -312,22 +312,23 @@ return [
                     'text' => 'Project',
                     'url' => 'projects',
                     'icon' => 'fas fa-project-diagram',
-                    'can' => 'guru'
+                    'can' => 'guru|super_admin|kepala_tefa'
                 ],
-                [
-                    'text' => 'Anggota Project',
-                    'url' => 'project-members',
-                    'icon' => 'fas fa-users',
-                    'can' => 'guru'
-                ],
+
                 [
                     'text' => 'Design Brief',
                     'url' => 'design-brief',
                     'icon' => 'fas fa-file-alt',
-                    'can' => 'guru|siswa'
-                ]
-                
-                
+                    'can' => 'guru|siswa|super_admin|kepala_tefa'
+                ],
+                [
+                    'text' => 'Timeline',
+                    'url' => 'timeline',
+                    'icon' => 'fas fa-stream',
+                    'can' => 'guru|siswa|kepala_tefa'
+                ],
+
+
             ],
         ],
         [
@@ -335,7 +336,7 @@ return [
             'url' => 'materi',
             'icon' => 'fas fa-book',
             'can' => 'guru'
-           
+
         ],
         [
             'text' => 'Pretest/Posttest',

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Design_Brief;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -9,10 +10,7 @@ use Yajra\DataTables\Facades\DataTables;
 
 class ProjectController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('role:guru|super_admin');
-    }
+
 
     /**
      * Display a listing of the resource.
@@ -41,7 +39,7 @@ class ProjectController extends Controller
                 ';
             })
             ->rawColumns(['action'])
-            ->make(true);   
+            ->make(true);
     }
 
     /**
@@ -59,34 +57,37 @@ class ProjectController extends Controller
     {
         // Validasi input
         $request->validate([
-           'judul' => 'required|string|max:255',
-           'deskripsi' => 'required|string',
-           'guru_id' => 'required|exists:users,id',
-           'client' => 'required|string|max:255',
-           'status' => 'required|string|max:255',
+            'judul' => 'required|string|max:255',
+            'deskripsi' => 'required|string',
+            'guru_id' => 'required|exists:users,id',
+            'client' => 'required|string|max:255',
+            'status' => 'required|string|max:255',
         ]);
 
-        // Simpan data project
-        $project = Project::create([
-           'judul' => $request->judul,
-           'deskripsi' => $request->deskripsi,
-           'guru_id' => $request->guru_id,
-           'client' => $request->client,
-           'status' => $request->status,
+        $project = Project::create($request->all());
+
+        // Laravel otomatis tahu project_id-nya adalah ID dari $project
+        $project->designBrief()->create([
+            'project_id' => $project->id,
+            'description' => '',
+            'approved_by' => null,
+            'approval_status' => 'pending',
         ]);
 
         return response()->json(['message' => 'Project berhasil dibuat', 'project' => $project]);
 
 
-       
+
     }
+
+  
 
     /**
      * Display the specified resource.
      */
     public function show(string $id)
     {
-        $project = Project::with('guru')->findOrFail($id);
+        $project = Project::join('design_briefs', 'projects.id', '=', 'design_briefs.project_id')->where('projects.id', $id)->select('projects.*', 'design_briefs.description as design_description', 'design_briefs.approval_status', 'design_briefs.approved_by','design_briefs.id as design_brief_id')->first();
         return response()->json($project);
     }
 
@@ -122,6 +123,8 @@ class ProjectController extends Controller
             'client' => $request->client,
             'status' => $request->status,
         ]);
+
+
 
         return response()->json(['message' => 'Project berhasil diupdate', 'project' => $project]);
     }

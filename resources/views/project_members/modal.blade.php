@@ -27,8 +27,9 @@
                         <select name="tugas" id="tugas" class="form-control">
                             <option value="">Pilih Tugas</option>
                             <option value="designer">Designer</option>
-                            <option value="operator_produksi">Operator Produksi</option>
+                            <option value="kepala_tefa">Kepala TEFA</option>
                             <option value="marketing">Marketing</option>
+                            <option value="operator_produksi">Operator Produksi</option>
                             <option value="pembimbing">Pembimbing</option>
                             <option value="qc">QC</option>
                         </select>

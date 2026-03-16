@@ -17,8 +17,8 @@ class DashboardController extends Controller
         } else if (auth()->user()->hasRole('siswa')) {
             return view('dashboard.siswa');
         } 
-         else if (auth()->user()->hasRole('kepala_produksi')) {
-            return view('dashboard.kepala_produksi');
+         else if (auth()->user()->hasRole('kepala_tefa')) {
+            return view('dashboard.kepala_tefa');
         }
          else if (auth()->user()->hasRole('bendahara')) {
             return view('dashboard.bendahara');

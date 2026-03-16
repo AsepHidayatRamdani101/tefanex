@@ -10,8 +10,10 @@ class Design_Brief extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name',
+        'project_id',
         'description',
+        'approval_status',
+        'approved_by',
     ];
 
     protected $table = 'design_briefs';
