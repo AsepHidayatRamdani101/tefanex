@@ -181,6 +181,8 @@ class DesignBriefController extends Controller
     {
         $designBrief = Design_Brief::findOrFail($id);
         $designBrief->approval_status = $request->status;
+        $designBrief->approved_by = auth()->user()->id;
+        $designBrief->keterangan = $request->keterangan;
         $designBrief->save();
     }
 

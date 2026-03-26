@@ -327,6 +327,12 @@ return [
                     'icon' => 'fas fa-stream',
                     'can' => 'guru|siswa|kepala_tefa'
                 ],
+                [
+                    'text' => 'Mockup Design',
+                    'url' => 'mockup',
+                    'icon' => 'fas fa-drafting-compass',
+                    'can' => 'guru|kepala_tefa'
+                ],
 
 
             ],

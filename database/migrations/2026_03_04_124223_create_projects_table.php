@@ -16,6 +16,7 @@ return new class extends Migration {
         $table->text('deskripsi')->nullable();
         $table->string('client')->nullable();
         $table->enum('status', [
+            'awal',
             'design_brief',
             'timeline',
             'design',

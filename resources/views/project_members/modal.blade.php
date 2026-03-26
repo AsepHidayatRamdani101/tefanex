@@ -9,8 +9,8 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <input type="text" name="id" id="projectMember_id">
-                    <input type="text" name="project_id_member" id="project_id_member">
+                    <input type="hidden" name="id" id="projectMember_id">
+                    <input type="hidden" name="project_id_member" id="project_id_member">
                     <div class="form-group">
                         <label>Nama Anggota</label>
                         <select name="anggota_id" id="anggota_id" class="form-control">

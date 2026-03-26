@@ -31,14 +31,15 @@ class TimelineController extends Controller
     {
         //get project by id
        
-        $project = Project::whereHas('designBrief', function($query) {
-            $query->where('is_approved', 1);
-        })->get();
+       $project = Timeline::join('design_briefs', 'timelines.project_id', '=', 'design_briefs.project_id')
+            ->join('projects', 'timelines.project_id', '=', 'projects.id')
+            ->select('timelines.*', 'design_briefs.description as design_description', 'design_briefs.approval_status', 'design_briefs.approved_by', 'design_briefs.description as deskripsi', 'projects.judul as judul')
+            ->where('design_briefs.approval_status', 'approved')
+            ->get();
         return DataTables::of($project)
             ->addIndexColumn()
             ->addColumn('action', function ($row) {
-                $btn = '<a href="javascript:void(0)" class="edit btn btn-primary btn-sm">Edit</a> ';
-                return $btn;
+                return '<button class="btn btn-sm btn-primary set_timeline" data-id="' . $row->id . '">Set Timeline</button>';
             })
             ->rawColumns(['action'])
             ->make(true);
@@ -73,7 +74,26 @@ class TimelineController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        //validasi
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+        ]);
+
+        //update timeline
+        $timeline = Timeline::findOrFail($id);
+        $timeline->update([
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+        ]);
+
+        //update project
+        $project = Project::where('id', $timeline->project_id)->first();
+        $project->update([
+            'status' => 'timeline',
+        ]);
+
+        return response()->json(['message' => 'Timeline berhasil diupdate', 'timeline' => $timeline]);
     }
 
     /**

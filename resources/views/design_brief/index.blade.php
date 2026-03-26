@@ -32,6 +32,7 @@
     </div>
 
 @include('design_brief.modal')
+@include('design_brief.rejectmodal')
 
 @stop
 @section('footer')
@@ -159,6 +160,10 @@
                 //     // console.log(data);
 
                 // });
+
+                // $("#designBriefForm")[0].reset();
+                // $("#designBrief_id").val(id);
+                $("#rejectModal").modal("show");
             });
 
             $(document).on('click', '.tambahBtn', function() {
@@ -230,7 +235,8 @@
                     data: {
                         _token: $('meta[name="csrf-token"]').attr('content'),
                         id: id,
-                        status: 'approved'
+                        status: 'approved',
+                        keterangan: 'sesuai'
                     },
                     success: function() {
                         table.ajax.reload();
@@ -244,27 +250,35 @@
             })
 
             $(document).on('click', '.rejectBtn', function() {
-                // let id = $(this).data('id');
-                // console.log(id);
-                // $.ajax({
-                //     url: '/design-brief/' + id + '/status',
-                //     type: 'PUT',
-                //     data: {
-                //         _token: $('meta[name="csrf-token"]').attr('content'),
-                //         id: id,
-                //         status: 'rejected',
-                //         description: 'Design Brief ditolak, silakan perbaiki dan ajukan kembali.'
-                //     },
-                //     success: function() {
-                //         table.ajax.reload();
-                //         Swal.fire('Berhasil!', 'Design Brief ditolak', 'success');
-                //     },
-                //     error: function(xhr) {
-                //         console.log(xhr.responseText);
-                //         Swal.fire('Gagal!', 'Terjadi kesalahan saat mengirim request');
-                //     }
-                // })
+                let id = $(this).data('id');
+                console.log(id);
+                $("#designBrief_id").val($(this).data('id'));
+                $("#rejectModal").modal("show");
                 
+            })
+
+            $("#rejectForm").submit(function(e) {
+                e.preventDefault();
+                let id = $('#designBrief_id').val();
+                $.ajax({
+                    url: '/design-brief/' + id + '/status',
+                    type: 'PUT',
+                    data: {
+                        _token: $('meta[name="csrf-token"]').attr('content'),
+                        id: id,
+                        status: 'rejected',
+                        keterangan: $('#keterangan').val()
+                    },
+                    success: function() {
+                        table.ajax.reload();
+                        $("#rejectModal").modal("hide");
+                        Swal.fire('Berhasil!', 'Design Brief disetujui', 'success');
+                    },
+                    error: function(xhr) {
+                        console.log(xhr.responseText);
+                        Swal.fire('Gagal!', 'Terjadi kesalahan saat mengirim request');
+                    }
+                })
             })
 
             $(document).on('click', '.editBtn', function() {

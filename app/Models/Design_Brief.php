@@ -14,6 +14,7 @@ class Design_Brief extends Model
         'description',
         'approval_status',
         'approved_by',
+        'keterangan',
     ];
 
     protected $table = 'design_briefs';
@@ -26,6 +27,11 @@ class Design_Brief extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function mockup()
+    {
+        return $this->hasMany(Mockup::class);
     }
 
 

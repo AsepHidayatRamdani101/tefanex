@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DesignBriefController;
+use App\Http\Controllers\MockupController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectMemberController;
@@ -63,5 +64,8 @@ Route::put('design-brief/{id}/status', [DesignBriefController::class, 'updateSta
 Route::resource('timeline', TimelineController::class)
     ->middleware('role:siswa|guru|super_admin|kepala_tefa');
 Route::get('timeline-data', [TimelineController::class, 'data'])->name('timeline.data');
+Route::resource('mockup', MockupController::class)
+    ->middleware('role:siswa|guru|super_admin|kepala_tefa');
+Route::get('mockup-data', [MockupController::class, 'data'])->name('mockup.data');
 
 require __DIR__ . '/auth.php';

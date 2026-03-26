@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('mockups', function (Blueprint $table) {
             $table->id();
             $table->foreignId('project_id')->constrained('projects')->cascadeOnDelete();
-            $table->string('file_path');
+            $table->string('file_path')->nullable();
             $table->text('revision_note')->nullable();
             $table->enum('status', ['pending', 'approved', 'revisi'])->default('pending');
             $table->foreignId('reviewed_by')->nullable()->constrained('users')->nullOnDelete();

@@ -36,4 +36,14 @@ class Project extends Model
     {
         return $this->hasOne(Design_Brief::class);
     }
+
+    public function timeline()
+    {
+        return $this->hasOne(Timeline::class);
+    }
+
+    public function mockups()
+    {
+        return $this->hasMany(Mockup::class);
+    }
 }

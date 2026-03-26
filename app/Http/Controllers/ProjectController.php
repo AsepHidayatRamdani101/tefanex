@@ -74,6 +74,21 @@ class ProjectController extends Controller
             'approval_status' => 'pending',
         ]);
 
+        // Buat timeline
+        $project->timeline()->create([
+            'project_id' => $project->id,
+            'start_date' => now(),
+            'end_date' => now(),
+            'created_by' => auth()->user()->id,
+        ]);
+
+        //buat mockup
+        $project->mockups()->create([
+            'project_id' => $project->id,
+            'status' => 'pending',
+        ]);
+    
+
         return response()->json(['message' => 'Project berhasil dibuat', 'project' => $project]);
 
 

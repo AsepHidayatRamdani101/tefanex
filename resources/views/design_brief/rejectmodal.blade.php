@@ -11,6 +11,7 @@
                 </div>
 
                 <div class="modal-body">
+                    <input type="hidden" name="designBrief_id" id="designBrief_id">
                     <div class="form-group">
                         <label>Alasan</label>
                         <textarea class="form-control" name="alasan" id="alasan" rows="5"></textarea>
@@ -20,6 +21,7 @@
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-primary">Tolak</button>
                 </div>
+            </div>
         </form>
     </div>
 </div>
