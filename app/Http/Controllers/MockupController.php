@@ -54,6 +54,10 @@ class MockupController extends Controller
             ->addColumn('waktu', function ($project) {
                 return date('d-m-Y', strtotime($project->start_date)) . ' s.d ' . date('d-m-Y', strtotime($project->end_date));
             })
+             ->addColumn('hasil', function ($project) {
+                return $project->file_path ?? '';
+            })
+           
            
             ->addColumn('action', function ($project) {
                 return '
@@ -83,7 +87,8 @@ class MockupController extends Controller
      */
     public function edit(string $id)
     {
-        //
+      
+
     }
 
     /**
@@ -91,7 +96,25 @@ class MockupController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        
+
+        $request->validate([
+            'file' => 'required|file|mimes:jpg,jpeg,png,pdf,doc,docx',
+        ]);
+
+        $mockup = Mockup::findOrFail($id);
+        $file = $request->file('file');
+        $filename = time() . '_' . $file->getClientOriginalName();
+        $file->storeAs('public/reference_files', $filename);
+        $mockup->file_path = 'storage/reference_files/' . $filename;
+        $mockup->save();
+
+        // update status di project
+        $project = Project::findOrFail($mockup->project_id);
+        $project->status = "design";
+        $project->save();
+
+        return response()->json(['status' => 'berhasil']);
     }
 
     /**

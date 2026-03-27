@@ -13,8 +13,7 @@ class Mockup extends Model
 
     protected $fillable = [
         'project_id',
-        'name',
-        'file',
+        'file_path',
     ];
 
     public function project()

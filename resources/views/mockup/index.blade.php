@@ -22,7 +22,7 @@
                             <th>File Referensi</th>
                             <th>Status</th>
                             <th>Waktu</th>
-                             <th>Hasil Design</th>
+                            <th>Hasil Design</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -66,7 +66,7 @@
                         name: 'judul'
                     },
                     {
-                         data: 'deskripsi',
+                        data: 'deskripsi',
                         data: function(row) {
                             let deskripsiArray = row.deskripsi.split('\n');
                             return {
@@ -98,7 +98,7 @@
                             `;
                         }
                     },
-                   
+
                     {
                         data: 'status',
                         name: 'status'
@@ -116,7 +116,7 @@
                             `;
                         }
                     },
-                   
+
                     {
                         data: 'action',
                         name: 'action',
@@ -129,45 +129,45 @@
             let projectId;
 
 
-            $('#addProjectBtn').click(function() {
-                $('#projectForm')[0].reset();
-                $('#projectModal').modal('show');
-            });
-
-            $('#projectForm').submit(function(e) {
+            $("#uploadForm").submit(function(e) {
                 e.preventDefault();
 
-                let id = $('#project_id').val();
-                let url = id ? '/projects/' + id : '/projects';
-                let method = id ? 'PUT' : 'POST';
+                let formData = new FormData(this);
+                formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+                let file = $('#file')[0].files[0];
+                if (file) {
+                    formData.append('file', file);
+                }
 
-                console.log(id, url, method);
+                let id = $('#mockup_id').val();
+                let url = '/mockup';
+                let method = 'POST';
+
+                if (id) {
+                    url = '/mockup/' + id;
+                    formData.append('_method', 'PUT');
+                }
 
 
                 $.ajax({
                     url: url,
                     type: method,
-                    data: {
-                        _token: "{{ csrf_token() }}",
-                        judul: $('#judul').val(),
-                        deskripsi: $('#deskripsi').val(),
-                        client: $('#client').val(),
-                        status: $('#status').val(),
-                        guru_id: $('#guru_id').val(),
-
-                    },
-                    success: function() {
-                        $('#projectModal').modal('hide');
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        
+                        $('#uploadModal').modal('hide');
                         table.ajax.reload();
-                        Swal.fire('Berhasil!', 'Data tersimpan', 'success');
+                        Swal.fire('Berhasil!', 'File berhasil diupload', 'success');
                     },
-                    error: function(xhr, status, error) {
-                        Swal.fire('Gagal!',
-                            'Terjadi kesalahan saat mengirimkan request ke server');
+                    error: function(xhr) {
                         console.log(xhr.responseText);
+                        Swal.fire('Gagal!', 'Terjadi kesalahan saat mengirim request', 'error');
                     }
                 });
             });
+
 
             $(document).on('click', '.editBtn', function() {
                 let id = $(this).data('id');
@@ -182,153 +182,18 @@
                 });
             });
 
-
-            //lihat anggota
-            $(document).on('click', '.lihatAnggota', function() {
+            $(document).on('click', '.addBtn', function() {
                 let id = $(this).data('id');
-                console.log(id);
-                projectId = id;
+                $("#mockup_id").val(id);
+                $("#uploadForm")[0].reset();
+                $("#uploadModal").modal("show");
 
-                $('#lihatAnggotaModal').modal('show');
-                $('#tableAnggota').DataTable().destroy();
-
-                let tableAnggota = $('#tableAnggota').DataTable({
-                    processing: true,
-                    serverSide: true,
-                    responsive: true,
-                    ajax: {
-                        url: "{{ route('projects.members.data', ':projectId') }}".replace(
-                            ':projectId',
-                            id),
-                        type: 'GET',
-                    },
-                    columns: [{
-                            data: 'anggota',
-                            name: 'anggota'
-                        },
-                        {
-                            data: 'tugas',
-                            name: 'tugas'
-                        },
-                        {
-                            data: 'action',
-                            name: 'action',
-                            orderable: false,
-                            searchable: false
-                        }
-                    ]
-                });
-            });
-
-            $(document).on('click', '.deleteBtn', function() {
-                let id = $(this).data('id');
-
-                Swal.fire({
-                    title: 'Yakin hapus?',
-                    icon: 'warning',
-                    showCancelButton: true
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: '/projects/' + id,
-                            type: 'DELETE',
-                            data: {
-                                _token: "{{ csrf_token() }}"
-                            },
-                            success: function() {
-                                table.ajax.reload();
-                                Swal.fire('Terhapus!', '', 'success');
-                            }
-                        });
-                    }
-                });
-            });
-
-            $('#projectMemberForm').submit(function(e) {
-                e.preventDefault();
-                let projectId = $('#project_id').val();
-
-                let id = $('#projectMember_id').val();
-                let url = id ? '/project-members/' + id : '/project-members';
-                let method = id ? 'PUT' : 'POST';
-                console.log(projectId);
-
-                $.ajax({
-                    url: url,
-                    type: method,
-                    data: {
-                        _token: "{{ csrf_token() }}",
-                        anggota_id: $('#anggota_id').val(),
-                        project_id: $('#project_id_member').val(),
-                        tugas: $('#tugas').val()
-
-                    },
-                    success: function() {
-                        $('#projectMemberModal').modal('hide');
-                        // tableAnggota.ajax.reload();
-                        Swal.fire('Berhasil!', 'Data tersimpan', 'success');
-                    },
-                    error: function(xhr, status, error) {
-                        Swal.fire('Gagal!',
-                            'Terjadi kesalahan saat mengirimkan request ke server');
-                        console.log(xhr.responseText);
-                    }
-                });
             });
 
 
-            $(document).on('click', '.editBtnMember', function() {
-                let id = $(this).data('id');
 
 
-                $.get('/project-members/' + id + '/edit', function(data) {
-                    console.log(data);
-
-                    $('#anggota_id').val(data.user_id);
-                    $('#project_id_member').val(data.project_id);
-                    $('#tugas').val(data.role_in_project);
-                    $('#projectMember_id').val(data.id);
-                    tableAnggota.ajax.reload();
-                    $('#lihatAnggotaModal').modal('hide');
-                    $('#projectMemberModal').modal('show');
-                    // console.log(data);
-
-                });
-            });
-
-            $('#tambahAnggota').click(function() {
-                console.log(projectId);
-
-                $('#projectMemberForm')[0].reset();
-                $('#project_id_member').val(projectId);
-                $('#lihatAnggotaModal').modal('hide');
-                $('#projectMemberModal').modal('show');
-            });
-
-            $(document).on('click', '.deleteBtnMember', function() {
-                let id = $(this).data('id');
-
-                Swal.fire({
-                    title: 'Yakin hapus?',
-                    icon: 'warning',
-                    showCancelButton: true
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: '/project-members/' + id,
-                            type: 'DELETE',
-                            data: {
-                                _token: "{{ csrf_token() }}"
-                            },
-                            success: function() {
-                                $('#lihatAnggotaModal').modal('hide');
-                                tableAnggota.ajax.reload();
-                                Swal.fire('Terhapus!', '', 'success');
-                            }
-                        });
-                    }
-                });
-            });
+            
 
         });
     </script>
