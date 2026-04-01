@@ -14,6 +14,8 @@ class Mockup extends Model
     protected $fillable = [
         'project_id',
         'file_path',
+        'status',
+        'revision_note',
     ];
 
     public function project()

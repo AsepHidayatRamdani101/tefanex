@@ -331,7 +331,25 @@ return [
                     'text' => 'Mockup Design',
                     'url' => 'mockup',
                     'icon' => 'fas fa-drafting-compass',
-                    'can' => 'guru|kepala_tefa'
+                    'can' => 'guru|kepala_tefa|siswa'
+                ],
+                [
+                    'text' => 'Produksi',
+                    'url' => 'produksi',
+                    'icon' => 'fas fa-industry',
+                    'can' => 'guru|kepala_tefa|siswa'
+                ],
+                [
+                    'text' => 'Quality Control',
+                    'url' => 'quality-control',
+                    'icon' => 'fas fa-check-circle',
+                    'can' => 'guru|kepala_tefa|siswa'
+                ],
+                [
+                    'text' => 'Invoice',
+                    'url' => 'invoice',
+                    'icon' => 'fas fa-file-invoice',
+                    'can' => 'guru|kepala_tefa|siswa|bendahara'
                 ],
 
 

@@ -51,8 +51,8 @@ class MockupController extends Controller
             ->addColumn('file', function ($project) {
                 return $project->file ?? '';
             })
-            ->addColumn('waktu', function ($project) {
-                return date('d-m-Y', strtotime($project->start_date)) . ' s.d ' . date('d-m-Y', strtotime($project->end_date));
+            ->addColumn('revisi', function ($project) {
+                return $project->revision_note ?? '';
             })
              ->addColumn('hasil', function ($project) {
                 return $project->file_path ?? '';
@@ -60,9 +60,16 @@ class MockupController extends Controller
            
            
             ->addColumn('action', function ($project) {
-                return '
-                <button class="btn btn-sm btn-warning addBtn" data-id="' . $project->id . '">Upload</button>
-                ';
+                if (auth()->user()->hasRole('siswa')) {
+                    return '
+                    <button class="btn btn-sm btn-warning addBtn" data-id="' . $project->id . '">Upload</button>
+                    ';
+                } else if (auth()->user()->hasRole('kepala_tefa')) {
+                    return '
+                    <button class="btn btn-sm btn-success approveBtn" data-id="' . $project->id . '">approve</button>
+                    <button class="btn btn-sm btn-danger rejectBtn" data-id="' . $project->id . '">reject</button>
+                    ';          
+                }
             })
             ->make(true);
     }
@@ -113,6 +120,16 @@ class MockupController extends Controller
         $project = Project::findOrFail($mockup->project_id);
         $project->status = "design";
         $project->save();
+
+        return response()->json(['status' => 'berhasil']);
+    }
+
+     public function updateStatus(Request $request, string $id)
+    {
+        $mockup = Mockup::findOrFail($id);
+        $mockup->status = $request->status;
+        $mockup->revision_note = $request->revisi;
+        $mockup->save();
 
         return response()->json(['status' => 'berhasil']);
     }

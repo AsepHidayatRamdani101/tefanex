@@ -1,6 +1,6 @@
 @extends('adminlte::page')
 
-@section('title', 'Mockup Design')
+@section('title', 'Produksi')
 
 @section('content')
 
@@ -8,7 +8,7 @@
         <div class="card-header">
             <div class="row">
                 <div class="col-md-6">
-                    <h3 class="card-title">Mockup Design</h3>
+                    <h3 class="card-title">Produksi</h3>
                 </div>
             </div>
         </div>
@@ -17,12 +17,12 @@
                 <table class="table table-bordered" id="projectTable">
                     <thead>
                         <tr>
-                            <th>Nama Project</th>
+                            <th>Nama Produksi</th>
                             <th width="10%">Deskripsi</th>
                             <th>File Referensi</th>
                             <th>Status</th>
                             <th>Revisi</th>
-                            <th>Hasil Design</th>
+                            <th>Hasil Produksi</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -30,10 +30,9 @@
             </div>
         </div>
 
-
     </div>
 
-    @include('mockup.modal');
+    @include('produksi.modal');
     @include('design_brief.rejectmodal')
 
 
@@ -61,17 +60,17 @@
                 processing: true,
                 serverSide: true,
                 responsive: true,
-                ajax: "{{ route('mockup.data') }}",
+                ajax: "{{ route('produksi.data') }}",
                 columns: [{
-                        data: 'judul',
-                        name: 'judul'
+                        data: 'nama',
+                        name: 'nama'
                     },
                     {
                         data: 'deskripsi',
                         data: function(row) {
                             let deskripsiArray = row.deskripsi.split('\n');
                             return {
-                                judul: deskripsiArray[0],
+                                nama: deskripsiArray[0],
                                 lama_pengerjaan: deskripsiArray[1],
                                 dimensi: deskripsiArray[2],
                                 warna: deskripsiArray[3],
@@ -81,13 +80,13 @@
                         },
                         render: function(data) {
                             return `
-                                <p><b>Judul</b> : ${data.judul} </p>
-                                <p><b>Lama Pengerjaan</b> : ${data.lama_pengerjaan}</p>
-                                <p><b>Dimensi</b> : ${data.dimensi} </p>
-                                <p><b>Font</b> : ${data.font} </p>
-                                <p><b>Warna</b> : ${data.warna} </p>
-                                <p><b>Tagline</b> : ${data.tagline} </p>
-                            `;
+                                        <p><b>Nama</b> : ${data.nama} </p>
+                                        <p><b>Lama Pengerjaan</b> : ${data.lama_pengerjaan}</p>
+                                        <p><b>Dimensi</b> : ${data.dimensi} </p>
+                                        <p><b>Font</b> : ${data.font} </p>
+                                        <p><b>Warna</b> : ${data.warna} </p>
+                                        <p><b>Tagline</b> : ${data.tagline} </p>
+                                    `;
                         }
                     },
                     {
@@ -95,11 +94,10 @@
                         name: 'file',
                         render: function(data) {
                             return `
-                                <a href="${data}" class="btn btn-sm btn-primary" target="_blank">Lihat File</a>
-                            `;
+                                        <a href="${data}" class="btn btn-sm btn-primary" target="_blank">Lihat File</a>
+                                    `;
                         }
                     },
-
                     {
                         data: 'status',
                         name: 'status'
@@ -113,8 +111,8 @@
                         name: 'hasil',
                         render: function(data) {
                             return `
-                                <a href="${data}" class="btn btn-sm btn-primary" target="_blank">Lihat Hasil</a>
-                            `;
+                                        <a href="${data}" class="btn btn-sm btn-primary" target="_blank">Lihat Hasil</a>
+                                    `;
                         }
                     },
 
@@ -140,12 +138,12 @@
                     formData.append('file', file);
                 }
 
-                let id = $('#mockup_id').val();
-                let url = '/mockup';
+                let id = $('#produksi_id').val();
+                let url = '/produksi';
                 let method = 'POST';
 
                 if (id) {
-                    url = '/mockup/' + id;
+                    url = '/produksi/' + id;
                     formData.append('_method', 'PUT');
                 }
 
@@ -172,20 +170,20 @@
 
             $(document).on('click', '.editBtn', function() {
                 let id = $(this).data('id');
-                $.get('/projects/' + id + '/edit', function(data) {
-                    $('#judul').val(data.judul);
+                $.get('/produksi/' + id + '/edit', function(data) {
+                    $('#nama').val(data.nama);
                     $('#deskripsi').val(data.deskripsi);
                     $('#client').val(data.client);
                     $('#status').val(data.status);
                     $('#guru_id').val(data.guru_id);
-                    $('#project_id').val(data.id);
-                    $('#projectModal').modal('show');
+                    $('#produksi_id').val(data.id);
+                    $('#produksiModal').modal('show');
                 });
             });
 
             $(document).on('click', '.addBtn', function() {
                 let id = $(this).data('id');
-                $("#mockup_id").val(id);
+                $("#produksi_id").val(id);
                 $("#uploadForm")[0].reset();
                 $("#uploadModal").modal("show");
 
@@ -194,7 +192,7 @@
             $(document).on('click', '.approveBtn', function() {
                 let id = $(this).data('id');
                 $.ajax({
-                    url: '/mockup/' + id + '/status',
+                    url: '/produksi/' + id + '/status',
                     type: 'PUT',
                     data: {
                         _token: $('meta[name="csrf-token"]').attr('content'),
@@ -204,7 +202,7 @@
                     },
                     success: function(response) {
                         table.ajax.reload();
-                        Swal.fire('Berhasil!', 'Mockup berhasil disetujui', 'success');
+                        Swal.fire('Berhasil!', 'Produksi berhasil disetujui', 'success');
                     },
                     error: function(xhr) {
                         console.log(xhr.responseText);
@@ -216,16 +214,16 @@
 
             $(document).on('click', '.rejectBtn', function() {
                 let id = $(this).data('id');
-                $("#designBrief_id").val(id);
+                $("#produksi_id").val(id);
                 $("#rejectForm")[0].reset();
                 $("#rejectModal").modal("show");
             });
 
-             $("#rejectForm").submit(function(e) {
+            $("#rejectForm").submit(function(e) {
                 e.preventDefault();
-                let id = $('#designBrief_id').val();
+                let id = $('#produksi_id').val();
                 $.ajax({
-                    url: '/mockup/' + id + '/status',
+                    url: '/produksi/' + id + '/status',
                     type: 'PUT',
                     data: {
                         _token: $('meta[name="csrf-token"]').attr('content'),
@@ -236,7 +234,7 @@
                     success: function() {
                         table.ajax.reload();
                         $("#rejectModal").modal("hide");
-                        Swal.fire('Berhasil!', 'Mockup Design disetujui', 'success');
+                        Swal.fire('Berhasil!', 'Produksi Design disetujui', 'success');
                     },
                     error: function(xhr) {
                         console.log(xhr.responseText);
@@ -244,12 +242,6 @@
                     }
                 })
             })
-
-
-
-
-
-
-        });
+        })
     </script>
 @endsection

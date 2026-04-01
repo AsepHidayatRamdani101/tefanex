@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DesignBriefController;
 use App\Http\Controllers\MockupController;
+use App\Http\Controllers\ProduksiController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectMemberController;
@@ -67,5 +68,8 @@ Route::get('timeline-data', [TimelineController::class, 'data'])->name('timeline
 Route::resource('mockup', MockupController::class)
     ->middleware('role:siswa|guru|super_admin|kepala_tefa');
 Route::get('mockup-data', [MockupController::class, 'data'])->name('mockup.data');
-
+Route::put('mockup/{id}/status', [MockupController::class, 'updateStatus'])->name('mockup.status')->middleware('role:kepala_tefa');
+Route::resource('produksi', ProduksiController::class)
+    ->middleware('role:siswa|guru|super_admin|kepala_tefa');
+Route::get('produksi-data', [ProduksiController::class, 'data'])->name('produksi.data');
 require __DIR__ . '/auth.php';

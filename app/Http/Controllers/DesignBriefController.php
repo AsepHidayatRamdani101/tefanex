@@ -32,7 +32,7 @@ class DesignBriefController extends Controller
     {
         $projectMember = Design_Brief::with(['project', 'user','project.project_members'])
             ->whereHas('project.project_members', function($query) {
-                $query->where('project_members.user_id', auth()->id());
+                $query->where('project__members.user_id', auth()->id());
             })->select('design_briefs.*');
 
         if (auth()->user()->hasRole('guru|super_admin|kepala_tefa')) {
