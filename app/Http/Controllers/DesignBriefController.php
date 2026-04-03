@@ -6,11 +6,13 @@ use App\Models\Design_Brief;
 use App\Models\Project;
 use App\Models\Project_Member;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
 use Yajra\DataTables\Facades\DataTables;
 
 class DesignBriefController extends Controller
 {
+    
     /**
      * Display a listing of the resource.
      */
@@ -30,12 +32,15 @@ class DesignBriefController extends Controller
 
     public function data(Request $request)
     {
+        /** @var User $user */
+        $user = Auth::user();
+        
         $projectMember = Design_Brief::with(['project', 'user','project.project_members'])
             ->whereHas('project.project_members', function($query) {
                 $query->where('project__members.user_id', auth()->id());
             })->select('design_briefs.*');
 
-        if (auth()->user()->hasRole('guru|super_admin|kepala_tefa')) {
+        if ($user->hasRole('guru|super_admin|kepala_tefa')) {
              $projectMember = Design_Brief::with(['project', 'user'])->select('design_briefs.*');
            
         
@@ -61,18 +66,18 @@ class DesignBriefController extends Controller
 
             })
 
-            ->addColumn('action', function ($projectMember) {
-                if (auth()->user()->hasRole('guru')) {
+            ->addColumn('action', function ($projectMember) use ($user) {
+               if ($user->hasRole('guru')) {
                     $btn = '<button class="btn btn-sm btn-primary tambahBtn" data-id="' . $projectMember->project->id . '">Tambah</button>';
                     $btn .= ' <button class="btn btn-sm btn-secondary lihatBtn" data-id="' . $projectMember->project->id . '">Lihat</button>';
                     $btn .= ' <button class="btn btn-sm btn-warning editBtn" data-id="' . $projectMember->project->id . '">Edit</button>';
                     return $btn;
-                } else if (auth()->user()->hasRole('siswa')) {
+                } else if ($user->hasRole('siswa')) {
                     $btn = '<button class="btn btn-sm btn-primary tambahBtn" data-id="' . $projectMember->project->id . '">Tambah</button>';
                     $btn .= ' <button class="btn btn-sm btn-secondary lihatBtn" data-id="' . $projectMember->project->id . '">Lihat</button>';
                     $btn .= ' <button class="btn btn-sm btn-warning editBtn" data-id="' . $projectMember->project->id . '">Edit</button>';
                     return $btn;
-                } else if (auth()->user()->hasRole('kepala_tefa')) {
+                } else if ($user->hasRole('kepala_tefa')) {
                     $btn = '<button class="btn btn-sm btn-secondary lihatBtn" data-id="' . $projectMember->project->id . '">Lihat</button>';
                     $btn .= ' <button class="btn btn-sm btn-success approveBtn" data-id="' . $projectMember->id . '">Aprove</button>';
                     $btn .= ' <button class="btn btn-sm btn-danger rejectBtn" data-id="' . $projectMember->id . '">Reject</button>';

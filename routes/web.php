@@ -7,6 +7,7 @@ use App\Http\Controllers\ProduksiController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectMemberController;
+use App\Http\Controllers\QualityController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\UserController;
@@ -72,4 +73,14 @@ Route::put('mockup/{id}/status', [MockupController::class, 'updateStatus'])->nam
 Route::resource('produksi', ProduksiController::class)
     ->middleware('role:siswa|guru|super_admin|kepala_tefa');
 Route::get('produksi-data', [ProduksiController::class, 'data'])->name('produksi.data');
+Route::put('produksi/{id}/status', [ProduksiController::class, 'updateStatus'])->name('produksi.status')->middleware('role:kepala_tefa');
+Route::put('produksi/{id}/revisi', [ProduksiController::class, 'revisi'])->name('produksi.revisi')->middleware('role:kepala_tefa');
+
+Route::resource('quality-control', QualityController::class)
+    ->middleware('role:siswa|guru|super_admin|kepala_tefa');
+Route::get('quality-control-data', [QualityController::class, 'data'])->name('quality.data');
+Route::put('quality-control/{id}/status', [QualityController::class, 'updateStatus'])->name('quality-control.status')->middleware('role:kepala_tefa');
+Route::put('quality-control/{id}/revisi', [QualityController::class, 'revisi'])->name('quality-control.revisi')->middleware('role:kepala_tefa
+');
+
 require __DIR__ . '/auth.php';

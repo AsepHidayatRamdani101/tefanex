@@ -19,9 +19,13 @@ class UserSeeder extends Seeder
         $roles = [
             'guru',
             'siswa',
-            'kepala_produksi',
+            'kepala_tefa',
             'bendahara',
-            'marketing'
+            'marketing',
+            'admin',
+            'produksi',
+            'designer',
+            'qa'
         ];
 
         foreach ($roles as $role) {
@@ -41,15 +45,56 @@ class UserSeeder extends Seeder
         );
         $guru->assignRole('guru');
 
-        // Kepala Produksi
-        $kp = User::firstOrCreate(
-            ['email' => 'produksi@tefa.com'],
+        // Kepala TEFA
+        $kepalaTefa = User::firstOrCreate(
+            ['email' => 'kepala_tefa@tefa.com'],
             [
-                'name' => 'Kepala Produksi',
+                'name' => 'Kepala TEFA',
+                'password' => Hash::make('password')    
+            ]
+        );
+        $kepalaTefa->assignRole('kepala_tefa');
+
+        // Admin
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@tefa.com'],
+            [
+                'name' => 'Admin TEFA',
                 'password' => Hash::make('password')
             ]
         );
-        $kp->assignRole('kepala_produksi');
+        $admin->assignRole('admin');
+
+        // Produksi
+        $produksi = User::firstOrCreate(
+            ['email' => 'produksi@tefa.com'],
+            [
+                'name' => 'Produksi TEFA',
+                'password' => Hash::make('password')
+            ]
+        );
+        $produksi->assignRole('produksi');
+
+        // Designer
+        $designer = User::firstOrCreate(
+            ['email' => 'designer@tefa.com'],
+            [
+                'name' => 'Designer TEFA',
+                'password' => Hash::make('password')
+            ]
+        );
+        $designer->assignRole('designer');
+
+        // QA
+        $qa = User::firstOrCreate(
+            ['email' => 'qa@tefa.com'],
+            [
+                'name' => 'QA TEFA',
+                'password' => Hash::make('password')
+            ]
+        );
+        $qa->assignRole('qa');
+
 
         // Bendahara
         $bendahara = User::firstOrCreate(

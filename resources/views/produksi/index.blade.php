@@ -20,9 +20,9 @@
                             <th>Nama Produksi</th>
                             <th width="10%">Deskripsi</th>
                             <th>File Referensi</th>
+                            <th>waktu</th>
                             <th>Status</th>
                             <th>Revisi</th>
-                            <th>Hasil Produksi</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -33,7 +33,7 @@
     </div>
 
     @include('produksi.modal');
-    @include('design_brief.rejectmodal')
+    @include('produksi.revisi');
 
 
 @stop
@@ -62,15 +62,29 @@
                 responsive: true,
                 ajax: "{{ route('produksi.data') }}",
                 columns: [{
-                        data: 'nama',
-                        name: 'nama'
+                        data: 'project',
+                        name: 'project'
                     },
                     {
+
+                        data: 'deskripsi',
+                        name: 'deskripsi',
                         data: 'deskripsi',
                         data: function(row) {
+                            if (row.deskripsi === '-') {
+                                return {
+                                    judul: '-',
+                                    lama_pengerjaan: '-',
+                                    dimensi: '-',
+                                    warna: '-',
+                                    font: '-',
+                                    tagline: '-',
+                                };
+                            }
+
                             let deskripsiArray = row.deskripsi.split('\n');
                             return {
-                                nama: deskripsiArray[0],
+                                judul: deskripsiArray[0],
                                 lama_pengerjaan: deskripsiArray[1],
                                 dimensi: deskripsiArray[2],
                                 warna: deskripsiArray[3],
@@ -80,13 +94,13 @@
                         },
                         render: function(data) {
                             return `
-                                        <p><b>Nama</b> : ${data.nama} </p>
-                                        <p><b>Lama Pengerjaan</b> : ${data.lama_pengerjaan}</p>
-                                        <p><b>Dimensi</b> : ${data.dimensi} </p>
-                                        <p><b>Font</b> : ${data.font} </p>
-                                        <p><b>Warna</b> : ${data.warna} </p>
-                                        <p><b>Tagline</b> : ${data.tagline} </p>
-                                    `;
+                                <p><b>Judul</b> : ${data.judul} </p>
+                                <p><b>Lama Pengerjaan</b> : ${data.lama_pengerjaan}</p>
+                                <p><b>Dimensi</b> : ${data.dimensi} </p>
+                                <p><b>Font</b> : ${data.font} </p>
+                                <p><b>Warna</b> : ${data.warna} </p>
+                                <p><b>Tagline</b> : ${data.tagline} </p>
+                            `;
                         }
                     },
                     {
@@ -99,6 +113,18 @@
                         }
                     },
                     {
+                        data: 'waktu',
+                        name: 'waktu',
+                        render: function(data) {
+                            let date = new Date(data);
+                            return date.toLocaleDateString('id-ID', {
+                                day: '2-digit',
+                                month: 'long',
+                                year: 'numeric'
+                            });
+                        }
+                    },
+                    {
                         data: 'status',
                         name: 'status'
                     },
@@ -106,15 +132,7 @@
                         data: 'revisi',
                         name: 'revisi'
                     },
-                    {
-                        data: 'hasil',
-                        name: 'hasil',
-                        render: function(data) {
-                            return `
-                                        <a href="${data}" class="btn btn-sm btn-primary" target="_blank">Lihat Hasil</a>
-                                    `;
-                        }
-                    },
+
 
                     {
                         data: 'action',
@@ -128,120 +146,159 @@
             let projectId;
 
 
-            $("#uploadForm").submit(function(e) {
-                e.preventDefault();
+            $(document).on('click', '.tambahBtn', function() {
+                projectId = $(this).data('id');
+                $('#id').val(projectId);
+                $('#uploadModal').modal('show');
+            });
 
+            $(document).on('submit', '#uploadForm', function(e) {
+                e.preventDefault();
+                let id = $('#id').val();
                 let formData = new FormData(this);
-                formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+                formData.append('id', projectId);
+
                 let file = $('#file')[0].files[0];
                 if (file) {
                     formData.append('file', file);
                 }
-
-                let id = $('#produksi_id').val();
-                let url = '/produksi';
-                let method = 'POST';
 
                 if (id) {
                     url = '/produksi/' + id;
                     formData.append('_method', 'PUT');
                 }
 
-
                 $.ajax({
                     url: url,
-                    type: method,
+                    method: 'POST',
                     data: formData,
                     contentType: false,
                     processData: false,
                     success: function(response) {
-
                         $('#uploadModal').modal('hide');
+                        Swal.fire(
+                            'Success',
+                            response.message,
+                            'success'
+                        );
                         table.ajax.reload();
-                        Swal.fire('Berhasil!', 'File berhasil diupload', 'success');
                     },
                     error: function(xhr) {
-                        console.log(xhr.responseText);
-                        Swal.fire('Gagal!', 'Terjadi kesalahan saat mengirim request', 'error');
+                        Swal.fire(
+                            'Error',
+                            xhr.responseJSON.message,
+                            'error'
+                        );
                     }
                 });
-            });
+            })
 
-
-            $(document).on('click', '.editBtn', function() {
-                let id = $(this).data('id');
-                $.get('/produksi/' + id + '/edit', function(data) {
-                    $('#nama').val(data.nama);
-                    $('#deskripsi').val(data.deskripsi);
-                    $('#client').val(data.client);
-                    $('#status').val(data.status);
-                    $('#guru_id').val(data.guru_id);
-                    $('#produksi_id').val(data.id);
-                    $('#produksiModal').modal('show');
-                });
-            });
-
-            $(document).on('click', '.addBtn', function() {
-                let id = $(this).data('id');
-                $("#produksi_id").val(id);
-                $("#uploadForm")[0].reset();
-                $("#uploadModal").modal("show");
-
-            });
-
+            //btn approve
             $(document).on('click', '.approveBtn', function() {
                 let id = $(this).data('id');
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, approve it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/produksi/' + id + '/status',
+                            method: 'PUT',
+                            data: {
+                                _token: '{{ csrf_token() }}',
+                                status: 'selesai'
+                            },
+                            success: function(response) {
+                                Swal.fire(
+                                    'Approved!',
+                                    response.message,
+                                    'success'
+                                );
+                                table.ajax.reload();
+                            },
+                            error: function(xhr) {
+                                Swal.fire(
+                                    'Error',
+                                    xhr.responseJSON.message,
+                                    'error'
+                                );
+                                console.log(xhr);
+
+                            }
+                        });
+                    }
+                })
+            });
+
+            //btn revisi
+            $(document).on('click', '.revisiBtn', function() {
+                projectId = $(this).data('id');
+                $('#revisi_produksi_id').val(projectId);
+                $('#revisiModal').modal('show');
+            });
+
+            $(document).on('submit', '#revisiForm', function(e) {
+                e.preventDefault();
+                let id = $('#revisi_produksi_id').val();
+                let revisi_note = $('#revisi_note').val();
+
                 $.ajax({
-                    url: '/produksi/' + id + '/status',
-                    type: 'PUT',
+                    url: '/produksi/' + id + '/revisi',
+                    method: 'PUT',
                     data: {
-                        _token: $('meta[name="csrf-token"]').attr('content'),
-                        status: 'approved',
-                        id: id,
-                        revisi: "-",
+                        _token: '{{ csrf_token() }}',
+                        revisi_note: revisi_note
                     },
                     success: function(response) {
+                        $('#revisiModal').modal('hide');
+                        Swal.fire(
+                            'Revised!',
+                            response.message,
+                            'success'
+                        );
                         table.ajax.reload();
-                        Swal.fire('Berhasil!', 'Produksi berhasil disetujui', 'success');
                     },
                     error: function(xhr) {
-                        console.log(xhr.responseText);
-                        Swal.fire('Gagal!', 'Terjadi kesalahan saat mengirim request', 'error');
+                        Swal.fire(
+                            'Error',
+                            xhr.responseJSON.message,
+                            'error'
+                        );
+                        console.log(xhr);
                     }
-                })
-
+                });
             });
 
-            $(document).on('click', '.rejectBtn', function() {
+            //btn lihat detail produksi
+            $(document).on('click', '.lihatBtn', function() {
                 let id = $(this).data('id');
-                $("#produksi_id").val(id);
-                $("#rejectForm")[0].reset();
-                $("#rejectModal").modal("show");
-            });
+                console.log(id);
 
-            $("#rejectForm").submit(function(e) {
-                e.preventDefault();
-                let id = $('#produksi_id').val();
                 $.ajax({
-                    url: '/produksi/' + id + '/status',
-                    type: 'PUT',
-                    data: {
-                        _token: $('meta[name="csrf-token"]').attr('content'),
-                        id: id,
-                        status: 'revisi',
-                        revisi: $('#alasan').val()
-                    },
-                    success: function() {
-                        table.ajax.reload();
-                        $("#rejectModal").modal("hide");
-                        Swal.fire('Berhasil!', 'Produksi Design disetujui', 'success');
+                    url: '/produksi/' + id,
+                    method: 'GET',
+                    success: function(response) {
+                        //buka langsung tanpa modal path file produksi
+                        window.open(response.file_path, '_blank');
+
                     },
                     error: function(xhr) {
-                        console.log(xhr.responseText);
-                        Swal.fire('Gagal!', 'Terjadi kesalahan saat mengirim request');
+                        Swal.fire(
+                            'Error',
+                            xhr.responseJSON.message,
+                            'error'
+                        );
+                        console.log(xhr);
                     }
-                })
-            })
-        })
+                });
+            });
+
+
+        });
     </script>
 @endsection

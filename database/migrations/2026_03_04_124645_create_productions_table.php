@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('project_id')->constrained('projects')->cascadeOnDelete();
             $table->text('description')->nullable();
-            $table->enum('status', ['proses', 'selesai'])->default('proses');
+            $table->enum('status', ['proses', 'selesai','revisi'])->default('proses');
             $table->timestamps();
         });
     }

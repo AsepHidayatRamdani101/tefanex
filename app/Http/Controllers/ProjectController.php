@@ -87,7 +87,26 @@ class ProjectController extends Controller
             'project_id' => $project->id,
             'status' => 'pending',
         ]);
-    
+
+        //buat produksi
+        $project->productions()->create([
+            'project_id' => $project->id,
+            'status' => 'proses',
+        ]);
+
+        // buat quality control
+        $project->qualityControls()->create([
+            'project_id' => $project->id,
+            'status' => 'revisi',
+        ]);
+
+        // buat mass production
+        $project->massProductions()->create([
+            'project_id' => $project->id,
+            'status' => 'proses',
+            'quantity' => 0,
+        ]);
+
 
         return response()->json(['message' => 'Project berhasil dibuat', 'project' => $project]);
 

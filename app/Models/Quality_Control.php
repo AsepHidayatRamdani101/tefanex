@@ -8,4 +8,20 @@ use Illuminate\Database\Eloquent\Model;
 class Quality_Control extends Model
 {
     use HasFactory;
+
+    protected $table = 'quality_controls';
+
+    protected $guarded = ['id'];
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
+
+    public function production()
+    {
+        return $this->belongsTo(Production::class);
+    }
+
+    
 }

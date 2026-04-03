@@ -46,4 +46,20 @@ class Project extends Model
     {
         return $this->hasMany(Mockup::class);
     }
+
+    public function productions()
+    {
+        return $this->hasMany(Production::class);
+    }
+
+    public function qualityControls()
+    {
+        return $this->hasMany(Quality_Control::class);
+    }
+
+    // tambahkan relasi mass production
+    public function massProductions()
+    {
+        return $this->hasMany(Mass_Production::class);
+    }
 }
