@@ -33,7 +33,7 @@ class MassProController extends Controller
             ->select(
                 'projects.judul as project_nama',
                 'mass_productions.id as id',
-                'mass_productions.quantity as quantity',
+                'design_briefs.quantity as quantity',
                 'mass_productions.status as status',
                 'timelines.end_date as waktu'
             )
@@ -53,13 +53,9 @@ class MassProController extends Controller
                 return $item->status ?: '-';
             })
             ->addColumn('action', function ($item) {
-                if ($item->status === 'selesai') {
-                    return '<span class="badge badge-success">Selesai</span>';
-                }
-
+              
                 return '
-                    <button class="btn btn-sm btn-success approveBtn" data-id="' . $item->id . '">Approve</button>
-                    <button class="btn btn-sm btn-danger revisiBtn" data-id="' . $item->id . '">Revisi</button>
+                    <button class="btn btn-sm btn-primary tambahBtn" data-id="' . $item->id . '">Proses</button>
                 ';
             })
             ->rawColumns(['action'])
@@ -105,7 +101,9 @@ class MassProController extends Controller
      */
     public function show(string $id)
     {
-        //
+        //maspro show
+        $massPro = Mass_Production::with('project','designBrief', 'timeline')->findOrFail($id);
+        return response()->json($massPro);
     }
 
     /**
@@ -121,7 +119,13 @@ class MassProController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        //update masspro
+        $massPro = Mass_Production::findOrFail($id);
+        $massPro->quantity_mass = $request->quantity;
+        $massPro->status = $request->status;
+        $massPro->save();
+
+        return response()->json(['message' => 'Mass Production updated successfully']);
     }
 
     /**

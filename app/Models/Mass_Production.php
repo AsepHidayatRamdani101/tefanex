@@ -19,4 +19,14 @@ class Mass_Production extends Model
     {
         return $this->belongsTo(Project::class);
     }
+
+    public function timeline()
+    {
+        return $this->hasOne(Timeline::class, 'project_id', 'project_id');
+    }
+
+    public function designBrief()
+    {
+        return $this->hasOne(Design_Brief::class, 'project_id', 'project_id');
+    }
 }

@@ -11,6 +11,7 @@ use App\Http\Controllers\ProjectMemberController;
 use App\Http\Controllers\QualityController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TimelineController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -81,7 +82,10 @@ Route::resource('masspro', MassProController::class)
     ->middleware('role:siswa|guru|super_admin|kepala_tefa');
 Route::get('masspro-data', [MassProController::class, 'data'])->name('masspro.data');
 Route::put('masspro/{id}/status', [MassProController::class, 'updateStatus'])->name('masspro.status')->middleware('role:kepala_tefa');
-Route::put('masspro/{id}/revisi', [MassProController::class, 'revisi'])->name('masspro.revisi')->middleware('role:kepala_tefa');
+
+Route::resource('invoices', InvoiceController::class)
+    ->middleware('role:siswa|guru|super_admin|kepala_tefa');
+Route::get('invoices-data', [InvoiceController::class, 'data'])->name('invoices.data');
 
 Route::resource('quality-control', QualityController::class)
     ->middleware('role:siswa|guru|super_admin|kepala_tefa');
@@ -89,5 +93,7 @@ Route::get('quality-control-data', [QualityController::class, 'data'])->name('qu
 Route::put('quality-control/{id}/status', [QualityController::class, 'updateStatus'])->name('quality-control.status')->middleware('role:kepala_tefa');
 Route::put('quality-control/{id}/revisi', [QualityController::class, 'revisi'])->name('quality-control.revisi')->middleware('role:kepala_tefa
 ');
+
+
 
 require __DIR__ . '/auth.php';

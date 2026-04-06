@@ -107,6 +107,14 @@ class ProjectController extends Controller
             'quantity' => 0,
         ]);
 
+        // buat invoice
+        $project->invoice()->create([
+            'project_id' => $project->id,
+            'invoice_number' => 'INV-' . strtoupper(uniqid()),
+            'amount' => 0,
+            'status' => 'belum bayar',
+        ]);
+
 
         return response()->json(['message' => 'Project berhasil dibuat', 'project' => $project]);
 

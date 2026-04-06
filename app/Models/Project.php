@@ -62,4 +62,9 @@ class Project extends Model
     {
         return $this->hasMany(Mass_Production::class);
     }
+
+    public function invoice()
+    {
+        return $this->hasOne(Invoice::class);
+    }
 }

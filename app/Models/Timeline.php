@@ -42,4 +42,9 @@ class Timeline extends Model
     {
         return $this->belongsTo(Mockup::class);
     }
+
+    public function massProduction()
+    {
+        return $this->belongsTo(Mass_Production::class);
+    }
 }

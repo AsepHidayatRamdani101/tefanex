@@ -27,7 +27,11 @@
             </div>
         </div>
     </div>
+
+    @include('masspro.modal')
 @stop
+
+
 
 @section('footer')
     <div class="float-right d-none d-sm-inline">
@@ -52,8 +56,7 @@
                 serverSide: true,
                 responsive: true,
                 ajax: "{{ route('masspro.data') }}",
-                columns: [
-                    {
+                columns: [{
                         data: 'project',
                         name: 'project'
                     },
@@ -92,64 +95,61 @@
                 ]
             });
 
-            $(document).on('click', '.approveBtn', function() {
+            $('#massproTable').on('click', '.tambahBtn', function() {
                 let id = $(this).data('id');
-                Swal.fire({
-                    title: 'Approve mass production?',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, approve!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: '/masspro/' + id + '/status',
-                            method: 'PUT',
-                            data: {
-                                _token: '{{ csrf_token() }}',
-                                status: 'selesai'
-                            },
-                            success: function(response) {
-                                Swal.fire('Success', response.message, 'success');
-                                table.ajax.reload();
-                            },
-                            error: function(xhr) {
-                                Swal.fire('Error', xhr.responseJSON?.message || 'Terjadi kesalahan', 'error');
-                            }
-                        });
+                $.get('/masspro/' + id, function(data) {
+                    console.log(data);
+                    $('#massForm')[0].reset();
+                    $('#massproId').val(data.id);
+                    $('#nama').val(data.project.judul);
+                    $('#jumlah').val(data.design_brief ? data.design_brief.quantity : '');
+                    $('#status').val(data.status);
+                    $('#massproModal').modal('show');
+                });
+                
+            });
+
+            $('#massForm').submit(function(e) {
+                e.preventDefault();
+                let id = $('#massproId').val();
+                if(id){
+                    var url = '/masspro/' + id;
+                    var method = 'PUT';
+                } else {
+                    var url = '/masspro';
+                    var method = 'POST';
+                }
+                $.ajax({
+                    url: url,
+                    method: method,
+                    data: {
+                        id: id,
+                        quantity: $('#jumlah').val(),
+                        status: $('#status').val(),
+                        _token: $('input[name="_token"]').val()
+                    },
+                    success: function(response) {
+                        $('#massproModal').modal('hide');
+                        Swal.fire(
+                            'Berhasil!',
+                            'Data mass production berhasil diperbarui.',
+                            'success'
+                        );
+                        table.ajax.reload();
+                    },
+                    error: function(xhr) {
+                        console.log(xhr.responseText);
+                        
+                        Swal.fire(
+                            'Gagal!',
+                            'Terjadi kesalahan saat memperbarui data.',
+                            'error'
+                        );
                     }
                 });
             });
 
-            $(document).on('click', '.revisiBtn', function() {
-                let id = $(this).data('id');
-                Swal.fire({
-                    title: 'Kirim ke revisi?',
-                    text: 'Status akan diubah menjadi revisi.',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Ya, revisi',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: '/masspro/' + id + '/status',
-                            method: 'PUT',
-                            data: {
-                                _token: '{{ csrf_token() }}',
-                                status: 'revisi'
-                            },
-                            success: function(response) {
-                                Swal.fire('Success', response.message, 'success');
-                                table.ajax.reload();
-                            },
-                            error: function(xhr) {
-                                Swal.fire('Error', xhr.responseJSON?.message || 'Terjadi kesalahan', 'error');
-                            }
-                        });
-                    }
-                });
-            });
+
         });
     </script>
 @endsection

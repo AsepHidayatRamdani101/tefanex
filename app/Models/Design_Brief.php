@@ -28,5 +28,15 @@ class Design_Brief extends Model
         return $this->hasMany(Mockup::class);
     }
 
+    public function timeline()
+    {
+        return $this->hasOne(Timeline::class, 'project_id', 'project_id');
+    }
+
+        public function massProduction()
+        {
+            return $this->hasOne(Mass_Production::class, 'project_id', 'project_id');
+        }
+
 
 }

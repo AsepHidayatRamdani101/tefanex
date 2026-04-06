@@ -352,8 +352,8 @@ return [
                     'can' => 'guru|kepala_tefa|siswa'
                 ],
                 [
-                    'text' => 'Invoice',
-                    'url' => 'invoice',
+                    'text' => 'Invoices',
+                    'url' => 'invoices',
                     'icon' => 'fas fa-file-invoice',
                     'can' => 'guru|kepala_tefa|siswa|bendahara'
                 ],
