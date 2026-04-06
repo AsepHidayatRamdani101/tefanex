@@ -67,4 +67,9 @@ class Project extends Model
     {
         return $this->hasOne(Invoice::class);
     }
+
+    public function materials()
+    {
+        return $this->hasMany(Material::class);
+    }
 }

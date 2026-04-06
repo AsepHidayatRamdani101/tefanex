@@ -377,7 +377,7 @@ return [
         ],
         [
             'text' => 'Absensi',
-            'url' => 'absensi',
+            'url' => 'attendances',
             'icon' => 'fas fa-calendar-check',
             'can' => 'guru|siswa'
         ],

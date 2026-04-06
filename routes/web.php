@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DesignBriefController;
 use App\Http\Controllers\MockupController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\QualityController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\MateriController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -87,12 +89,25 @@ Route::resource('invoices', InvoiceController::class)
     ->middleware('role:siswa|guru|super_admin|kepala_tefa');
 Route::get('invoices-data', [InvoiceController::class, 'data'])->name('invoices.data');
 
+Route::post('attendances/bulk', [AttendanceController::class, 'bulk'])->name('attendances.bulk')->middleware('role:siswa|guru|super_admin|kepala_tefa');
+Route::resource('attendances', AttendanceController::class)
+    ->middleware('role:siswa|guru|super_admin|kepala_tefa');
+Route::get('attendances-data', [AttendanceController::class, 'data'])->name('attendances.data');
+
+Route::post('materi/bulk', [MateriController::class, 'bulk'])->name('materi.bulk')->middleware('role:guru|super_admin|kepala_tefa');
+Route::resource('materi', MateriController::class)
+    ->middleware('role:guru|super_admin|kepala_tefa');
+Route::get('materi-data', [MateriController::class, 'data'])->name('materi.data');
+
 Route::resource('quality-control', QualityController::class)
     ->middleware('role:siswa|guru|super_admin|kepala_tefa');
 Route::get('quality-control-data', [QualityController::class, 'data'])->name('quality.data');
 Route::put('quality-control/{id}/status', [QualityController::class, 'updateStatus'])->name('quality-control.status')->middleware('role:kepala_tefa');
-Route::put('quality-control/{id}/revisi', [QualityController::class, 'revisi'])->name('quality-control.revisi')->middleware('role:kepala_tefa
-');
+Route::put('quality-control/{id}/revisi', [QualityController::class, 'revisi'])->name('quality-control.revisi')->middleware('role:kepala_tefa');
+
+
+
+require __DIR__ . '/auth.php';
 
 
 
