@@ -35,6 +35,7 @@
 
     @include('mockup.modal');
     @include('design_brief.rejectmodal')
+    @include('mockup.modal_checklist')
 
 
 @stop
@@ -193,62 +194,100 @@
 
             $(document).on('click', '.approveBtn', function() {
                 let id = $(this).data('id');
+                $("#mockup_id").val(id);
+                $.get('/mockup/' + id, function(data) {
+                    console.log(data);
+
+                    //ambil data gambar mockup
+                    $('#mockupPreview').attr('src', data.file_path);
+
+
+                });
+                //checklist modal
+                $("#qcFileDesainForm")[0].reset();
+                $("#qcFileDesainModal").modal("show");
+
+            });
+
+            $('#qcFileDesainForm').submit(function(e) {
+                e.preventDefault();
+
+                let revision_note = $('#qcFileDesainNote').val();
+                let status = $('#qcFileDesainStatus').val();
+                const checkList = {
+                    checkResolusi: $('#checkResolusi').is(':checked'),
+                    checkModeWarna: $('#checkModeWarna').is(':checked'),
+                    checkUkuran: $('#checkUkuran').is(':checked'),
+                    checkMarginBleed: $('#checkMarginBleed').is(':checked'),
+                    checkFont: $('#checkFont').is(':checked'),
+                    checkTypo: $('#checkTypo').is(':checked')
+                };
+                let note = JSON.stringify(checkList);
+
+                console.log(note);
+                
+
+                let id = $('#mockup_id').val();
+
+                // console.log(id, revision_note, status, note);
+
+
                 $.ajax({
                     url: '/mockup/' + id + '/status',
                     type: 'PUT',
                     data: {
-                        _token: $('meta[name="csrf-token"]').attr('content'),
-                        status: 'approved',
-                        id: id,
-                        revisi: "-",
+                        _token: '{{ csrf_token() }}',
+                        status: status,
+                        note: note,
+                        keterangan: revision_note
                     },
                     success: function(response) {
+                        $('#qcFileDesainModal').modal('hide');
                         table.ajax.reload();
-                        Swal.fire('Berhasil!', 'Mockup berhasil disetujui', 'success');
+                        Swal.fire('Berhasil!', 'QC checklist berhasil disimpan', 'success');
                     },
                     error: function(xhr) {
                         console.log(xhr.responseText);
-                        Swal.fire('Gagal!', 'Terjadi kesalahan saat mengirim request', 'error');
+                        Swal.fire('Gagal!', 'Terjadi kesalahan saat menyimpan checklist',
+                            'error');
                     }
-                })
-
+                });
             });
 
-            $(document).on('click', '.rejectBtn', function() {
+            $(document).on('click', '.lihatBtn', function() {
                 let id = $(this).data('id');
-                $("#designBrief_id").val(id);
-                $("#rejectForm")[0].reset();
-                $("#rejectModal").modal("show");
+                $.get('/mockup/' + id, function(data) {
+                    console.log(data);
+
+                    //ambil data gambar mockup
+                    $('#mockupPreview').attr('src', data.file_path);
+                    $('#qcFileDesainNote').val(data.keterangan);
+                    let note = JSON.parse(data.note);
+                   
+                    
+                    $('#checkResolusi').prop('checked', note.checkResolusi);
+                    $('#checkModeWarna').prop('checked', note.checkModeWarna);
+                    $('#checkUkuran').prop('checked', note.checkUkuran);
+                    $('#checkMarginBleed').prop('checked', note.checkMarginBleed);
+                    $('#checkFont').prop('checked', note.checkFont);
+                    $('#checkTypo').prop('checked', note.checkTypo);
+                    $('#qcFileDesainStatus').val(data.status);
+                    
+
+                });
+                //checklist modal
+                $("#qcFileDesainForm")[0].reset();
+                $("#qcFileDesainModal").modal("show");
+
+
+
+
+
+
+
+
+
             });
-
-             $("#rejectForm").submit(function(e) {
-                e.preventDefault();
-                let id = $('#designBrief_id').val();
-                $.ajax({
-                    url: '/mockup/' + id + '/status',
-                    type: 'PUT',
-                    data: {
-                        _token: $('meta[name="csrf-token"]').attr('content'),
-                        id: id,
-                        status: 'revisi',
-                        revisi: $('#alasan').val()
-                    },
-                    success: function() {
-                        table.ajax.reload();
-                        $("#rejectModal").modal("hide");
-                        Swal.fire('Berhasil!', 'Mockup Design disetujui', 'success');
-                    },
-                    error: function(xhr) {
-                        console.log(xhr.responseText);
-                        Swal.fire('Gagal!', 'Terjadi kesalahan saat mengirim request');
-                    }
-                })
-            })
-
-
-
-
-
 
         });
     </script>

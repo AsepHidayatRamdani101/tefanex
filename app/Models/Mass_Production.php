@@ -11,6 +11,10 @@ class Mass_Production extends Model
 
     protected $guarded = ['id'];
 
+    protected $table = 'mass_productions';
+
+    
+
     public function project()
     {
         return $this->belongsTo(Project::class);

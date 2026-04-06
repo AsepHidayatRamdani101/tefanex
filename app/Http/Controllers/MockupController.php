@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Mockup;
 use App\Models\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 
 class MockupController extends Controller
@@ -30,6 +31,13 @@ class MockupController extends Controller
      */
     public function data(Request $request)
     {
+
+        /** @var User $user */
+        $user = Auth::user();
+
+        if (!$user) {
+            abort(403);
+        }
        $projects = Mockup::join('design_briefs', 'mockups.project_id', '=', 'design_briefs.project_id')
             ->join('timelines', 'mockups.project_id', '=', 'timelines.project_id')
             ->join('projects', 'timelines.project_id', '=', 'projects.id')
@@ -59,15 +67,15 @@ class MockupController extends Controller
             })
            
            
-            ->addColumn('action', function ($project) {
-                if (auth()->user()->hasRole('siswa')) {
+            ->addColumn('action', function ($project) use ($user) {
+                if ($user->hasRole('siswa')) {
                     return '
                     <button class="btn btn-sm btn-warning addBtn" data-id="' . $project->id . '">Upload</button>
                     ';
-                } else if (auth()->user()->hasRole('kepala_tefa')) {
+                } else if ($user->hasRole('kepala_tefa')) {
                     return '
                     <button class="btn btn-sm btn-success approveBtn" data-id="' . $project->id . '">approve</button>
-                    <button class="btn btn-sm btn-danger rejectBtn" data-id="' . $project->id . '">reject</button>
+                    <button class="btn btn-sm btn-info lihatBtn" data-id="' . $project->id . '">lihat</button>
                     ';          
                 }
             })
@@ -86,7 +94,9 @@ class MockupController extends Controller
      */
     public function show(string $id)
     {
-        //
+        //ambil data mockup berdasarkan id
+        $mockup = Mockup::findOrFail($id);
+        return response()->json($mockup);
     }
 
     /**
@@ -128,7 +138,9 @@ class MockupController extends Controller
     {
         $mockup = Mockup::findOrFail($id);
         $mockup->status = $request->status;
-        $mockup->revision_note = $request->revisi;
+        $mockup->revision_note = $request->keterangan ?? '-';
+        $mockup->note = $request->note;
+         
         $mockup->save();
 
         return response()->json(['status' => 'berhasil']);

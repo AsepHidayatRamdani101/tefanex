@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DesignBriefController;
 use App\Http\Controllers\MockupController;
+use App\Http\Controllers\MassProController;
 use App\Http\Controllers\ProduksiController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
@@ -75,6 +76,12 @@ Route::resource('produksi', ProduksiController::class)
 Route::get('produksi-data', [ProduksiController::class, 'data'])->name('produksi.data');
 Route::put('produksi/{id}/status', [ProduksiController::class, 'updateStatus'])->name('produksi.status')->middleware('role:kepala_tefa');
 Route::put('produksi/{id}/revisi', [ProduksiController::class, 'revisi'])->name('produksi.revisi')->middleware('role:kepala_tefa');
+
+Route::resource('masspro', MassProController::class)
+    ->middleware('role:siswa|guru|super_admin|kepala_tefa');
+Route::get('masspro-data', [MassProController::class, 'data'])->name('masspro.data');
+Route::put('masspro/{id}/status', [MassProController::class, 'updateStatus'])->name('masspro.status')->middleware('role:kepala_tefa');
+Route::put('masspro/{id}/revisi', [MassProController::class, 'revisi'])->name('masspro.revisi')->middleware('role:kepala_tefa');
 
 Route::resource('quality-control', QualityController::class)
     ->middleware('role:siswa|guru|super_admin|kepala_tefa');

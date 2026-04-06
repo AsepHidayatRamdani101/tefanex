@@ -188,6 +188,7 @@ class DesignBriefController extends Controller
         $designBrief->approval_status = $request->status;
         $designBrief->approved_by = auth()->user()->id;
         $designBrief->keterangan = $request->keterangan;
+        $designBrief->note = $request->note;
         $designBrief->save();
     }
 

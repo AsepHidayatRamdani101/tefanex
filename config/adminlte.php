@@ -346,11 +346,18 @@ return [
                     'can' => 'guru|kepala_tefa|siswa'
                 ],
                 [
+                    'text' => 'Mass Production',
+                    'url' => 'masspro',
+                    'icon' => 'fas fa-cogs',
+                    'can' => 'guru|kepala_tefa|siswa'
+                ],
+                [
                     'text' => 'Invoice',
                     'url' => 'invoice',
                     'icon' => 'fas fa-file-invoice',
                     'can' => 'guru|kepala_tefa|siswa|bendahara'
                 ],
+                
 
 
             ],
