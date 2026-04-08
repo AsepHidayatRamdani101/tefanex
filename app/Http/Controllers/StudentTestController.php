@@ -6,13 +6,15 @@ use App\Models\Test;
 use App\Models\Test_Result;
 use App\Models\StudentTestAnswer;
 use App\Models\Siswa;
+use App\Models\Project_Member;
+use App\Models\Material;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class StudentTestController extends Controller
 {
     /**
-     * Display a listing of available tests for the student
+     * Display a listing of available tests for the student based on project membership
      */
     public function listTests()
     {
@@ -24,10 +26,17 @@ class StudentTestController extends Controller
                 ->with('error', 'Data siswa tidak ditemukan. Hubungi administrator.');
         }
 
-        // Get all available tests (pretest and posttest)
-        $tests = Test::with('material')
+        // Get projects where student is a member
+        $projectIds = Project_Member::where('user_id', $user->id)
+            ->pluck('project_id');
+
+        // Get tests for materials in those projects
+        $tests = Test::whereHas('material', function ($query) use ($projectIds) {
+                $query->whereIn('project_id', $projectIds);
+            })
+            ->with(['material.project', 'questions.answers'])
             ->get()
-            ->map(function ($test) use ($siswa, $user) {
+            ->map(function ($test) use ($user) {
                 $result = Test_Result::where('test_id', $test->id)
                     ->where('user_id', $user->id)
                     ->first();
@@ -40,7 +49,21 @@ class StudentTestController extends Controller
                 return $test;
             });
 
-        return view('student.tests.list', compact('tests', 'siswa'));
+        $projectTestGroups = $tests->filter(function ($test) {
+                return $test->material && $test->material->project;
+            })
+            ->groupBy(function ($test) {
+                return $test->material->project->id;
+            })
+            ->map(function ($group) {
+                $project = $group->first()->material->project;
+                return [
+                    'project' => $project,
+                    'tests' => $group,
+                ];
+            });
+
+        return view('student.tests.list', compact('projectTestGroups', 'siswa'));
     }
 
     /**
@@ -51,7 +74,16 @@ class StudentTestController extends Controller
         $user = Auth::user();
         $siswa = Siswa::where('user_id', $user->id)->firstOrFail();
 
-        $test = $test->load(['material', 'questions.answers']);
+        // Load material first
+        $test->load(['material', 'questions.answers']);
+
+        // Verify student has access to this test's project
+        $projectIds = Project_Member::where('user_id', $user->id)->pluck('project_id');
+        $material = $test->material;
+        
+        if (!$material || !$projectIds->contains($material->project_id)) {
+            abort(403, 'Anda tidak memiliki akses ke test ini');
+        }
 
         // Check if student already completed this test
         $existingResult = Test_Result::where('test_id', $test->id)
@@ -76,6 +108,17 @@ class StudentTestController extends Controller
         $user = Auth::user();
         $test = $test->load('questions.answers');
 
+        // Load material for access verification
+        $test->load('material');
+
+        // Verify student has access to this test's project
+        $projectIds = Project_Member::where('user_id', $user->id)->pluck('project_id');
+        $material = $test->material;
+        
+        if (!$material || !$projectIds->contains($material->project_id)) {
+            return response()->json(['message' => 'Anda tidak memiliki akses ke test ini'], 403);
+        }
+
         // Check if student already completed this test
         $existingResult = Test_Result::where('test_id', $test->id)
             ->where('user_id', $user->id)
@@ -94,40 +137,59 @@ class StudentTestController extends Controller
 
         $totalQuestions = $test->questions->count();
         $correctAnswers = 0;
+        $totalAutoGraded = 0;
 
         // Process each answer
         foreach ($test->questions as $question) {
             $answerKey = 'answer_' . $question->id;
             $userAnswer = $request->input($answerKey);
-
             $isCorrect = false;
+            $answerText = null;
+            $selectedOption = null;
 
             if ($question->type === 'multiple_choice') {
-                // Check if selected option is correct
+                $selectedText = null;
+
                 if ($userAnswer !== null) {
-                    $correctAnswer = $question->answers()->where('is_correct', true)->first();
-                    if ($correctAnswer && $correctAnswer->id == $userAnswer) {
+                    $selectedAnswer = is_numeric($userAnswer)
+                        ? $question->answers->firstWhere('id', $userAnswer)
+                        : null;
+
+                    if ($selectedAnswer) {
+                        $selectedText = $selectedAnswer->answer_text;
+                        $selectedOption = (string) $selectedAnswer->id;
+                    } else {
+                        $selectedText = $userAnswer;
+                        $selectedOption = $userAnswer;
+                    }
+                }
+
+                if ($selectedText !== null) {
+                    $answerText = $selectedText;
+                    if ($question->correct_answer !== null && $selectedText === $question->correct_answer) {
                         $isCorrect = true;
                         $correctAnswers++;
                     }
                 }
-            } else if ($question->type === 'essay') {
-                // Essay answers need manual grading, store the answer
+
+                $totalAutoGraded++;
+            } elseif ($question->type === 'essay') {
+                $answerText = $userAnswer;
+                $selectedOption = null;
                 $isCorrect = false;
             }
 
-            // Store student answer
             StudentTestAnswer::create([
                 'test_result_id' => $testResult->id,
                 'question_id' => $question->id,
-                'answer_text' => $question->type === 'essay' ? $userAnswer : null,
-                'selected_option' => $question->type === 'multiple_choice' ? $userAnswer : null,
+                'answer_text' => $answerText,
+                'selected_option' => $selectedOption,
                 'is_correct' => $isCorrect,
             ]);
         }
 
-        // Calculate score (percentage)
-        $score = ($correctAnswers / $totalQuestions) * 100;
+        // Calculate score based on auto-graded questions only
+        $score = $totalAutoGraded > 0 ? ($correctAnswers / $totalAutoGraded) * 100 : 0;
         $testResult->update(['score' => round($score, 2)]);
 
         return response()->json([
@@ -144,16 +206,107 @@ class StudentTestController extends Controller
      */
     public function showResult(Test_Result $result)
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
-        
-        // Make sure the test result belongs to the authenticated user
-        if ($result->user_id !== $user->id) {
-            abort(403, 'Unauthorized');
+        $isTeacher = $user->hasRole('guru|super_admin|kepala_tefa');
+
+        if (!$isTeacher) {
+            // Make sure the test result belongs to the authenticated student
+            if ($result->user_id !== $user->id) {
+                abort(403, 'Unauthorized');
+            }
+
+            // Verify student has access to this test's project
+            $projectIds = Project_Member::where('user_id', $user->id)->pluck('project_id');
+            $material = $result->test->material;
+            
+            if (!$material || !$projectIds->contains($material->project_id)) {
+                abort(403, 'Anda tidak memiliki akses ke hasil test ini');
+            }
         }
 
-        $testResult = $result->load(['test.questions.answers', 'studentAnswers']);
-        $siswa = Siswa::where('user_id', $user->id)->first();
+        $testResult = $result->load(['test.questions.answers', 'studentAnswers', 'test.material.project']);
+        $siswa = Siswa::where('user_id', $result->user_id)->first();
+        $taskScore = $testResult->task_score ?? $this->calculateTaskScore($testResult);
+        $finalScore = $testResult->manual_score ?? $testResult->score;
 
-        return view('student.tests.result', compact('testResult', 'siswa'));
+        return view('student.tests.result', compact('testResult', 'siswa', 'isTeacher', 'taskScore', 'finalScore'));
+    }
+
+    public function updateEvaluation(Request $request, Test_Result $result)
+    {
+        $request->validate([
+            'manual_score' => 'nullable|numeric|min:0|max:100',
+            'task_score' => 'nullable|numeric|min:0|max:100',
+            'attitude_note' => 'nullable|string|max:2000',
+        ]);
+
+        $result->update([
+            'manual_score' => $request->input('manual_score'),
+            'task_score' => $request->input('task_score'),
+            'attitude_note' => $request->input('attitude_note'),
+        ]);
+
+        return redirect()->route('student.test.result', $result->id)
+            ->with('success', 'Evaluasi guru berhasil disimpan.');
+    }
+
+    private function calculateTaskScore(Test_Result $testResult)
+    {
+        $project = $testResult->test->material?->project;
+        if (!$project) {
+            return null;
+        }
+
+        $member = Project_Member::where('user_id', $testResult->user_id)
+            ->where('project_id', $project->id)
+            ->first();
+
+        if (!$member) {
+            return null;
+        }
+
+        $role = strtolower($member->role_in_project);
+        $taskItems = collect();
+
+        if (in_array($role, ['marketing', 'marketing (pemasaran)'])) {
+            if ($project->designBrief) {
+                $taskItems->push([
+                    'approved' => $project->designBrief->approval_status === 'approved',
+                ]);
+            }
+        }
+
+        if (in_array($role, ['designer', 'desain'])) {
+            foreach ($project->mockups ?? collect() as $mockup) {
+                $taskItems->push([
+                    'approved' => $mockup->status === 'approved',
+                ]);
+            }
+        }
+
+        if (in_array($role, ['operator produksi', 'operator_produksi', 'produksi'])) {
+            foreach ($project->productions ?? collect() as $production) {
+                $taskItems->push([
+                    'approved' => $production->status === 'selesai',
+                ]);
+            }
+        }
+
+        if (in_array($role, ['qc', 'quality control', 'quality_control', 'kontrol kualitas'])) {
+            foreach ($project->qualityControls ?? collect() as $qc) {
+                $taskItems->push([
+                    'approved' => $qc->status === 'lulus',
+                ]);
+            }
+        }
+
+        $total = $taskItems->count();
+        if ($total === 0) {
+            return null;
+        }
+
+        $approvedCount = $taskItems->where('approved', true)->count();
+        return round(($approvedCount / $total) * 100, 2);
     }
 }

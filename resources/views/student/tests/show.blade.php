@@ -10,7 +10,7 @@
                     <div class="card-header with-border bg-primary">
                         <h3 class="card-title text-white">
                             <i class="fas fa-pencil-alt"></i>
-                            {{ ucfirst($test->type) }}: {{ $test->material->name ?? 'Test' }}
+                            {{ ucfirst($test->type) }}: {{ $test->material->title ?? 'Test' }}
                         </h3>
                     </div>
 
@@ -43,12 +43,12 @@
                                                     <div class="custom-control custom-radio mb-2">
                                                         @php
                                                             $answer = $question->answers->get($optionIndex);
-                                                            $answerId = $answer ? $answer->id : null;
+                                                            $optionValue = $answer ? $answer->id : $option;
                                                         @endphp
                                                         <input type="radio" class="custom-control-input"
                                                                id="answer_{{ $question->id }}_{{ $optionIndex }}"
                                                                name="answer_{{ $question->id }}"
-                                                               value="{{ $answerId }}" required>
+                                                               value="{{ $optionValue }}" required>
                                                         <label class="custom-control-label"
                                                                for="answer_{{ $question->id }}_{{ $optionIndex }}">
                                                             {{ chr(65 + $optionIndex) }}. {{ $option }}

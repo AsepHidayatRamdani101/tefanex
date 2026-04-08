@@ -152,16 +152,28 @@
                 $('#uploadModal').modal('show');
             });
 
+            let params = new URLSearchParams(window.location.search);
+            let produksiProjectId = params.get('project_id');
+            if (produksiProjectId) {
+                projectId = produksiProjectId;
+                $('#id').val(produksiProjectId);
+                $('#uploadForm')[0].reset();
+                $('#uploadModal').modal('show');
+            }
+
             $(document).on('submit', '#uploadForm', function(e) {
                 e.preventDefault();
                 let id = $('#id').val();
                 let formData = new FormData(this);
-                formData.append('id', projectId);
+                formData.append('id', id);
 
                 let file = $('#file')[0].files[0];
                 if (file) {
                     formData.append('file', file);
                 }
+
+                let url = '/produksi';
+                let method = 'POST';
 
                 if (id) {
                     url = '/produksi/' + id;
@@ -170,7 +182,7 @@
 
                 $.ajax({
                     url: url,
-                    method: 'POST',
+                    method: method,
                     data: formData,
                     contentType: false,
                     processData: false,

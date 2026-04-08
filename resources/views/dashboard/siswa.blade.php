@@ -12,7 +12,7 @@
                 <!-- small card -->
                 <div class="small-box bg-danger">
                     <div class="inner">
-                        <h3>65</h3>
+                        <h3>{{ \App\Models\Attendance::where('user_id', auth()->user()->id)->count() }}</h3>
 
                         <p>Absensi</p>
                     </div>
@@ -28,7 +28,9 @@
                 <!-- small card -->
                 <div class="small-box bg-info">
                     <div class="inner">
-                        <h3>150</h3>
+                        <h3>{{ \App\Models\Project::whereHas('project_members', function (\Illuminate\Database\Eloquent\Builder $builder) {
+                            $builder->where('user_id', '=', auth()->user()->id);
+                        })->count() }}</h3>
 
                         <p>Project Saya</p>
                     </div>
@@ -44,7 +46,11 @@
                 <!-- small card -->
                 <div class="small-box bg-warning">
                     <div class="inner">
-                        <h3>44</h3>
+                        <h3>{{ \App\Models\Material::whereHas('project', function (\Illuminate\Database\Eloquent\Builder $builder) {
+                            $builder->whereHas('project_members', function (\Illuminate\Database\Eloquent\Builder $builder2) {
+                                $builder2->where('user_id', '=', auth()->user()->id);
+                            });
+                        })->count() }}</h3>
 
                         <p>Materi Saya</p>
                     </div>
@@ -61,7 +67,7 @@
                 <!-- small card -->
                 <div class="small-box bg-success">
                     <div class="inner">
-                        <h3>53<sup style="font-size: 20px">%</sup></h3>
+                        <h3>{{ \App\Models\Project_Member::where('user_id', auth()->user()->id)->count() }}</h3>
 
                         <p>Tugas Hari ini </p>
                     </div>

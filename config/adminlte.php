@@ -308,6 +308,7 @@ return [
         [
             'text' => 'Project TEFA',
             'icon' => 'fas fa-project-diagram',
+            'can' => 'guru|super_admin|kepala_tefa',
             'submenu' => [
                 [
                     'text' => 'Project',
@@ -320,43 +321,43 @@ return [
                     'text' => 'Design Brief',
                     'url' => 'design-brief',
                     'icon' => 'fas fa-file-alt',
-                    'can' => 'guru|siswa|super_admin|kepala_tefa'
+                    'can' => 'guru|super_admin|kepala_tefa'
                 ],
                 [
                     'text' => 'Timeline',
                     'url' => 'timeline',
                     'icon' => 'fas fa-stream',
-                    'can' => 'guru|siswa|kepala_tefa'
+                    'can' => 'guru|kepala_tefa'
                 ],
                 [
                     'text' => 'Mockup Design',
                     'url' => 'mockup',
                     'icon' => 'fas fa-drafting-compass',
-                    'can' => 'guru|kepala_tefa|siswa'
+                    'can' => 'guru|kepala_tefa'
                 ],
                 [
                     'text' => 'Produksi',
                     'url' => 'produksi',
                     'icon' => 'fas fa-industry',
-                    'can' => 'guru|kepala_tefa|siswa'
+                    'can' => 'guru|kepala_tefa'
                 ],
                 [
                     'text' => 'Quality Control',
                     'url' => 'quality-control',
                     'icon' => 'fas fa-check-circle',
-                    'can' => 'guru|kepala_tefa|siswa'
+                    'can' => 'guru|kepala_tefa'
                 ],
                 [
                     'text' => 'Mass Production',
                     'url' => 'masspro',
                     'icon' => 'fas fa-cogs',
-                    'can' => 'guru|kepala_tefa|siswa'
+                    'can' => 'guru|kepala_tefa'
                 ],
                 [
                     'text' => 'Invoices',
                     'url' => 'invoices',
                     'icon' => 'fas fa-file-invoice',
-                    'can' => 'guru|kepala_tefa|siswa|bendahara'
+                    'can' => 'guru|kepala_tefa|bendahara'
                 ],
 
 
@@ -381,9 +382,27 @@ return [
                     'can' => 'guru'
                 ],
                 [
+                    'text' => 'Nilai',
+                    'url' => 'nilai',
+                    'icon' => 'fas fa-star',
+                    'can' => 'guru'
+                ],
+                [
                     'text' => 'Kerjakan Test',
                     'url' => 'student/tests',
                     'icon' => 'fas fa-pencil-alt',
+                    'can' => 'siswa'
+                ],
+                [
+                    'text' => 'Materi Saya',
+                    'url' => 'student/materials',
+                    'icon' => 'fas fa-book-open',
+                    'can' => 'siswa'
+                ],
+                [
+                    'text' => 'Tugas Saya',
+                    'url' => 'student/tasks',
+                    'icon' => 'fas fa-tasks',
                     'can' => 'siswa'
                 ],
                 [

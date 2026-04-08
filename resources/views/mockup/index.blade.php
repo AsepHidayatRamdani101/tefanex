@@ -192,6 +192,14 @@
 
             });
 
+            let queryParams = new URLSearchParams(window.location.search);
+            let mockupProjectId = queryParams.get('project_id');
+            if (mockupProjectId) {
+                $("#mockup_id").val(mockupProjectId);
+                $("#uploadForm")[0].reset();
+                $("#uploadModal").modal("show");
+            }
+
             $(document).on('click', '.approveBtn', function() {
                 let id = $(this).data('id');
                 $("#mockup_id").val(id);

@@ -61,7 +61,6 @@
 
 @section('js')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="{{ asset('vendor/adminlte/dist/js/jquery.js') }}"></script>
     <script>
         $(function() {
 
@@ -108,7 +107,7 @@
             });
 
             let projectId;
-
+            let tableAnggota;
 
             $('#addProjectBtn').click(function() {
                 $('#projectForm')[0].reset();
@@ -171,9 +170,11 @@
                 projectId = id;
 
                 $('#lihatAnggotaModal').modal('show');
-                $('#tableAnggota').DataTable().destroy();
+                if ($.fn.DataTable.isDataTable('#tableAnggota')) {
+                    $('#tableAnggota').DataTable().destroy();
+                }
                 
-                let tableAnggota = $('#tableAnggota').DataTable({
+                tableAnggota = $('#tableAnggota').DataTable({
                     processing: true,
                     serverSide: true,
                     responsive: true,
@@ -227,26 +228,33 @@
 
             $('#projectMemberForm').submit(function(e) {
                 e.preventDefault();
-                let projectId = $('#project_id').val();
 
-                let id = $('#projectMember_id').val();
+                let id = $.trim($('#projectMember_id').val());
+                let projectId = $.trim($('#project_id_member').val());
                 let url = id ? '/project-members/' + id : '/project-members';
-                let method = id ? 'PUT' : 'POST';
-                console.log(projectId);
+                let ajaxType = id ? 'POST' : 'POST';
+                let payload = {
+                    _token: "{{ csrf_token() }}",
+                    anggota_id: $('#anggota_id').val(),
+                    project_id: projectId,
+                    tugas: $('#tugas').val()
+                };
+
+                if (id) {
+                    payload._method = 'PUT';
+                }
+
+                console.log('projectMember submit', {id, url, payload});
 
                 $.ajax({
                     url: url,
-                    type: method,
-                    data: {
-                        _token: "{{ csrf_token() }}",
-                        anggota_id: $('#anggota_id').val(),
-                        project_id: $('#project_id_member').val(),
-                        tugas: $('#tugas').val()
-
-                    },
+                    type: ajaxType,
+                    data: payload,
                     success: function() {
                         $('#projectMemberModal').modal('hide');
-                        // tableAnggota.ajax.reload();
+                        if (tableAnggota) {
+                            tableAnggota.ajax.reload(null, false);
+                        }
                         Swal.fire('Berhasil!', 'Data tersimpan', 'success');
                     },
                     error: function(xhr, status, error) {
@@ -261,20 +269,17 @@
 
             $(document).on('click', '.editBtnMember', function() {
                 let id = $(this).data('id');
-
+                console.log('edit member id', id);
 
                 $.get('/project-members/' + id + '/edit', function(data) {
-                    console.log(data);
+                    console.log('edit member data', data);
 
                     $('#anggota_id').val(data.user_id);
                     $('#project_id_member').val(data.project_id);
                     $('#tugas').val(data.role_in_project);
                     $('#projectMember_id').val(data.id);
-                    tableAnggota.ajax.reload();
                     $('#lihatAnggotaModal').modal('hide');
                     $('#projectMemberModal').modal('show');
-                    // console.log(data);
-
                 });
             });
 

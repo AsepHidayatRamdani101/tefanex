@@ -68,16 +68,14 @@ class MockupController extends Controller
            
            
             ->addColumn('action', function ($project) use ($user) {
-                if ($user->hasRole('siswa')) {
+               
                     return '
-                    <button class="btn btn-sm btn-warning addBtn" data-id="' . $project->id . '">Upload</button>
-                    ';
-                } else if ($user->hasRole('kepala_tefa')) {
-                    return '
+                    <button class="btn btn-sm btn-warning addBtn" data-id="' . $project->id . '">Upload</button>        
+                    
                     <button class="btn btn-sm btn-success approveBtn" data-id="' . $project->id . '">approve</button>
                     <button class="btn btn-sm btn-info lihatBtn" data-id="' . $project->id . '">lihat</button>
                     ';          
-                }
+                
             })
             ->make(true);
     }

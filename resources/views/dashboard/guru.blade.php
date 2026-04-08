@@ -12,7 +12,7 @@
             <!-- small card -->
             <div class="small-box bg-info">
               <div class="inner">
-                <h3>150</h3>
+                <h3>{{ \App\Models\Project_Member::where('project_id', auth()->user()->id)->count() }}</h3>
 
                 <p>Project Saya</p>
               </div>
@@ -29,7 +29,10 @@
             <!-- small card -->
             <div class="small-box bg-success">
               <div class="inner">
-                <h3>53<sup style="font-size: 20px">%</sup></h3>
+                <h3>{{ \App\Models\Project::whereHas('project_members', function ($query) {
+                    $query->where('user_id', auth()->user()->id);
+                })->where('status', '<>', 'awal')
+                    ->count() }}</h3>
 
                 <p>Progress Project </p>
               </div>

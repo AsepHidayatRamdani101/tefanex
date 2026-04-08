@@ -60,11 +60,24 @@
                 serverSide: true,
                 responsive: true,
                 ajax: "{{ route('test.data') }}",
-                columns: [
-                    { data: 'material_title', name: 'material_title' },
-                    { data: 'type', name: 'type' },
-                    { data: 'created_at', name: 'created_at' },
-                    { data: 'action', name: 'action', orderable: false, searchable: false }
+                columns: [{
+                        data: 'material_title',
+                        name: 'material_title'
+                    },
+                    {
+                        data: 'type',
+                        name: 'type'
+                    },
+                    {
+                        data: 'created_at',
+                        name: 'created_at'
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false
+                    }
                 ]
             });
 
@@ -103,6 +116,7 @@
                     error: function(xhr) {
                         console.log(xhr.responseText);
 
+
                         let error = 'Terjadi kesalahan saat mengirimkan request ke server';
                         if (xhr.responseJSON && xhr.responseJSON.errors) {
                             error = Object.values(xhr.responseJSON.errors).flat().join('<br>');
@@ -134,13 +148,16 @@
                         $.ajax({
                             url: '/test/' + id,
                             type: 'DELETE',
-                            data: { _token: "{{ csrf_token() }}" },
+                            data: {
+                                _token: "{{ csrf_token() }}"
+                            },
                             success: function() {
                                 table.ajax.reload();
                                 Swal.fire('Terhapus!', '', 'success');
                             },
                             error: function() {
-                                Swal.fire('Gagal!', 'Tidak dapat menghapus data', 'error');
+                                Swal.fire('Gagal!', 'Tidak dapat menghapus data',
+                                    'error');
                             }
                         });
                     }

@@ -21,7 +21,7 @@ class StudentTestAnswer extends Model
 
     public function testResult()
     {
-        return $this->belongsTo(Test_Result::class);
+        return $this->belongsTo(Test_Result::class, 'test_result_id');
     }
 
     public function question()

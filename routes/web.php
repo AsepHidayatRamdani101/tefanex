@@ -17,6 +17,7 @@ use App\Http\Controllers\MateriController;
 use App\Http\Controllers\KelasController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\StudentTestController;
+use App\Http\Controllers\StudentMaterialController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\UserController;
@@ -65,6 +66,7 @@ Route::get('projects-get-id', [ProjectController::class, 'getProjectId'])->name(
 
 Route::resource('project-members', ProjectMemberController::class)
     ->middleware('role:guru|super_admin|kepala_tefa');
+Route::get('project-members-data', [ProjectMemberController::class, 'data'])->name('project-members.data');
 Route::get('projects/{project}/members', 
     [ProjectMemberController::class, 'data']
 )->name('projects.members.data');
@@ -127,6 +129,12 @@ Route::resource('siswa', SiswaController::class)
 Route::resource('test', TestController::class)
     ->middleware('role:guru|super_admin|kepala_tefa');
 Route::get('test-data', [TestController::class, 'data'])->name('test.data');
+Route::get('nilai', [TestController::class, 'gradeIndex'])
+    ->middleware('role:guru|super_admin|kepala_tefa')
+    ->name('grades.index');
+Route::get('nilai-data', [TestController::class, 'gradeData'])
+    ->middleware('role:guru|super_admin|kepala_tefa')
+    ->name('grades.data');
 
 Route::resource('question', QuestionController::class)
     ->middleware('role:guru|super_admin|kepala_tefa');
@@ -145,8 +153,20 @@ Route::middleware('role:siswa')->group(function () {
     Route::get('student/tests', [StudentTestController::class, 'listTests'])->name('student.tests.list');
     Route::get('student/test/{test}', [StudentTestController::class, 'showTest'])->name('student.test.show');
     Route::post('student/test/{test}/submit', [StudentTestController::class, 'submitTest'])->name('student.test.submit');
+    
+    // Student Materials and Tasks Routes
+    Route::get('student/materials', [StudentMaterialController::class, 'materials'])->name('student.materials.index');
+    Route::get('student/tasks', [StudentMaterialController::class, 'tasks'])->name('student.tasks.index');
+    Route::get('student/material/{material}', [StudentMaterialController::class, 'showMaterial'])->name('student.material.detail');
+});
+
+Route::group(['middleware' => 'role:siswa|guru|super_admin|kepala_tefa'], function () {
     Route::get('student/test/result/{result}', [StudentTestController::class, 'showResult'])->name('student.test.result');
 });
+
+Route::put('student/test/result/{result}', [StudentTestController::class, 'updateEvaluation'])
+    ->middleware('role:guru|super_admin|kepala_tefa')
+    ->name('student.test.result.update');
 
 
 require __DIR__ . '/auth.php';

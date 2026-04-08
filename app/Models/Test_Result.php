@@ -13,6 +13,9 @@ class Test_Result extends Model
         'test_id',
         'user_id',
         'score',
+        'manual_score',
+        'task_score',
+        'attitude_note',
     ];
 
     protected $table = 'test_results';
@@ -34,6 +37,6 @@ class Test_Result extends Model
 
     public function studentAnswers()
     {
-        return $this->hasMany(StudentTestAnswer::class);
+        return $this->hasMany(StudentTestAnswer::class, 'test_result_id');
     }
 }

@@ -53,11 +53,11 @@
 
                     <div class="form-group" id="videoGroup" style="display: none;">
                         <label for="video_link">Link Video 
-                            <span class="badge badge-info">YouTube, Vimeo, dll</span>
+                            <span class="badge badge-info">YouTube</span>
                             <span class="text-danger">*</span>
                         </label>
-                        <input type="url" class="form-control" id="video_link" name="video_link" placeholder="https://youtube.com/watch?v=...">
-                        <small class="form-text text-muted">Masukkan URL video dari platform seperti YouTube, Vimeo, atau Google Drive</small>
+                        <input type="url" class="form-control" id="video_link" name="video_link" placeholder="https://youtube.com/watch?v=dQw4w9WgXcQ atau https://youtu.be/dQw4w9WgXcQ">
+                        <small class="form-text text-muted">Dukung format: https://youtube.com/watch?v=... atau https://youtu.be/... atau embed URL</small>
                     </div>
 
                     <div id="fileInfo"></div>

@@ -14,20 +14,26 @@
                     </div>
 
                     <div class="card-body">
+                        @if(session('success'))
+                            <div class="alert alert-success">
+                                {{ session('success') }}
+                            </div>
+                        @endif
+
                         <div class="row mb-4">
                             <div class="col-md-6">
                                 <div class="info-box bg-blue">
                                     <div class="info-box-content">
                                         <span class="info-box-text">Materi</span>
-                                        <span class="info-box-number">{{ $testResult->test->material->name ?? 'N/A' }}</span>
+                                        <span class="info-box-number">{{ $testResult->test->material->title ?? 'N/A' }}</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="info-box bg-green">
                                     <div class="info-box-content">
-                                        <span class="info-box-text">Nilai Anda</span>
-                                        <span class="info-box-number">{{ $testResult->score }}%</span>
+                                        <span class="info-box-text">Nilai {{ ucfirst($testResult->test->type) }}</span>
+                                        <span class="info-box-number">{{ $finalScore }}%</span>
                                     </div>
                                 </div>
                             </div>
@@ -64,7 +70,35 @@
                             </div>
                         </div>
 
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="info-box bg-warning">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">Nilai Tugas</span>
+                                        <span class="info-box-number">{{ $taskScore !== null ? $taskScore . '%' : '-' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-box bg-info">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">Catatan Sikap</span>
+                                        <span class="info-box-number">{{ $testResult->attitude_note ? 'Tersedia' : '-' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <hr>
+
+                        @if($testResult->attitude_note)
+                            <div class="card card-secondary mb-4">
+                                <div class="card-body">
+                                    <h5 class="card-title">Catatan Sikap</h5>
+                                    <p class="mb-0">{{ $testResult->attitude_note }}</p>
+                                </div>
+                            </div>
+                        @endif
 
                         <h4 class="mb-3">Detail Jawaban</h4>
 
@@ -95,16 +129,21 @@
                                         <p class="mb-2"><strong>Pilihan Anda:</strong></p>
                                         @if ($studentAnswer->selected_option)
                                             @php
-                                                $selectedAnswer = $question->answers->find($studentAnswer->selected_option);
-                                                $answerIndex = $question->answers->search(
-                                                    fn($a) => $a->id == $studentAnswer->selected_option
-                                                );
+                                                $selectedAnswer = is_numeric($studentAnswer->selected_option)
+                                                    ? $question->answers->find($studentAnswer->selected_option)
+                                                    : null;
+                                                $answerIndex = $selectedAnswer
+                                                    ? $question->answers->search(fn($a) => $a->id == $studentAnswer->selected_option)
+                                                    : false;
+                                                $selectedText = $selectedAnswer
+                                                    ? $selectedAnswer->answer_text
+                                                    : $studentAnswer->selected_option;
                                             @endphp
                                             <p class="ml-3 mb-3">
                                                 @if ($answerIndex !== false)
                                                     {{ chr(65 + $answerIndex) }}.
                                                 @endif
-                                                {{ $selectedAnswer->answer_text ?? 'N/A' }}
+                                                {{ $selectedText }}
                                             </p>
                                         @else
                                             <p class="ml-3 mb-3 text-muted">Tidak ada jawaban</p>
@@ -113,17 +152,17 @@
                                         @if (!$studentAnswer->is_correct)
                                             <p class="mb-2"><strong>Jawaban Benar:</strong></p>
                                             @php
-                                                $correctAnswer = $question->answers->where('is_correct', true)->first();
-                                                $correctIndex = $question->answers->search(
-                                                    fn($a) => $a->is_correct
-                                                );
+                                                $correctAnswer = $question->correct_answer
+                                                    ? $question->correct_answer
+                                                    : optional($question->answers->where('is_correct', true)->first())->answer_text;
+                                                $correctIndex = $question->answers->search(fn($a) => $a->is_correct);
                                             @endphp
                                             @if ($correctAnswer)
                                                 <p class="ml-3 text-success">
                                                     @if ($correctIndex !== false)
                                                         {{ chr(65 + $correctIndex) }}.
                                                     @endif
-                                                    {{ $correctAnswer->answer_text }}
+                                                    {{ $correctAnswer }}
                                                 </p>
                                             @endif
                                         @endif
@@ -140,6 +179,41 @@
                             </div>
                         @endforeach
                     </div>
+
+                    @if($isTeacher)
+                        <div class="card mt-4">
+                            <div class="card-header bg-primary">
+                                <h5 class="card-title text-white mb-0">Evaluasi Guru</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="POST" action="{{ route('student.test.result.update', $testResult->id) }}">
+                                    @csrf
+                                    @method('PUT')
+
+                                    <div class="form-group">
+                                        <label for="manual_score">Nilai Manual / Final (%)</label>
+                                        <input type="number" name="manual_score" id="manual_score" class="form-control" min="0" max="100" value="{{ old('manual_score', $testResult->manual_score) }}">
+                                        <small class="form-text text-muted">Gunakan nilai ini jika tugas essay perlu koreksi manual.</small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="task_score">Nilai Tugas (%)</label>
+                                        <input type="number" name="task_score" id="task_score" class="form-control" min="0" max="100" value="{{ old('task_score', $testResult->task_score ?? $taskScore) }}">
+                                        <small class="form-text text-muted">Nilai tugas dihitung otomatis dari status approved.</small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="attitude_note">Catatan Sikap</label>
+                                        <textarea name="attitude_note" id="attitude_note" rows="4" class="form-control">{{ old('attitude_note', $testResult->attitude_note) }}</textarea>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-save"></i> Simpan Evaluasi Guru
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    @endif
 
                     <div class="card-footer">
                         <a href="{{ route('student.tests.list') }}" class="btn btn-primary">

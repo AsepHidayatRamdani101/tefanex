@@ -11,7 +11,7 @@
             <!-- small card -->
             <div class="small-box bg-info">
               <div class="inner">
-                <h3>150</h3>
+                <h3>{{ \App\Models\Project::count() }}</h3>
 
                 <p>Project Saya</p>
               </div>
@@ -28,7 +28,7 @@
             <!-- small card -->
             <div class="small-box bg-success">
               <div class="inner">
-                <h3>53<sup style="font-size: 20px">%</sup></h3>
+                <h3>{{ number_format(\App\Models\Project::where('status', '!=', 'done')->count() / \App\Models\Project::count() * 100, 2) }}<sup style="font-size: 20px">%</sup></h3>
 
                 <p>Progress Project </p>
               </div>
@@ -45,7 +45,7 @@
             <!-- small card -->
             <div class="small-box bg-warning">
               <div class="inner">
-                <h3>44</h3>
+                <h3>{{ \App\Models\Student::count() }}</h3>
 
                 <p>Aktivitas siswa</p>
               </div>

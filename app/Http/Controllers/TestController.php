@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Test;
 use App\Models\Material;
+use App\Models\Test_Result;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -42,6 +43,57 @@ class TestController extends Controller
                     . '<button class="btn btn-sm btn-danger deleteBtn" data-id="' . $test->id . '">Hapus</button>';
             })
             ->rawColumns(['type', 'action'])
+            ->make(true);
+    }
+
+    public function gradeIndex()
+    {
+        return view('grades.index');
+    }
+
+    public function gradeData()
+    {
+        $results = Test_Result::with(['test.material.project', 'user'])
+            ->join('tests', 'test_results.test_id', '=', 'tests.id')
+            ->join('materials', 'tests.material_id', '=', 'materials.id')
+            ->join('project_members', 'project_members.user_id', '=', 'test_results.user_id')
+            ->whereColumn('materials.project_id', 'project_members.project_id')
+            ->select('test_results.*');
+
+        return DataTables::of($results)
+            ->addColumn('student_name', function (Test_Result $result) {
+                return $result->user?->name ?? '-';
+            })
+            ->addColumn('project_name', function (Test_Result $result) {
+                return $result->test->material->project?->name ?? '-';
+            })
+            ->addColumn('material_title', function (Test_Result $result) {
+                return $result->test->material?->title ?? '-';
+            })
+            ->addColumn('test_type', function (Test_Result $result) {
+                $badge = match($result->test->type) {
+                    'pretest' => 'primary',
+                    'posttest' => 'success',
+                    default => 'secondary'
+                };
+                return '<span class="badge badge-' . $badge . '">' . ucfirst($result->test->type) . '</span>';
+            })
+            ->addColumn('score', function (Test_Result $result) {
+                return $result->manual_score !== null ? $result->manual_score . '%' : $result->score . '%';
+            })
+            ->addColumn('task_score', function (Test_Result $result) {
+                return $result->task_score !== null ? $result->task_score . '%' : '-';
+            })
+            ->addColumn('attitude_note', function (Test_Result $result) {
+                return $result->attitude_note ? substr($result->attitude_note, 0, 50) . (strlen($result->attitude_note) > 50 ? '...' : '') : '-';
+            })
+            ->addColumn('action', function (Test_Result $result) {
+                $studentName = htmlspecialchars($result->user?->name ?? '-', ENT_QUOTES, 'UTF-8');
+                $materialTitle = htmlspecialchars($result->test->material?->title ?? '-', ENT_QUOTES, 'UTF-8');
+                $attitudeNote = htmlspecialchars($result->attitude_note ?? '', ENT_QUOTES, 'UTF-8');
+                return '<button class="btn btn-sm btn-primary editGradeBtn" data-id="' . $result->id . '" data-student="' . $studentName . '" data-material="' . $materialTitle . '" data-manual-score="' . ($result->manual_score ?? '') . '" data-task-score="' . ($result->task_score ?? '') . '" data-attitude-note="' . $attitudeNote . '">Nilai</button>';
+            })
+            ->rawColumns(['test_type', 'action'])
             ->make(true);
     }
 

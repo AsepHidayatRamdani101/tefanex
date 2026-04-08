@@ -320,6 +320,20 @@
                 });
             });
 
+            let urlParams = new URLSearchParams(window.location.search);
+            let designProjectId = urlParams.get('project_id');
+            if (designProjectId) {
+                $.get('/projects/' + designProjectId, function(data) {
+                    $('#designBriefForm')[0].reset();
+                    $('#name').val(data.judul);
+                    $('#client').val(data.client);
+                    $('#gambardetail').attr('src', '');
+                    $('#designBrief_id').val(data.design_brief_id || '');
+                    $('#project_id').val(data.id);
+                    $('#designBriefModal').modal('show');
+                });
+            }
+
         });
     </script>
 @endsection
