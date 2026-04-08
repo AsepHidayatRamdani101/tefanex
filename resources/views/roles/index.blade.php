@@ -5,7 +5,11 @@
 @section('content')
     <div class="card mt-2">
         <div class="card-header">
-            <button class="btn btn-primary" id="createNewRole">Tambah Role</button>
+            <div class="btn-group" role="group">
+                <button class="btn btn-primary btn-sm" id="createNewRole">
+                    <i class="fas fa-plus"></i> Tambah Role
+                </button>
+            </div>
         </div>
         <div class="card-body">
             <div class="table-responsive">

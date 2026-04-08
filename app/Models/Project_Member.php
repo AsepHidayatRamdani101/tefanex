@@ -17,7 +17,7 @@ class Project_Member extends Model
 
     ];
 
-    protected $table = 'project__members';
+    protected $table = 'project_members';
 
     public function project()
     {

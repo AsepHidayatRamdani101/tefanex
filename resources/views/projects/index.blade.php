@@ -11,7 +11,11 @@
                     <h3 class="card-title">Project Management</h3>
                 </div>
                 <div class="col-md-6 text-right">
-                    <button class="btn btn-primary mb-3" id="addProjectBtn">Tambah Project</button>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-primary btn-sm" id="addProjectBtn">
+                            <i class="fas fa-plus"></i> Tambah Project
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

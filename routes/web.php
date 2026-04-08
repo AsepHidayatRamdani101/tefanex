@@ -14,6 +14,11 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\MateriController;
+use App\Http\Controllers\KelasController;
+use App\Http\Controllers\SiswaController;
+use App\Http\Controllers\StudentTestController;
+use App\Http\Controllers\TestController;
+use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -99,16 +104,49 @@ Route::resource('materi', MateriController::class)
     ->middleware('role:guru|super_admin|kepala_tefa');
 Route::get('materi-data', [MateriController::class, 'data'])->name('materi.data');
 
+// Custom kelas routes BEFORE resource to avoid route conflicts
+Route::middleware('role:guru|super_admin|kepala_tefa')->group(function () {
+    Route::get('kelas/export', [KelasController::class, 'export'])->name('kelas.export');
+    Route::get('kelas/download-template', [KelasController::class, 'downloadTemplate'])->name('kelas.downloadTemplate');
+    Route::post('kelas/import', [KelasController::class, 'import'])->name('kelas.import');
+    Route::get('kelas-data', [KelasController::class, 'data'])->name('kelas.data');
+});
+Route::resource('kelas', KelasController::class)
+    ->middleware('role:guru|super_admin|kepala_tefa');
+
+// Custom siswa routes BEFORE resource to avoid route conflicts
+Route::middleware('role:guru|super_admin|kepala_tefa')->group(function () {
+    Route::get('siswa/export', [SiswaController::class, 'export'])->name('siswa.export');
+    Route::get('siswa/download-template', [SiswaController::class, 'downloadTemplate'])->name('siswa.downloadTemplate');
+    Route::post('siswa/import', [SiswaController::class, 'import'])->name('siswa.import');
+    Route::get('siswa-data', [SiswaController::class, 'data'])->name('siswa.data');
+});
+Route::resource('siswa', SiswaController::class)
+    ->middleware('role:guru|super_admin|kepala_tefa');
+
+Route::resource('test', TestController::class)
+    ->middleware('role:guru|super_admin|kepala_tefa');
+Route::get('test-data', [TestController::class, 'data'])->name('test.data');
+
+Route::resource('question', QuestionController::class)
+    ->middleware('role:guru|super_admin|kepala_tefa');
+Route::get('question-data', [QuestionController::class, 'data'])->name('question.data');
+Route::post('question/import/excel', [QuestionController::class, 'importExcel'])->name('question.import.excel');
+Route::post('question/import/word', [QuestionController::class, 'importWord'])->name('question.import.word');
+
 Route::resource('quality-control', QualityController::class)
     ->middleware('role:siswa|guru|super_admin|kepala_tefa');
 Route::get('quality-control-data', [QualityController::class, 'data'])->name('quality.data');
 Route::put('quality-control/{id}/status', [QualityController::class, 'updateStatus'])->name('quality-control.status')->middleware('role:kepala_tefa');
 Route::put('quality-control/{id}/revisi', [QualityController::class, 'revisi'])->name('quality-control.revisi')->middleware('role:kepala_tefa');
 
-
-
-require __DIR__ . '/auth.php';
-
+// Student Test Routes
+Route::middleware('role:siswa')->group(function () {
+    Route::get('student/tests', [StudentTestController::class, 'listTests'])->name('student.tests.list');
+    Route::get('student/test/{test}', [StudentTestController::class, 'showTest'])->name('student.test.show');
+    Route::post('student/test/{test}/submit', [StudentTestController::class, 'submitTest'])->name('student.test.submit');
+    Route::get('student/test/result/{result}', [StudentTestController::class, 'showResult'])->name('student.test.result');
+});
 
 
 require __DIR__ . '/auth.php';

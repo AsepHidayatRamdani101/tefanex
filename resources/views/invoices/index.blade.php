@@ -10,7 +10,11 @@
                     <h3 class="card-title">Invoice Management</h3>
                 </div>
                 <div class="col-md-6 text-right">
-                    <button class="btn btn-primary mb-3" id="addInvoiceBtn">Tambah Invoice</button>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-primary btn-sm" id="addInvoiceBtn">
+                            <i class="fas fa-plus"></i> Tambah Invoice
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

@@ -11,7 +11,11 @@
                     <h3 class="card-title">User Management</h3>
                 </div>
                 <div class="col-md-6 text-right">
-                    <button class="btn btn-primary mb-3" id="addUserBtn">Tambah User</button>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-primary btn-sm" id="addUserBtn">
+                            <i class="fas fa-plus"></i> Tambah User
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

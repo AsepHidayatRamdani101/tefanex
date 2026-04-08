@@ -11,7 +11,11 @@
                     <h3 class="card-title">Attendance Management</h3>
                 </div>
                 <div class="col-md-6 text-right">
-                    <button class="btn btn-primary mb-3" id="addAttendanceBtn">Tambah Attendance</button>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-primary btn-sm" id="addAttendanceBtn">
+                            <i class="fas fa-plus"></i> Tambah Attendance
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

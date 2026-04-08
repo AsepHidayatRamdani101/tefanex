@@ -304,6 +304,7 @@ return [
             'url' => 'dashboard',
             'icon' => 'fas fa-tachometer-alt',
         ],
+
         [
             'text' => 'Project TEFA',
             'icon' => 'fas fa-project-diagram',
@@ -357,29 +358,67 @@ return [
                     'icon' => 'fas fa-file-invoice',
                     'can' => 'guru|kepala_tefa|siswa|bendahara'
                 ],
-                
+
 
 
             ],
         ],
         [
-            'text' => 'Materi',
-            'url' => 'materi',
+            'text' => 'Modul',
             'icon' => 'fas fa-book',
-            'can' => 'guru'
+            'submenu' => [
+                [
+                    'text' => 'Materi',
+                    'url' => 'materi',
+                    'icon' => 'fas fa-book',
+                    'can' => 'guru'
 
+                ],
+                [
+                    'text' => 'Test',
+                    'url' => 'test',
+                    'icon' => 'fas fa-file-alt',
+                    'can' => 'guru'
+                ],
+                [
+                    'text' => 'Kerjakan Test',
+                    'url' => 'student/tests',
+                    'icon' => 'fas fa-pencil-alt',
+                    'can' => 'siswa'
+                ],
+                [
+                    'text' => 'Pertanyaan',
+                    'url' => 'question',
+                    'icon' => 'fas fa-question-circle',
+                    'can' => 'guru'
+                ],
+                [
+                    'text' => 'Absensi',
+                    'url' => 'attendances',
+                    'icon' => 'fas fa-calendar-check',
+                    'can' => 'guru|siswa'
+                ],
+            ]
         ],
+
+
         [
-            'text' => 'Pretest/Posttest',
-            'url' => 'pretest',
-            'icon' => 'fas fa-file-alt',
-            'can' => 'guru'
-        ],
-        [
-            'text' => 'Absensi',
-            'url' => 'attendances',
-            'icon' => 'fas fa-calendar-check',
-            'can' => 'guru|siswa'
+            'text' => 'Administrasi',
+            'icon' => 'fas fa-cogs',
+            'submenu' => [
+                [
+                    'text' => 'Kelas',
+                    'url' => 'kelas',
+                    'icon' => 'fas fa-school',
+                    'can' => 'guru|super_admin|kepala_tefa'
+                ],
+                [
+                    'text' => 'Siswa',
+                    'url' => 'siswa',
+                    'icon' => 'fas fa-user-graduate',
+                    'can' => 'guru|super_admin|kepala_tefa'
+                ],
+            ],
         ],
         [
             'text' => 'User',

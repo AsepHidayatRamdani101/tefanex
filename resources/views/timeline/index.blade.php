@@ -11,7 +11,11 @@
                     <h3 class="card-title">Timeline</h3>
                 </div>
                 <div class="col-md-6 text-right">
-                    <button class="btn btn-primary mb-3" id="addTimelineBtn">Tambah Timeline</button>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-primary btn-sm" id="addTimelineBtn">
+                            <i class="fas fa-plus"></i> Tambah Timeline
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
