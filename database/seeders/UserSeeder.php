@@ -75,6 +75,8 @@ class UserSeeder extends Seeder
         );
         $produksi->assignRole('produksi');
 
+        
+
         // Designer
         $designer = User::firstOrCreate(
             ['email' => 'designer@tefa.com'],
@@ -116,16 +118,6 @@ class UserSeeder extends Seeder
         );
         $marketing->assignRole('marketing');
 
-        // 5 Siswa
-        for ($i = 1; $i <= 5; $i++) {
-            $siswa = User::firstOrCreate(
-                ['email' => "siswa$i@tefa.com"],
-                [
-                    'name' => "Siswa $i",
-                    'password' => Hash::make('password')
-                ]
-            );
-            $siswa->assignRole('siswa');
-        }
+        
     }
 }

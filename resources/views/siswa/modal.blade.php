@@ -14,7 +14,7 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>NIM <span class="text-danger">*</span></label>
+                                <label>NIS <span class="text-danger">*</span></label>
                                 <input type="text" name="nim" id="nim" class="form-control" placeholder="Contoh: 2024001" required maxlength="50">
                             </div>
                         </div>
