@@ -20,15 +20,29 @@
             </div>
         </div>
         <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="projectFilter">Pilih Project:</label>
+                    <select id="projectFilter" class="form-control">
+                        <option value="">-- Pilih Project --</option>
+                        @foreach($projects as $project)
+                            <option value="{{ $project->id }}">{{ $project->judul }} ({{ $project->client ?? 'N/A' }})</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
             <div class="table-responsive">
-                <table class="table table-bordered" id="projectMemberTable">
+                <table class="table table-bordered table-striped" id="projectMemberTable">
                     <thead>
                         <tr>
                             <th>Nama Project</th>
                             <th>Deskripsi</th>
+                            <th>Anggota</th>
+                            <th>Tugas</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>
@@ -54,40 +68,71 @@
 @section('js')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        let table;
+        
         $(function() {
+            // Initialize DataTable
+            table = $('#projectMemberTable').DataTable({
+                processing: true,
+                serverSide: true,
+                responsive: true,
+                ajax: {
+                    url: "{{ route('project-members.data') }}",
+                    data: function(d) {
+                        d.project = $('#projectFilter').val();
+                    }
+                },
+                columns: [
+                    {
+                        data: 'project',
+                        name: 'project'
+                    },
+                    { 
+                        data:'deskripsi', 
+                        name:'deskripsi' 
+                    },
+                    {
+                        data: 'anggota',
+                        name: 'anggota'
+                    },
+                    {
+                        data: 'tugas',
+                        name: 'tugas'
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false
+                    }
+                ]
+            });
 
-            // let table = $('#projectMemberTable').DataTable({
-            //     processing: true,
-            //     serverSide: true,
-            //     responsive: true,
-            //     ajax: "{{ route('project-members.data') }}",
-            //     columns: [{
-            //             data: 'project',
-            //             name: 'project'
-            //         },
-            //         { data:'deskripsi', name:'deskripsi' },
-            //         {
-            //             data: 'action',
-            //             name: 'action',
-            //             orderable: false,
-            //             searchable: false
-            //         }
-            //     ]
-            // });
+            // Reload table when project changes
+            $('#projectFilter').change(function() {
+                if($(this).val()) {
+                    table.ajax.reload();
+                } else {
+                    table.clear().draw();
+                }
+            });
 
             $('#addProjectMemberBtn').click(function() {
-                let projectId = $(this).data('id');
-                console.log(projectId);
+                let projectId = $('#projectFilter').val();
+                
+                if(!projectId) {
+                    Swal.fire('Perhatian!', 'Silahkan pilih project terlebih dahulu', 'warning');
+                    return;
+                }
                 
                 $('#projectMemberForm')[0].reset();
-                $('#project_id_member').val(projectId);
+                $('#project_id').val(projectId);
                 $('#projectMemberModal').modal('show');
             });
 
             $('#projectMemberForm').submit(function(e) {
                 e.preventDefault();
               
-
                 let id = $('#projectMember_id').val();
                if(id){
                     var url = '/project-members/' + id;
@@ -96,7 +141,6 @@
                     var url = '/project-members';
                     var method = 'POST';
                 }
-                // console.log(id,url,method);
                 
                 $.ajax({
                     url: url,
@@ -121,20 +165,16 @@
                 });
             });
 
-            
             $(document).on('click', '.editBtnMember', function() {
                 let id = $(this).data('id');
-                console.log(id);
                 
-                // $.get('/project-members/' + id + '/edit', function(data) {
-                //     $('#anggota_id').val(data.user_id);
-                //     $('#project_id').val(data.project_id);
-                //     $('#tugas').val(data.role_in_project);
-                //     $('#projectMember_id').val(data.id);
-                //     $('#projectMemberModal').modal('show');
-                //     // console.log(data);
-                    
-                // });
+                $.get('/project-members/' + id + '/edit', function(data) {
+                    $('#anggota_id').val(data.user_id);
+                    $('#project_id').val(data.project_id);
+                    $('#tugas').val(data.role_in_project);
+                    $('#projectMember_id').val(data.id);
+                    $('#projectMemberModal').modal('show');
+                });
             });
 
             $(document).on('click', '.deleteBtnMember', function() {

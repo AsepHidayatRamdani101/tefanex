@@ -11,6 +11,17 @@ class Design_Brief extends Model
 
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'budget' => 'decimal:2',
+        'harga_satuan' => 'decimal:2',
+        'quantity' => 'integer',
+        'reference_files' => 'array',
+    ];
+
+    protected $appends = [
+        'reference_files_list',
+    ];
+
     protected $table = 'design_briefs';
 
     public function project()
@@ -36,6 +47,19 @@ class Design_Brief extends Model
         public function massProduction()
         {
             return $this->hasOne(Mass_Production::class, 'project_id', 'project_id');
+        }
+
+        public function getReferenceFilesListAttribute()
+        {
+            if (is_array($this->reference_files) && !empty($this->reference_files)) {
+                return $this->reference_files;
+            }
+
+            if (!empty($this->reference_file)) {
+                return [$this->reference_file];
+            }
+
+            return [];
         }
 
 

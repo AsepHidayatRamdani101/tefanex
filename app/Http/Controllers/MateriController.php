@@ -32,13 +32,17 @@ class MateriController extends Controller
                 return $material->project?->judul ?? '-';
             })
             ->editColumn('type', function (Material $material) {
-                $badge = match($material->type) {
+                $types = explode(',', $material->type);
+                $badgeColors = [
                     'video' => 'info',
                     'pdf' => 'danger',
                     'text' => 'success',
-                    default => 'secondary'
-                };
-                return '<span class="badge badge-' . $badge . '">' . ucfirst($material->type) . '</span>';
+                ];
+                $badges = array_map(function($type) use ($badgeColors) {
+                    $color = $badgeColors[trim($type)] ?? 'secondary';
+                    return '<span class="badge badge-' . $color . '">' . ucfirst(trim($type)) . '</span>';
+                }, $types);
+                return implode(' ', $badges);
             })
             ->editColumn('created_at', function (Material $material) {
                 return $material->created_at?->format('Y-m-d');
@@ -58,12 +62,18 @@ class MateriController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'type' => 'required|in:video,pdf,text',
             'content' => 'nullable|string',
             'video_link' => 'nullable|url',
             'file' => 'nullable|file|mimes:pdf|max:102400',
             'project_id' => 'nullable|exists:projects,id',
         ]);
+
+        // Validate that at least one content type is provided
+        if (!$request->filled('content') && !$request->filled('video_link') && !$request->hasFile('file')) {
+            return response()->json([
+                'message' => 'Minimal harus ada satu dari: teks, video, atau PDF'
+            ], 422);
+        }
 
         $filePath = null;
         if ($request->hasFile('file')) {
@@ -72,8 +82,21 @@ class MateriController extends Controller
             $filePath = $file->storeAs('materi_files', $fileName, 'public');
         }
 
+        // Determine available content types
+        $types = [];
+        if ($request->filled('content')) {
+            $types[] = 'text';
+        }
+        if ($request->filled('video_link')) {
+            $types[] = 'video';
+        }
+        if ($filePath) {
+            $types[] = 'pdf';
+        }
+
         $validated['created_by'] = Auth::id();
         $validated['file_path'] = $filePath ? 'storage/' . $filePath : null;
+        $validated['type'] = implode(',', $types); // Store as comma-separated types
 
         Material::create($validated);
 
@@ -105,12 +128,23 @@ class MateriController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'type' => 'required|in:video,pdf,text',
             'content' => 'nullable|string',
             'video_link' => 'nullable|url',
             'file' => 'nullable|file|mimes:pdf|max:102400',
             'project_id' => 'nullable|exists:projects,id',
         ]);
+
+        // Validate that at least one content type is provided
+        $hasExistingContent = !empty($material->content);
+        $hasExistingVideo = !empty($material->video_link);
+        $hasExistingFile = !empty($material->file_path);
+
+        if (!$request->filled('content') && !$request->filled('video_link') && !$request->hasFile('file') 
+            && !$hasExistingContent && !$hasExistingVideo && !$hasExistingFile) {
+            return response()->json([
+                'message' => 'Minimal harus ada satu dari: teks, video, atau PDF'
+            ], 422);
+        }
 
         if ($request->hasFile('file')) {
             $file = $request->file('file');
@@ -118,6 +152,28 @@ class MateriController extends Controller
             $filePath = $file->storeAs('materi_files', $fileName, 'public');
             $validated['file_path'] = 'storage/' . $filePath;
         }
+
+        // Determine available content types
+        $types = [];
+        if ($request->filled('content')) {
+            $types[] = 'text';
+        } elseif ($hasExistingContent) {
+            $types[] = 'text';
+        }
+
+        if ($request->filled('video_link')) {
+            $types[] = 'video';
+        } elseif ($hasExistingVideo) {
+            $types[] = 'video';
+        }
+
+        if (!empty($validated['file_path'])) {
+            $types[] = 'pdf';
+        } elseif ($hasExistingFile) {
+            $types[] = 'pdf';
+        }
+
+        $validated['type'] = implode(',', $types); // Store as comma-separated types
 
         $material->update($validated);
 

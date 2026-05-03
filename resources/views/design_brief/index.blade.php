@@ -21,6 +21,7 @@
                             <th>Nama Project</th>
                             <th>Deskripsi</th>
                             <th>Klien</th>
+                            <th>Budget</th>
                             <th>Status</th>
                             <th>Aksi</th>
                         </tr>
@@ -70,6 +71,13 @@
                         data: 'klien',
                         name: 'klien'
                     },
+                    {
+                        data: 'budget',
+                        name: 'budget',
+                        render: function(data) {
+                            return formatRupiah(data);
+                        }
+                    },
                       {
                         data: 'status',
                         name: 'status'
@@ -98,7 +106,7 @@
 
                 let desskripsi_array = [
                     $('#dikerjakan').val() === "" ? "-" : $('#dikerjakan').val(),
-                    $('#lama_pengerjaan').val() === "" ? "-" : $('#lama_pengerjaan').val(),
+                    $('#lama_pengerjaan').val() === "" ? "-" : ($('#lama_pengerjaan').val() + ' ' + $('#lama_pengerjaan_satuan').val()),
                     $('#dimensi').val() === "" ? "-" : $('#dimensi').val(),
                     $('#warna').val() === "" ? "-" : $('#warna').val(),
                     $('#tagline').val() === "" ? "-" : $('#tagline').val(),
@@ -112,12 +120,19 @@
                 formData.append('project_id', $('#project_id').val());
                 formData.append('description', desskripsi);
                 formData.append('target_market', $('#target_market').val());
+                formData.append('harga_satuan', $('#harga_satuan').val());
+                formData.append('quantity', $('#quantity').val());
                 formData.append('budget', $('#budget').val());
 
-                let file = $('#gambar')[0].files[0];
-                if (file) {
-                    formData.append('reference_file', file);
+                const files = $('#reference_files')[0].files;
+                if (files.length > 3) {
+                    Swal.fire('Gagal!', 'Maksimal 3 gambar referensi');
+                    return;
                 }
+
+                Array.from(files).forEach(function(file) {
+                    formData.append('reference_files[]', file);
+                });
 
                let id = $('#designBrief_id').val();
                 
@@ -175,7 +190,14 @@
                     $('#designBriefForm')[0].reset();
                     $('#name').val(data.judul);
                     $('#client').val(data.client);
-                    $('#gambardetail').attr('src', '');
+                    $('#lama_pengerjaan').val('');
+                    $('#lama_pengerjaan_satuan').val('hari');
+                    $('#harga_satuan').val('');
+                    $('#harga_satuan_display').val('');
+                    $('#quantity').val('');
+                    $('#budget').val('');
+                    $('#budget_display').val('');
+                    $('#referenceFilePreview').empty();
                     $('#designBrief_id').val(data.design_brief_id);
                     $('#project_id').val(data.id);
 
@@ -199,7 +221,11 @@
                     $('#designBrief_id').val(data.id);
                     $('#project_id').val(data.project_id);
                     $('#dikerjakan').val(description[0].trim());
-                    $('#lama_pengerjaan').val(description[1]);
+                    {
+                        const lamaParts = (description[1] || '').trim().split(/\s+/);
+                        $('#lama_pengerjaan').val(lamaParts[0] || '');
+                        $('#lama_pengerjaan_satuan').val(lamaParts[1] || 'hari');
+                    }
                     $('#dimensi').val(description[2]);
                     $('#font').val(description[3]);
                     $('#warna').val(description[4]);
@@ -212,14 +238,12 @@
                         }
                     });
                     $('#target_market').val(data.target_market);
+                    $('#harga_satuan').val(data.harga_satuan);
+                    $('#harga_satuan_display').val(formatRupiah(data.harga_satuan));
+                    $('#quantity').val(data.quantity);
                     $('#budget').val(data.budget);
-
-                    if (data.reference_file) {
-                        $('#gambardetail').attr('src', data.reference_file);
-                        $('#gambardetail-link').attr('href', data.reference_file);
-                    } else {
-                        $('#gambardetail').attr('src', '');
-                    }
+                    $('#budget_display').val(formatRupiah(data.budget));
+                    renderReferencePreviews(data.reference_files_list || (data.reference_file ? [data.reference_file] : []));
                     
                     $('#designBriefModalLabel').text('Lihat Design Brief');
                     $('#designBriefModal').modal('show');
@@ -291,7 +315,11 @@
                     $('#designBrief_id').val(data.id);
                     $('#project_id').val(data.project_id);
                     $('#dikerjakan').val(description[0].trim());
-                    $('#lama_pengerjaan').val(description[1]);
+                    {
+                        const lamaParts = (description[1] || '').trim().split(/\s+/);
+                        $('#lama_pengerjaan').val(lamaParts[0] || '');
+                        $('#lama_pengerjaan_satuan').val(lamaParts[1] || 'hari');
+                    }
                     $('#dimensi').val(description[2]);
                     $('#font').val(description[3]);
                     $('#warna').val(description[4]);
@@ -304,14 +332,12 @@
                         }
                     });
                     $('#target_market').val(data.target_market);
+                    $('#harga_satuan').val(data.harga_satuan);
+                    $('#harga_satuan_display').val(formatRupiah(data.harga_satuan));
+                    $('#quantity').val(data.quantity);
                     $('#budget').val(data.budget);
-
-                    if (data.reference_file) {
-                        $('#gambardetail').attr('src', data.reference_file);
-                        $('#gambardetail-link').attr('href', data.reference_file);
-                    } else {
-                        $('#gambardetail').attr('src', '');
-                    }
+                    $('#budget_display').val(formatRupiah(data.budget));
+                    renderReferencePreviews(data.reference_files_list || (data.reference_file ? [data.reference_file] : []));
                     
                     $('#designBriefModalLabel').text('Edit Design Brief');
                     $('#sub').text('Edit');
@@ -327,10 +353,56 @@
                     $('#designBriefForm')[0].reset();
                     $('#name').val(data.judul);
                     $('#client').val(data.client);
-                    $('#gambardetail').attr('src', '');
+                    $('#referenceFilePreview').empty();
                     $('#designBrief_id').val(data.design_brief_id || '');
                     $('#project_id').val(data.id);
                     $('#designBriefModal').modal('show');
+                });
+            }
+
+            function syncBudget() {
+                let hargaSatuan = parseNumber($('#harga_satuan_display').val() || 0);
+                let quantity = parseInt($('#quantity').val() || 0, 10);
+                let budget = (hargaSatuan * quantity) || 0;
+                $('#harga_satuan').val(hargaSatuan);
+                $('#budget').val(budget);
+                $('#budget_display').val(formatRupiah(budget));
+            }
+
+            $(document).on('input', '#harga_satuan_display, #quantity', syncBudget);
+
+            $(document).on('input', '#harga_satuan_display', function() {
+                let raw = parseNumber($(this).val() || 0);
+                $(this).val(formatRupiah(raw));
+                $('#harga_satuan').val(raw);
+                syncBudget();
+            });
+
+            function parseNumber(value) {
+                return Number(String(value).replace(/[^\d]/g, '')) || 0;
+            }
+
+            function formatRupiah(value) {
+                const number = parseNumber(value);
+                return number ? 'Rp ' + number.toLocaleString('id-ID') : '';
+            }
+
+            function renderReferencePreviews(files) {
+                const container = $('#referenceFilePreview');
+                container.empty();
+
+                if (!files || !files.length) {
+                    return;
+                }
+
+                files.slice(0, 3).forEach(function(file) {
+                    container.append(
+                        '<div class="mr-2 mb-2 text-center">' +
+                            '<a href="' + file + '" target="_blank">' +
+                                '<img src="' + file + '" alt="Referensi" style="width: 100px; height: 100px; object-fit: cover; border: 1px solid #ddd; border-radius: 4px;">' +
+                            '</a>' +
+                        '</div>'
+                    );
                 });
             }
 

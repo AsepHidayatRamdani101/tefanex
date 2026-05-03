@@ -77,6 +77,8 @@
                 $('#materi_id').val('');
                 $('#project_id').val('');
                 $('#video_link').val('');
+                $('#content').val('');
+                $('#file').val('');
                 $('#materiModalLabel').text('Tambah Materi');
                 $('#fileInfo').hide();
                 $('#materiModal').modal('show');
@@ -111,7 +113,9 @@
                         console.log(xhr.responseText);
                         
                         let error = 'Terjadi kesalahan saat mengirimkan request ke server';
-                        if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            error = xhr.responseJSON.message;
+                        } else if (xhr.responseJSON && xhr.responseJSON.errors) {
                             error = Object.values(xhr.responseJSON.errors).flat().join('<br>');
                         }
                         Swal.fire('Gagal!', error, 'error');
@@ -119,39 +123,14 @@
                 });
             });
 
-            // Update content visibility based on type
-            $('#type').change(function() {
-                let type = $(this).val();
-                if (type === 'text') {
-                    $('#contentGroup').show();
-                    $('#fileGroup').hide();
-                    $('#videoGroup').hide();
-                    $('#content').prop('required', true);
-                } else if (type === 'file' || type === 'pdf') {
-                    $('#contentGroup').hide();
-                    $('#fileGroup').show();
-                    $('#videoGroup').hide();
-                    $('#content').prop('required', false);
-                } else if (type === 'video') {
-                    $('#contentGroup').hide();
-                    $('#fileGroup').hide();
-                    $('#videoGroup').show();
-                    $('#content').prop('required', false);
-                } else {
-                    $('#contentGroup').hide();
-                    $('#fileGroup').hide();
-                    $('#videoGroup').hide();
-                    $('#content').prop('required', false);
-                }
-            });
+            // Remove the conditional display logic since all fields are now shown
 
             $(document).on('click', '.editBtn', function() {
                 let id = $(this).data('id');
                 $.get('/materi/' + id + '/edit', function(data) {
                     $('#materi_id').val(data.id);
                     $('#title').val(data.title);
-                    $('#type').val(data.type).trigger('change');
-                    $('#content').val(data.content);
+                    $('#content').val(data.content || '');
                     $('#project_id').val(data.project_id || '');
                     $('#video_link').val(data.video_link || '');
                     

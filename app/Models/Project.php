@@ -13,6 +13,7 @@ class Project extends Model
         'judul',
         'guru_id',
         'client',
+        'no_hp_pelanggan',
         'status',
         'deskripsi',
     ];

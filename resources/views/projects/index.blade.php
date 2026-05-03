@@ -27,6 +27,7 @@
                             <th>Nama Project</th>
                             <th>Deskripsi</th>
                             <th>Klien</th>
+                            <th>No HP Pelanggan</th>
                             <th>Status</th>
                             <th>Guru</th>
                             <th>Aksi</th>
@@ -82,6 +83,10 @@
                         name: 'client'
                     },
                     {
+                        data: 'no_hp_pelanggan',
+                        name: 'no_hp_pelanggan'
+                    },
+                    {
                         data: 'status',
                         name: 'status',
                         render: function(data, type, row) {
@@ -132,6 +137,7 @@
                         judul: $('#judul').val(),
                         deskripsi: $('#deskripsi').val(),
                         client: $('#client').val(),
+                            no_hp_pelanggan: $('#no_hp_pelanggan').val(),
                         status: $('#status').val(),
                         guru_id: $('#guru_id').val(),
 
@@ -155,6 +161,7 @@
                     $('#judul').val(data.judul);
                     $('#deskripsi').val(data.deskripsi);
                     $('#client').val(data.client);
+                    $('#no_hp_pelanggan').val(data.no_hp_pelanggan);
                     $('#status').val(data.status);
                     $('#guru_id').val(data.guru_id);
                     $('#project_id').val(data.id);

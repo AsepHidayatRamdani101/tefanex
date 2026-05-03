@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Design_Brief;
 use App\Models\Project;
 use App\Models\Project_Member;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
@@ -84,7 +85,7 @@ class DesignBriefController extends Controller
                     return $btn;
                 }
             })
-            ->addIndexColumn('id')
+            ->addIndexColumn()
             ->rawColumns(['action'])
             ->make(true);
     }
@@ -99,20 +100,24 @@ class DesignBriefController extends Controller
             'project_id' => 'required|exists:projects,id',
             'description' => 'required|string',
             'target_market' => 'required|string',
-            'budget' => 'required|numeric',
-            'reference_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx',
+            'quantity' => 'required|integer|min:1',
+            'harga_satuan' => 'required|numeric|min:0',
+            'budget' => 'nullable|numeric',
+            'reference_files' => 'nullable|array|max:3',
+            'reference_files.*' => 'file|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $designBrief = new Design_Brief();
         $designBrief->project_id = $request->project_id;
         $designBrief->description = $request->description;
         $designBrief->target_market = $request->target_market;
-        $designBrief->budget = $request->budget;
-        if ($request->hasFile('reference_file')) {
-            $file = $request->file('reference_file');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->storeAs('public/reference_files', $filename);
-            $designBrief->reference_file = 'storage/reference_files/' . $filename;
+        $designBrief->quantity = $request->quantity;
+        $designBrief->harga_satuan = $request->harga_satuan;
+        $designBrief->setAttribute('budget', $this->calculateBudget($request->harga_satuan, $request->quantity));
+        $storedFiles = $this->storeReferenceFiles($request);
+        if (!empty($storedFiles)) {
+            $designBrief->reference_files = $storedFiles;
+            $designBrief->reference_file = $storedFiles[0];
         }
         $designBrief->save();
 
@@ -154,20 +159,24 @@ class DesignBriefController extends Controller
             'project_id' => 'required|exists:projects,id',
             'description' => 'required|string',
             'target_market' => 'required|string',
-            'budget' => 'required|numeric',
-            'reference_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx',
+            'quantity' => 'required|integer|min:1',
+            'harga_satuan' => 'required|numeric|min:0',
+            'budget' => 'nullable|numeric',
+            'reference_files' => 'nullable|array|max:3',
+            'reference_files.*' => 'file|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $designBrief = Design_Brief::findOrFail($id);
         $designBrief->project_id = $request->project_id;
         $designBrief->description = $request->description;
         $designBrief->target_market = $request->target_market;
-        $designBrief->budget = $request->budget;
-        if ($request->hasFile('reference_file')) {
-            $file = $request->file('reference_file');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->storeAs('public/reference_files', $filename);
-            $designBrief->reference_file = 'storage/reference_files/' . $filename;
+        $designBrief->quantity = $request->quantity;
+        $designBrief->harga_satuan = $request->harga_satuan;
+        $designBrief->setAttribute('budget', $this->calculateBudget($request->harga_satuan, $request->quantity));
+        $storedFiles = $this->storeReferenceFiles($request);
+        if (!empty($storedFiles)) {
+            $designBrief->reference_files = $storedFiles;
+            $designBrief->reference_file = $storedFiles[0];
         }
         $designBrief->save();
 
@@ -177,6 +186,36 @@ class DesignBriefController extends Controller
         $project->save();
 
         return response()->json(['message' => 'Design Brief updated successfully']);
+    }
+
+    private function calculateBudget($hargaSatuan, $quantity)
+    {
+        return number_format(((float) $hargaSatuan * (int) $quantity), 2, '.', '');
+    }
+
+    private function storeReferenceFiles(Request $request): array
+    {
+        if (!$request->hasFile('reference_files')) {
+            return [];
+        }
+
+        $paths = [];
+
+        foreach ($request->file('reference_files') as $file) {
+            if (!$file) {
+                continue;
+            }
+
+            $filename = time() . '_' . uniqid() . '_' . $file->getClientOriginalName();
+            $file->storeAs('public/reference_files', $filename);
+            $paths[] = 'storage/reference_files/' . $filename;
+
+            if (count($paths) >= 3) {
+                break;
+            }
+        }
+
+        return $paths;
     }
 
     /**

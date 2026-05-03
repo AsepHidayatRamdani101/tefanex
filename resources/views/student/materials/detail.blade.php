@@ -28,7 +28,7 @@
                             <div class="col-md-6">
                                 <p class="mb-2">
                                     <strong>Tipe Materi:</strong>
-                                    {{ $material->type ?? 'N/A' }}
+                                    {!! $material->types_badges !!}
                                 </p>
                                 <p class="mb-2">
                                     <strong>Tanggal Upload:</strong>

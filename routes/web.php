@@ -15,11 +15,13 @@ use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\MateriController;
 use App\Http\Controllers\KelasController;
+use App\Http\Controllers\SchoolSettingController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\StudentTestController;
 use App\Http\Controllers\StudentMaterialController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\QuestionController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -97,11 +99,30 @@ Route::resource('invoices', InvoiceController::class)
 Route::get('invoices-data', [InvoiceController::class, 'data'])->name('invoices.data');
 
 Route::post('attendances/bulk', [AttendanceController::class, 'bulk'])->name('attendances.bulk')->middleware('role:siswa|guru|super_admin|kepala_tefa');
+Route::get('attendances-rekap', [AttendanceController::class, 'rekap'])->name('attendances.rekap')->middleware('role:siswa|guru|super_admin|kepala_tefa');
+Route::get('attendances-rekap-data', [AttendanceController::class, 'rekapData'])->name('attendances.rekap.data')->middleware('role:siswa|guru|super_admin|kepala_tefa');
+Route::get('attendances-rekap-export', [AttendanceController::class, 'exportRekap'])->name('attendances.rekap.export')->middleware('role:siswa|guru|super_admin|kepala_tefa');
 Route::resource('attendances', AttendanceController::class)
     ->middleware('role:siswa|guru|super_admin|kepala_tefa');
 Route::get('attendances-data', [AttendanceController::class, 'data'])->name('attendances.data');
 
 Route::post('materi/bulk', [MateriController::class, 'bulk'])->name('materi.bulk')->middleware('role:guru|super_admin|kepala_tefa');
+
+// DEBUG ROUTE - Remove after testing
+Route::get('debug/attendance', function () {
+    $attendanceCount = \App\Models\Attendance::count();
+    $siswaCount = \App\Models\Siswa::whereNotNull('user_id')->count();
+    
+    $sample = \App\Models\Attendance::with('user.siswa')->first();
+    
+    return response()->json([
+        'total_attendance' => $attendanceCount,
+        'total_siswa' => $siswaCount,
+        'sample_attendance' => $sample,
+        'date_now' => now(),
+    ]);
+});
+
 Route::resource('materi', MateriController::class)
     ->middleware('role:guru|super_admin|kepala_tefa');
 Route::get('materi-data', [MateriController::class, 'data'])->name('materi.data');
@@ -112,6 +133,8 @@ Route::middleware('role:guru|super_admin|kepala_tefa')->group(function () {
     Route::get('kelas/download-template', [KelasController::class, 'downloadTemplate'])->name('kelas.downloadTemplate');
     Route::post('kelas/import', [KelasController::class, 'import'])->name('kelas.import');
     Route::get('kelas-data', [KelasController::class, 'data'])->name('kelas.data');
+    Route::get('setting-sekolah', [SchoolSettingController::class, 'index'])->name('school-settings.index');
+    Route::put('setting-sekolah', [SchoolSettingController::class, 'update'])->name('school-settings.update');
 });
 Route::resource('kelas', KelasController::class)
     ->middleware('role:guru|super_admin|kepala_tefa');
@@ -135,6 +158,22 @@ Route::get('nilai', [TestController::class, 'gradeIndex'])
 Route::get('nilai-data', [TestController::class, 'gradeData'])
     ->middleware('role:guru|super_admin|kepala_tefa')
     ->name('grades.data');
+Route::get('nilai-export', [TestController::class, 'exportGrades'])
+    ->middleware('role:guru|super_admin|kepala_tefa')
+    ->name('grades.export');
+Route::put('nilai/update', [TestController::class, 'gradeUpdate'])
+    ->middleware('role:guru|super_admin|kepala_tefa')
+    ->name('grades.update');
+Route::delete('nilai/delete', [TestController::class, 'gradeDestroy'])
+    ->middleware('role:guru|super_admin|kepala_tefa')
+    ->name('grades.destroy');
+
+Route::get('cetak-laporan', [ReportController::class, 'index'])
+    ->middleware('role:guru|super_admin|kepala_tefa')
+    ->name('report.index');
+Route::get('cetak-laporan/{siswa}', [ReportController::class, 'show'])
+    ->middleware('role:guru|super_admin|kepala_tefa')
+    ->name('report.show');
 
 Route::resource('question', QuestionController::class)
     ->middleware('role:guru|super_admin|kepala_tefa');

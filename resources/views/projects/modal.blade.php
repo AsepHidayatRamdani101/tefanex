@@ -23,6 +23,10 @@
                         <input type="text" name="client" id="client" class="form-control">
                     </div>
                     <div class="form-group">
+                        <label>No HP Pelanggan</label>
+                        <input type="text" name="no_hp_pelanggan" id="no_hp_pelanggan" class="form-control">
+                    </div>
+                    <div class="form-group">
                         <label>Status</label>
                         <select name="status" id="status" class="form-control">
                             <option value="">Pilih Status</option>

@@ -13,22 +13,48 @@
                 <div class="col-md-6 text-right">
                     <div class="btn-group" role="group">
                         <button class="btn btn-primary btn-sm" id="addAttendanceBtn">
-                            <i class="fas fa-plus"></i> Tambah Attendance
+                            <i class="fas fa-plus"></i> Ambil Attendance
                         </button>
                     </div>
                 </div>
             </div>
         </div>
         <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="filter_kelas">Filter Kelas</label>
+                    <select id="filter_kelas" class="form-control">
+                        <option value="">Semua Kelas</option>
+                        @foreach ($kelasList as $kelas)
+                            <option value="{{ $kelas->id }}">{{ $kelas->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="attendance_date">Tanggal</label>
+                    <input type="date" id="attendance_date" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <label>&nbsp;</label>
+                    <div id="bulkActionButtons" style="display: none;" class="btn-group btn-group-sm btn-block"
+                        role="group">
+                        <button type="button" class="btn btn-success bulk-status-btn" data-status="hadir">Hadir</button>
+                        <button type="button" class="btn btn-info bulk-status-btn" data-status="sakit">Sakit</button>
+                        <button type="button" class="btn btn-warning bulk-status-btn" data-status="izin">Izin</button>
+                        <button type="button" class="btn btn-danger bulk-status-btn" data-status="alpha">Alpa</button>
+                    </div>
+                </div>
+            </div>
             <div class="table-responsive">
                 <table class="table table-bordered" id="attendanceTable">
                     <thead>
                         <tr>
-                            <th>User</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                            <th>Dibuat</th>
-                            <th>Aksi</th>
+                            <th width="50px">
+                                <input type="checkbox" id="selectAllCheckbox">
+                            </th>
+                            <th>Nama Siswa</th>
+                            <th>Kelas</th>
+                            <th width="150px">Status</th>
                         </tr>
                     </thead>
                 </table>
@@ -54,7 +80,6 @@
 @section('plugins.Select2', true)
 
 @section('js')
-    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{ asset('vendor/adminlte/dist/js/jquery.js') }}"></script>
     <script>
@@ -62,155 +87,260 @@
             let table = $('#attendanceTable').DataTable({
                 processing: true,
                 serverSide: true,
-                responsive: true,
-                ajax: "{{ route('attendances.data') }}",
+                responsive: false,
+                ajax: {
+                    url: "{{ route('attendances.data') }}",
+                    data: function(d) {
+                        d.kelas_id = $('#filter_kelas').val();
+                        d.date = $('#attendance_date').val();
+                    }
+                },
                 columns: [{
+                        data: 'checkbox',
+                        name: 'checkbox',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
                         data: 'user',
-                        name: 'user'
+                        name: 'user',
+                        orderable: false,
+                        searchable: false
                     },
                     {
-                        data: 'date',
-                        name: 'date'
+                        data: 'kelas',
+                        name: 'kelas',
+                        orderable: false,
+                        searchable: false
                     },
                     {
-                        data: 'status',
-                        name: 'status'
-                    },
-                    {
-                        data: 'created_at',
-                        name: 'created_at'
-                    },
-                    {
-                        data: 'action',
-                        name: 'action',
+                        data: 'status_dropdown',
+                        name: 'status_dropdown',
                         orderable: false,
                         searchable: false
                     }
                 ]
             });
 
-            $('#addAttendanceBtn').click(function() {
-                $('#attendanceForm')[0].reset();
-                $('#attendance_id').val('');
-                $('#attendanceModalLabel').text('Tambah Attendance');
-                $('#attendanceModal').modal('show');
+            $('#filter_kelas').change(function() {
+                table.ajax.reload();
             });
 
-            // Inisialisasi Select2 untuk dropdown user (multiple)
-            $('#user_id').select2({
-                minimumInputLength: 0,
-                width: '100%',
-                dropdownParent: $('#attendanceModal'),
-                allowClear: true,
-                placeholder: 'Cari dan pilih user (bisa lebih dari 1)',
-                language: {
-                    noResults: function() {
-                        return 'User tidak ditemukan';
-                    },
-                    searching: function() {
-                        return 'Mencari...';
-                    }
+            $('#attendance_date').change(function() {
+                table.ajax.reload();
+            });
+
+            // Select all checkboxes
+            $('#selectAllCheckbox').change(function() {
+                const isChecked = $(this).is(':checked');
+                $('#attendanceTable').find('.row-checkbox').prop('checked', isChecked);
+                updateBulkActionButtons();
+            });
+
+            // Handle checkbox change for each row
+            $(document).on('change', '.row-checkbox', function() {
+                updateBulkActionButtons();
+            });
+
+            // Toggle bulk action buttons based on selection
+            function updateBulkActionButtons() {
+                const checkedCount = $('#attendanceTable').find('.row-checkbox:checked').length;
+                if (checkedCount > 0) {
+                    $('#bulkActionButtons').show();
+                } else {
+                    $('#bulkActionButtons').hide();
                 }
-            });
-            
+            }
 
-            $('#attendanceForm').submit(function(e) {
-                e.preventDefault();
+            // Handle bulk status button clicks
+            $(document).on('click', '.bulk-status-btn', function() {
+                const status = $(this).data('status');
+                const date = $('#attendance_date').val();
 
-                let id = $('#attendance_id').val();
-                let userIds = $('#user_id').val();
-                let date = $('#date').val();
-                let status = $('#status').val();
-
-                if (!userIds || userIds.length === 0) {
-                    Swal.fire('Perhatian!', 'Pilih minimal satu user', 'warning');
+                if (!date) {
+                    Swal.fire('Perhatian!', 'Silakan pilih tanggal terlebih dahulu', 'warning');
                     return;
                 }
 
-                // Jika edit single attendance
-                if (id) {
+                const selectedUserIds = [];
+                $('#attendanceTable').find('.row-checkbox:checked').each(function() {
+                    const $row = $(this).closest('tr');
+                    const $statusDropdown = $row.find('.status-dropdown');
+                    selectedUserIds.push($statusDropdown.data('user-id'));
+                });
+
+                if (selectedUserIds.length === 0) {
+                    Swal.fire('Perhatian!', 'Pilih minimal satu siswa', 'warning');
+                    return;
+                }
+
+                $.ajax({
+                    url: '/attendances/bulk',
+                    type: 'POST',
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        user_ids: selectedUserIds,
+                        date: date,
+                        status: status,
+                    },
+                    success: function() {
+                        $('#selectAllCheckbox').prop('checked', false);
+                        table.ajax.reload();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Tersimpan',
+                            text: 'Attendance untuk ' + selectedUserIds.length +
+                                ' siswa tersimpan',
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                    },
+                    error: function(xhr) {
+                        let error = 'Terjadi kesalahan saat mengirimkan request ke server';
+                        if (xhr.responseJSON && xhr.responseJSON.errors) {
+                            error = Object.values(xhr.responseJSON.errors).flat().join('<br>');
+                        }
+                        Swal.fire('Gagal!', error, 'error');
+                    }
+                });
+            });
+
+            // Handle status dropdown change
+            $(document).on('change', '.status-dropdown', function() {
+                const status = $(this).val();
+                const attendanceId = $(this).data('attendance-id');
+                const userId = $(this).data('user-id');
+                const date = $('#attendance_date').val();
+
+                if (!status) {
+                    return;
+                }
+
+                if (!date) {
+                    Swal.fire('Perhatian!', 'Silakan pilih tanggal terlebih dahulu', 'warning');
+                    $(this).val('');
+                    return;
+                }
+
+                const data = {
+                    _token: "{{ csrf_token() }}",
+                    user_id: userId,
+                    date: date,
+                    status: status,
+                };
+
+                // If attendance ID exists (not new record), update it
+                if (attendanceId && String(attendanceId).indexOf('new_') !== 0) {
                     $.ajax({
-                        url: '/attendances/' + id,
+                        url: '/attendances/' + attendanceId,
                         type: 'PUT',
-                        data: {
-                            _token: "{{ csrf_token() }}",
-                            user_id: userIds[0],
-                            date: date,
-                            status: status,
-                        },
+                        data: data,
                         success: function() {
-                            $('#attendanceModal').modal('hide');
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Tersimpan',
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
                             table.ajax.reload();
-                            Swal.fire('Berhasil!', 'Data tersimpan', 'success');
                         },
                         error: function(xhr) {
                             let error = 'Terjadi kesalahan saat mengirimkan request ke server';
                             if (xhr.responseJSON && xhr.responseJSON.errors) {
-                                error = Object.values(xhr.responseJSON.errors).flat().join('<br>');
+                                error = Object.values(xhr.responseJSON.errors).flat().join(
+                                    '<br>');
                             }
                             Swal.fire('Gagal!', error, 'error');
+                            table.ajax.reload();
                         }
                     });
                 } else {
-                    // Jika tambah untuk multiple users
+                    // Create new attendance record
                     $.ajax({
-                        url: '/attendances/bulk',
+                        url: '/attendances',
                         type: 'POST',
-                        data: {
-                            _token: "{{ csrf_token() }}",
-                            user_ids: userIds,
-                            date: date,
-                            status: status,
-                        },
+                        data: data,
                         success: function() {
-                            $('#attendanceModal').modal('hide');
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Tersimpan',
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
                             table.ajax.reload();
-                            Swal.fire('Berhasil!', 'Attendance untuk ' + userIds.length + ' siswa tersimpan', 'success');
                         },
                         error: function(xhr) {
                             let error = 'Terjadi kesalahan saat mengirimkan request ke server';
                             if (xhr.responseJSON && xhr.responseJSON.errors) {
-                                error = Object.values(xhr.responseJSON.errors).flat().join('<br>');
+                                error = Object.values(xhr.responseJSON.errors).flat().join(
+                                    '<br>');
                             }
                             Swal.fire('Gagal!', error, 'error');
+                            table.ajax.reload();
                         }
                     });
                 }
             });
 
-            $(document).on('click', '.editBtn', function() {
-                let id = $(this).data('id');
-                $.get('/attendances/' + id + '/edit', function(data) {
-                    $('#attendance_id').val(data.id);
-                    $('#user_id').val([data.user_id]).trigger('change');
-                    $('#date').val(data.date);
-                    $('#status').val(data.status);
-                    $('#attendanceModalLabel').text('Ubah Attendance');
-                    $('#attendanceModal').modal('show');
-                });
-            });
+            $('#addAttendanceBtn').click(function() {
+                const date = $('#attendance_date').val();
+                if (!date) {
+                    Swal.fire('Perhatian!', 'Silakan pilih tanggal terlebih dahulu', 'warning');
+                    return;
+                }
 
-            $(document).on('click', '.deleteBtn', function() {
-                let id = $(this).data('id');
+                const selectedUserIds = [];
+                $('#attendanceTable').find('.row-checkbox:checked').each(function() {
+                    const $row = $(this).closest('tr');
+                    const $statusDropdown = $row.find('.status-dropdown');
+                    selectedUserIds.push($statusDropdown.data('user-id'));
+                });
+
+                if (selectedUserIds.length === 0) {
+                    Swal.fire('Perhatian!', 'Pilih minimal satu siswa', 'warning');
+                    return;
+                }
+
                 Swal.fire({
-                    title: 'Yakin hapus?',
-                    icon: 'warning',
-                    showCancelButton: true
+                    title: 'Pilih Status',
+                    input: 'select',
+                    inputOptions: {
+                        'hadir': 'Hadir',
+                        'sakit': 'Sakit',
+                        'izin': 'Izin',
+                        'alpha': 'Alpa'
+                    },
+                    inputPlaceholder: 'Pilih status kehadiran',
+                    showCancelButton: true,
+                    confirmButtonText: 'Simpan',
+                    cancelButtonText: 'Batal'
                 }).then((result) => {
-                    if (result.isConfirmed) {
+                    if (result.isConfirmed && result.value) {
+                        const status = result.value;
                         $.ajax({
-                            url: '/attendances/' + id,
-                            type: 'DELETE',
+                            url: '/attendances/bulk',
+                            type: 'POST',
                             data: {
-                                _token: "{{ csrf_token() }}"
+                                _token: "{{ csrf_token() }}",
+                                user_ids: selectedUserIds,
+                                date: date,
+                                status: status,
                             },
                             success: function() {
+                                $('#selectAllCheckbox').prop('checked', false);
                                 table.ajax.reload();
-                                Swal.fire('Terhapus!', '', 'success');
+                                Swal.fire('Berhasil!', 'Attendance untuk ' +
+                                    selectedUserIds.length + ' siswa tersimpan',
+                                    'success');
                             },
-                            error: function() {
-                                Swal.fire('Gagal!', 'Tidak dapat menghapus data',
-                                    'error');
+                            error: function(xhr) {
+                                let error =
+                                    'Terjadi kesalahan saat mengirimkan request ke server';
+                                if (xhr.responseJSON && xhr.responseJSON.errors) {
+                                    error = Object.values(xhr.responseJSON.errors)
+                                    .flat().join('<br>');
+                                }
+                                Swal.fire('Gagal!', error, 'error');
                             }
                         });
                     }

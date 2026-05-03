@@ -23,11 +23,18 @@ class ProjectMemberController extends Controller
 
     public function data(Request $request)
     {
-        $projectMembers = Project_Member::with('user', 'project')->where('project_id', $request->project)->get();
+        $query = Project_Member::with('user', 'project');
+        
+        // Filter by project if provided
+        if ($request->has('project') && $request->project != '') {
+            $query->where('project_id', $request->project);
+        }
+        
+        $projectMembers = $query->get();
 
         return datatables()->of($projectMembers)
             ->addColumn('deskripsi', function ($projectMember) {
-                return $projectMember->project->deskripsi;
+                return $projectMember->project->deskripsi ?? '-';
             })
             ->addColumn('anggota', function ($projectMember) {
                 return $projectMember->user->name;
@@ -40,8 +47,12 @@ class ProjectMemberController extends Controller
             })
             ->addColumn('action', function ($projectMember) {
                 return '
-                <button class="btn btn-sm btn-warning editBtnMember" data-id="' . $projectMember->id . '">Edit</button>
-                <button class="btn btn-sm btn-danger deleteBtnMember" data-id="' . $projectMember->id . '">Delete</button>
+                <button class="btn btn-sm btn-warning editBtnMember" data-id="' . $projectMember->id . '">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="btn btn-sm btn-danger deleteBtnMember" data-id="' . $projectMember->id . '">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
                 ';
             })
             ->rawColumns(['action'])
@@ -91,8 +102,7 @@ class ProjectMemberController extends Controller
      */
     public function edit(string $id)
     {
-        //validasi data
-        $projectMember = Project_Member::findOrFail($id);
+        $projectMember = Project_Member::with('user', 'project')->findOrFail($id);
         return response()->json($projectMember);
     }
 

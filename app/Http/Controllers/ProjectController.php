@@ -29,7 +29,10 @@ class ProjectController extends Controller
 
         return DataTables::of($projects)
             ->addColumn('guru', function ($project) {
-                return $project->guru->name;
+                return $project->guru?->name ?? '-';
+            })
+            ->addColumn('no_hp_pelanggan', function ($project) {
+                return $project->no_hp_pelanggan ?: '-';
             })
             ->addColumn('action', function ($project) {
                 return '
@@ -61,6 +64,7 @@ class ProjectController extends Controller
             'deskripsi' => 'required|string',
             'guru_id' => 'required|exists:users,id',
             'client' => 'required|string|max:255',
+            'no_hp_pelanggan' => 'nullable|string|max:25',
             'status' => 'required|string|max:255',
         ]);
 
@@ -153,6 +157,7 @@ class ProjectController extends Controller
             'deskripsi' => 'required|string',
             'guru_id' => 'required|exists:users,id',
             'client' => 'required|string|max:255',
+            'no_hp_pelanggan' => 'nullable|string|max:25',
             'status' => 'required|string|max:255',
         ]);
 
@@ -163,6 +168,7 @@ class ProjectController extends Controller
             'deskripsi' => $request->deskripsi,
             'guru_id' => $request->guru_id,
             'client' => $request->client,
+            'no_hp_pelanggan' => $request->no_hp_pelanggan,
             'status' => $request->status,
         ]);
 

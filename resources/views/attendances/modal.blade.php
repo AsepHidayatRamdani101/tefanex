@@ -11,10 +11,10 @@
                 <div class="modal-body">
                     <input type="hidden" name="id" id="attendance_id">
                     <div class="form-group">
-                        <label>User (Pilih satu atau lebih)</label>
+                        <label>Siswa (Pilih satu atau lebih)</label>
                         <select name="user_id[]" id="user_id" class="form-control select2" style="width: 100%;" multiple>
-                            @foreach ($users as $user)
-                                <option value="{{ $user->id }}">{{ $user->name }}</option>
+                            @foreach ($siswas as $siswa)
+                                <option value="{{ $siswa->user_id }}">{{ $siswa->nama }}{{ $siswa->kelas ? ' - ' . $siswa->kelas->name : '' }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -25,9 +25,11 @@
                     <div class="form-group">
                         <label>Status</label>
                         <select name="status" id="status" class="form-control">
+                            <option value="">-- Pilih Status --</option>
                             <option value="hadir">Hadir</option>
+                            <option value="sakit">Sakit</option>
                             <option value="izin">Izin</option>
-                            <option value="alpha">Alpha</option>
+                            <option value="alpha">Alpa</option>
                         </select>
                     </div>
                 </div>

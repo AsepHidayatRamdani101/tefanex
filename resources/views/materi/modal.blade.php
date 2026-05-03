@@ -19,45 +19,35 @@
                         </select>
                     </div>
 
+                    
+
                     <div class="form-group">
                         <label>Judul Materi <span class="text-danger">*</span></label>
                         <input type="text" name="title" id="title" class="form-control" required>
                     </div>
 
+                    <div class="alert alert-info">
+                        <small><i class="fas fa-info-circle"></i> Anda dapat menambahkan materi dalam berbagai format sekaligus: teks, link video, atau PDF</small>
+                    </div>
+
                     <div class="form-group">
-                        <label>Tipe Materi <span class="text-danger">*</span></label>
-                        <select name="type" id="type" class="form-control" required>
-                            <option value="">Pilih Tipe</option>
-                            <option value="text">Text (Deskripsi Singkat)</option>
-                            <option value="video">Video (Link)</option>
-                            <option value="pdf">PDF (Upload)</option>
-                        </select>
+                        <label>Konten Teks <span class="text-muted">(Opsional)</span></label>
+                        <textarea name="content" id="content" class="form-control" rows="4" placeholder="Masukkan konten materi dalam bentuk teks..."></textarea>
                     </div>
 
-                    <div class="form-group" id="contentGroup" style="display: none;">
-                        <label>Konten <span class="text-danger">*</span></label>
-                        <textarea name="content" id="content" class="form-control" rows="5" placeholder="Masukkan konten materi..."></textarea>
+                    <div class="form-group">
+                        <label for="video_link">Link Video YouTube <span class="text-muted">(Opsional)</span></label>
+                        <input type="url" class="form-control" id="video_link" name="video_link" placeholder="https://youtube.com/watch?v=dQw4w9WgXcQ atau https://youtu.be/dQw4w9WgXcQ">
+                        <small class="form-text text-muted">Format: https://youtube.com/watch?v=... atau https://youtu.be/...</small>
                     </div>
 
-                    <div class="form-group" id="fileGroup" style="display: none;">
-                        <label for="file">Upload File 
-                            <span class="badge badge-info">PDF: .pdf</span>
-                            <span class="text-danger">*</span>
-                        </label>
+                    <div class="form-group">
+                        <label for="file">Upload File PDF <span class="text-muted">(Opsional)</span></label>
                         <div class="custom-file">
                             <input type="file" class="custom-file-input" id="file" name="file" accept=".pdf">
-                            <label class="custom-file-label" for="file">Pilih File</label>
+                            <label class="custom-file-label" for="file">Pilih File PDF</label>
                         </div>
                         <small class="form-text text-muted">Ukuran maksimal 100MB</small>
-                    </div>
-
-                    <div class="form-group" id="videoGroup" style="display: none;">
-                        <label for="video_link">Link Video 
-                            <span class="badge badge-info">YouTube</span>
-                            <span class="text-danger">*</span>
-                        </label>
-                        <input type="url" class="form-control" id="video_link" name="video_link" placeholder="https://youtube.com/watch?v=dQw4w9WgXcQ atau https://youtu.be/dQw4w9WgXcQ">
-                        <small class="form-text text-muted">Dukung format: https://youtube.com/watch?v=... atau https://youtu.be/... atau embed URL</small>
                     </div>
 
                     <div id="fileInfo"></div>

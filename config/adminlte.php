@@ -411,13 +411,26 @@ return [
                     'icon' => 'fas fa-question-circle',
                     'can' => 'guru'
                 ],
+
+            ]
+        ],
+        [
+            'text' => 'Absensi',
+            'icon' => 'fas fa-calendar-check',
+            'submenu' => [
                 [
-                    'text' => 'Absensi',
+                    'text' => 'Absen Siswa',
                     'url' => 'attendances',
                     'icon' => 'fas fa-calendar-check',
-                    'can' => 'guru|siswa'
+                    'can' => 'guru'
                 ],
-            ]
+                [
+                    'text' => 'Rekap Absensi',
+                    'url' => 'attendances-rekap',
+                    'icon' => 'fas fa-clipboard-list',
+                    'can' => 'guru|super_admin|kepala_tefa'
+                ],
+            ],
         ],
 
 
@@ -435,6 +448,18 @@ return [
                     'text' => 'Siswa',
                     'url' => 'siswa',
                     'icon' => 'fas fa-user-graduate',
+                    'can' => 'guru|super_admin|kepala_tefa'
+                ],
+                [
+                    'text' => 'Setting Sekolah',
+                    'url' => 'setting-sekolah',
+                    'icon' => 'fas fa-school',
+                    'can' => 'guru|super_admin|kepala_tefa'
+                ],
+                [
+                    'text' => 'Cetak Laporan',
+                    'url' => 'cetak-laporan',
+                    'icon' => 'fas fa-print',
                     'can' => 'guru|super_admin|kepala_tefa'
                 ],
             ],

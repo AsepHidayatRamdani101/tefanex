@@ -10,10 +10,18 @@
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="id" id="projectMember_id">
-                    <input type="hidden" name="project_id_member" id="project_id_member">
+                    <div class="form-group">
+                        <label>Project</label>
+                        <select name="project_id" id="project_id" class="form-control" required>
+                            <option value="">Pilih Project</option>
+                            @foreach ($projects as $project)
+                                <option value="{{ $project->id }}">{{ $project->judul }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div class="form-group">
                         <label>Nama Anggota</label>
-                        <select name="anggota_id" id="anggota_id" class="form-control">
+                        <select name="anggota_id" id="anggota_id" class="form-control" required>
                             <option value="">Pilih Anggota</option>
                             @foreach ($users as $user)
                                 <option value="{{ $user->id }}">{{ $user->name }}</option>
@@ -22,9 +30,7 @@
                     </div>
                     <div class="form-group">
                         <label>Tugas</label>
-
-
-                        <select name="tugas" id="tugas" class="form-control">
+                        <select name="tugas" id="tugas" class="form-control" required>
                             <option value="">Pilih Tugas</option>
                             <option value="designer">Designer</option>
                             <option value="kepala_tefa">Kepala TEFA</option>
@@ -33,14 +39,13 @@
                             <option value="pembimbing">Pembimbing</option>
                             <option value="qc">QC</option>
                         </select>
-
+                    </div>
                 </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
         </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-primary">Simpan</button>
-        </div>
-        </form>
     </div>
-</div>
 </div>

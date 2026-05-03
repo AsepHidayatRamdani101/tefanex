@@ -41,7 +41,16 @@
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label>Lama Pengerjaan</label>
-                                <input type="text" name="lama_pengerjaan" id="lama_pengerjaan" class="form-control">
+                                <div class="input-group">
+                                    <input type="number" name="lama_pengerjaan" id="lama_pengerjaan" class="form-control" min="1" step="1">
+                                    <div class="input-group-append">
+                                        <select name="lama_pengerjaan_satuan" id="lama_pengerjaan_satuan" class="form-control">
+                                            <option value="hari" selected>Hari</option>
+                                            <option value="minggu">Minggu</option>
+                                            <option value="bulan">Bulan</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-3">
@@ -76,8 +85,22 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
+                                <label>Harga Satuan</label>
+                                <input type="text" id="harga_satuan_display" class="form-control" inputmode="numeric" autocomplete="off">
+                                <input type="hidden" name="harga_satuan" id="harga_satuan">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Jumlah yang Akan Dicetak</label>
+                                <input type="number" name="quantity" id="quantity" class="form-control" min="1">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
                                 <label>Budget</label>
-                                <input type="number" name="budget" id="budget" class="form-control">
+                                <input type="text" id="budget_display" class="form-control" readonly>
+                                <input type="hidden" name="budget" id="budget">
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -120,7 +143,11 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Gambar Referensi</label>
-                                <input type="file" name="gambar" id="gambar" class="form-control">
+                                <input type="file" name="reference_files[]" id="reference_files" class="form-control" multiple accept="image/*">
+                                <small class="text-muted">Maksimal 3 gambar.</small>
                             </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div id="referenceFilePreview" class="d-flex flex-wrap"></div>
                         </div>
 
