@@ -128,13 +128,14 @@
                   return Number(numValue.toFixed(2));
             }
 
-            function updateInvoicePreview() {
-                const selectedBudget = $('#project_id option:selected').data('budget');
-                const budgetValue = selectedBudget ? parseFloat(selectedBudget) : 0;
+            function updateInvoicePreview(budgetValue) {
+                const resolvedBudget = typeof budgetValue !== 'undefined'
+                    ? parseFloat(budgetValue)
+                    : parseFloat($('#project_id option:selected').data('budget') || 0);
                 const paymentValue = parseNumeric($('#payment_amount').val());
-                const remainingValue = budgetValue - paymentValue;
+                const remainingValue = resolvedBudget - paymentValue;
 
-                $('#amount').val(formatRupiah(budgetValue));
+                $('#amount').val(formatRupiah(resolvedBudget));
                 $('#remaining_amount').val(formatRupiah(remainingValue));
             }
 
@@ -205,7 +206,7 @@
                     $('#status').val(data.status);
                     $('#amount').val(formatRupiah(data.amount));
                     $('#remaining_amount').val(formatRupiah(data.remaining_amount ?? 0));
-                    updateInvoicePreview();
+                    updateInvoicePreview(data.amount);
                     $('#invoiceModalLabel').text('Ubah Invoice');
                     $('#invoiceModal').modal('show');
                 });
