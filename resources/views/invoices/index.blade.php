@@ -137,6 +137,7 @@
                 $('#invoice_number_display').val('Akan digenerate otomatis');
                 // default payment amount to 0 so remaining shows the full budget
                 $('#payment_amount').val(formatRupiah(0));
+                $('#remaining_amount').val(formatRupiah(0));
                 updateInvoicePreview();
                 $('#invoiceModal').modal('show');
             });
@@ -195,6 +196,7 @@
                     $('#payment_amount').val(formatRupiah(data.payment_amount ?? 0));
                     $('#status').val(data.status);
                     $('#amount').val(formatRupiah(data.amount));
+                    $('#remaining_amount').val(formatRupiah(0));
                     $('#remaining_amount').val(formatRupiah(data.remaining_amount ?? 0));
                     updateInvoicePreview();
                     $('#invoiceModalLabel').text('Ubah Invoice');
