@@ -115,6 +115,7 @@
                                                     $statusColors = [
                                                         'awal' => 'secondary',
                                                         'design_brief' => 'info',
+                                                        'timeline' => 'primary',
                                                         'mockup' => 'primary',
                                                         'produksi' => 'warning',
                                                         'qc' => 'danger',
@@ -123,6 +124,7 @@
                                                     $statusLabels = [
                                                         'awal' => 'Awal',
                                                         'design_brief' => 'Design Brief',
+                                                        'timeline' => 'Timeline',
                                                         'mockup' => 'Mockup',
                                                         'produksi' => 'Produksi',
                                                         'qc' => 'QC',

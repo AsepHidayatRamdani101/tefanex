@@ -90,6 +90,7 @@ class DashboardController extends Controller
         $stages = [
             'awal' => 0,
             'design_brief' => 20,
+            'timeline' => 30,
             'mockup' => 40,
             'produksi' => 60,
             'qc' => 80,
