@@ -26,7 +26,7 @@ class DashboardController extends Controller
         } else if ($user->hasRole('siswa')) {
             return view('dashboard.siswa');
         } else if ($user->hasRole('kepala_tefa')) {
-            return view('dashboard.kepala_tefa');
+            return $this->kepalaDashboard($user);
         } else if ($user->hasRole('bendahara')) {
             return view('dashboard.bendahara');
         } else if ($user->hasRole('marketing')) {
@@ -95,5 +95,39 @@ class DashboardController extends Controller
         ];
         
         return $stages[$project->status] ?? 0;
+    }
+
+    private function kepalaDashboard($user)
+    {
+        // Aggregated totals for kepala TEFA (global view)
+        $totalProjects = Project::count();
+
+        $activeProjects = Project::where('status', '<>', 'awal')->count();
+
+        $projects = Project::with('project_members')
+            ->with('designBrief')
+            ->latest()
+            ->get();
+
+        $projectsWithProgress = $projects->map(function($project) {
+            $progress = $this->calculateProjectProgress($project);
+            return (object)[
+                'id' => $project->id,
+                'judul' => $project->judul,
+                'client' => $project->client,
+                'status' => $project->status,
+                'members_count' => $project->project_members->count(),
+                'progress' => $progress,
+            ];
+        });
+
+        $studentActivityCount = Project_Member::count();
+
+        return view('dashboard.kepala_tefa', [
+            'totalProjects' => $totalProjects,
+            'activeProjects' => $activeProjects,
+            'studentActivityCount' => $studentActivityCount,
+            'projects' => $projectsWithProgress,
+        ]);
     }
 }
