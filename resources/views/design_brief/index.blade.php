@@ -54,6 +54,21 @@
     <script>
         $(function() {
 
+            // Define formatRupiah function early, before DataTable init
+            function formatRupiah(value) {
+                const number = parseNumber(value);
+                return number ? 'Rp ' + number.toLocaleString('id-ID') : '';
+            }
+
+            function parseNumber(value) {
+                // Convert to string first, then extract digits before decimal
+                let strValue = String(value || '').trim();
+                // Convert to number to normalize (handles "1250000.00" → 1250000)
+                let numValue = parseFloat(strValue) || 0;
+                // Round to handle any floating point errors
+                return Math.round(numValue);
+            }
+
             let table = $('#designBriefTable').DataTable({
                 processing: true,
                 serverSide: true,
@@ -120,9 +135,9 @@
                 formData.append('project_id', $('#project_id').val());
                 formData.append('description', desskripsi);
                 formData.append('target_market', $('#target_market').val());
-                formData.append('harga_satuan', $('#harga_satuan').val());
-                formData.append('quantity', $('#quantity').val());
-                formData.append('budget', $('#budget').val());
+                formData.append('harga_satuan', parseNumber($('#harga_satuan').val()));
+                formData.append('quantity', parseInt($('#quantity').val()) || 0);
+                formData.append('budget', parseNumber($('#budget').val()));
 
                 const files = $('#reference_files')[0].files;
                 if (files.length > 3) {
@@ -377,15 +392,6 @@
                 $('#harga_satuan').val(raw);
                 syncBudget();
             });
-
-            function parseNumber(value) {
-                return Number(String(value).replace(/[^\d]/g, '')) || 0;
-            }
-
-            function formatRupiah(value) {
-                const number = parseNumber(value);
-                return number ? 'Rp ' + number.toLocaleString('id-ID') : '';
-            }
 
             function renderReferencePreviews(files) {
                 const container = $('#referenceFilePreview');

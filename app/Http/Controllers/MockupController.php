@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Mockup;
 use App\Models\Project;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
@@ -44,7 +45,7 @@ class MockupController extends Controller
             ->select('mockups.*','timelines.start_date', 'timelines.end_date', 
             'design_briefs.description as design_description', 'design_briefs.approval_status', 
             'design_briefs.approved_by', 'design_briefs.description as deskripsi', 
-            'projects.judul as judul','design_briefs.reference_file as file')
+            'projects.judul as judul','design_briefs.reference_files', 'design_briefs.reference_file')
             ->where('design_briefs.approval_status', 'approved')
             ->get();
 
@@ -57,7 +58,41 @@ class MockupController extends Controller
                 return $project->design_description;
             })
             ->addColumn('file', function ($project) {
-                return $project->file ?? '';
+                $files = [];
+                
+                // Check if there are multiple reference files (stored as JSON array)
+                if (!empty($project->reference_files)) {
+                    $referenceFiles = is_string($project->reference_files) 
+                        ? json_decode($project->reference_files, true) 
+                        : $project->reference_files;
+                    
+                    if (is_array($referenceFiles)) {
+                        $files = $referenceFiles;
+                    }
+                }
+                
+                // Fallback to single reference file if no array
+                if (empty($files) && !empty($project->reference_file)) {
+                    $files = [$project->reference_file];
+                }
+                
+                // Generate HTML for all files
+                if (empty($files)) {
+                    return '<span class="badge badge-secondary">Tidak ada file</span>';
+                }
+                
+                $html = '<div class="file-list">';
+                foreach ($files as $file) {
+                    if (!empty($file)) {
+                        $filename = basename($file);
+                        $html .= '<a href="' . $file . '" class="btn btn-sm btn-primary mb-1" target="_blank">'
+                                . '<i class="fas fa-download"></i> ' . substr($filename, 0, 20) . ''
+                                . (strlen($filename) > 20 ? '...' : '') . '</a><br/>';
+                    }
+                }
+                $html .= '</div>';
+                
+                return $html;
             })
             ->addColumn('revisi', function ($project) {
                 return $project->revision_note ?? '';
@@ -77,6 +112,7 @@ class MockupController extends Controller
                     ';          
                 
             })
+            ->rawColumns(['file', 'hasil', 'action'])
             ->make(true);
     }
     /**

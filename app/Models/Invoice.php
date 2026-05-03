@@ -12,6 +12,11 @@ class Invoice extends Model
 
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'amount' => 'decimal:2',
+        'payment_amount' => 'decimal:2',
+    ];
+
     public function project()
     {
         return $this->belongsTo(Project::class);

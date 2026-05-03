@@ -1,3 +1,21 @@
+
+@push('css')
+    <style>
+        .file-list {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .file-list a {
+            display: inline-block;
+            padding: 5px 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+        }
+    </style>
+@endpush
 @extends('adminlte::page')
 
 @section('title', 'Quality Control')
@@ -106,9 +124,8 @@
                         data: 'file',
                         name: 'file',
                         render: function(data) {
-                            return `
-                                        <a href="${data}" class="btn btn-sm btn-primary" target="_blank">Lihat File</a>
-                                    `;
+                            // Data sudah berupa HTML list dari controller
+                            return data || '<span class="badge badge-secondary">Tidak ada file</span>';
                         }
                     },
                     {

@@ -52,6 +52,24 @@
 @section('plugins.Datatables', true)
 @section('plugins.DatatablesPlugins', true)
 
+@push('css')
+    <style>
+        .file-list {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .file-list a {
+            display: inline-block;
+            padding: 5px 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+        }
+    </style>
+@endpush
+
 @section('js')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{ asset('vendor/adminlte/dist/js/jquery.js') }}"></script>
@@ -69,35 +87,17 @@
                     },
                     {
                         data: 'deskripsi',
-                        data: function(row) {
-                            let deskripsiArray = row.deskripsi.split('\n');
-                            return {
-                                judul: deskripsiArray[0],
-                                lama_pengerjaan: deskripsiArray[1],
-                                dimensi: deskripsiArray[2],
-                                warna: deskripsiArray[3],
-                                font: deskripsiArray[4],
-                                tagline: deskripsiArray[5],
-                            };
-                        },
+                        name: 'deskripsi',
                         render: function(data) {
-                            return `
-                                <p><b>Judul</b> : ${data.judul} </p>
-                                <p><b>Lama Pengerjaan</b> : ${data.lama_pengerjaan}</p>
-                                <p><b>Dimensi</b> : ${data.dimensi} </p>
-                                <p><b>Font</b> : ${data.font} </p>
-                                <p><b>Warna</b> : ${data.warna} </p>
-                                <p><b>Tagline</b> : ${data.tagline} </p>
-                            `;
+                            return data ? data.replace(/\n/g, '<br>') : '-';
                         }
                     },
                     {
                         data: 'file',
                         name: 'file',
                         render: function(data) {
-                            return `
-                                <a href="${data}" class="btn btn-sm btn-primary" target="_blank">Lihat File</a>
-                            `;
+                            // Data sudah berupa HTML list dari controller
+                            return data || '<span class=\"badge badge-secondary\">Tidak ada file</span>';
                         }
                     },
 
@@ -113,9 +113,7 @@
                         data: 'hasil',
                         name: 'hasil',
                         render: function(data) {
-                            return `
-                                <a href="${data}" class="btn btn-sm btn-primary" target="_blank">Lihat Hasil</a>
-                            `;
+                            return data ? `<a href="${data}" class="btn btn-sm btn-primary" target="_blank">Lihat Hasil</a>` : '<span class="badge badge-secondary">Belum ada hasil</span>';
                         }
                     },
 

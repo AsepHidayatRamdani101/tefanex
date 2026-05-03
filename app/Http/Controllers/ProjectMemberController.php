@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\Project_Member;
 use App\Models\User;
+use App\Models\Kelas;
+use App\Models\Siswa;
 use Illuminate\Http\Request;
 
 class ProjectMemberController extends Controller
@@ -16,9 +18,43 @@ class ProjectMemberController extends Controller
     {
         $projects = Project::all();
         $users = User::all();
+        $kelas = Kelas::all();
 
-        return view('project_members.index', compact('projects', 'users'));
+        return view('project_members.index', compact('projects', 'users', 'kelas'));
+    }
 
+    /**
+     * Get students by class
+     */
+    public function getStudentsByClass(Request $request)
+    {
+        try {
+            if (!$request->has('kelas_id') || !$request->kelas_id) {
+                return response()->json([]);
+            }
+
+            $students = Siswa::where('kelas_id', $request->kelas_id)
+                ->whereNotNull('user_id')
+                ->with('user')
+                ->get()
+                ->map(function ($siswa) {
+                    // Make sure user exists before accessing
+                    if ($siswa->user) {
+                        return [
+                            'id' => $siswa->user_id,
+                            'name' => $siswa->nama . ' (' . $siswa->nim . ')',
+                        ];
+                    }
+                })
+                ->filter() // Remove null values
+                ->values() // Reindex array
+                ->toArray();
+
+            return response()->json($students, 200);
+        } catch (\Exception $e) {
+            \Log::error('Get Students by Class Error: ' . $e->getMessage());
+            return response()->json(['error' => 'Gagal memuat siswa'], 500);
+        }
     }
 
     public function data(Request $request)

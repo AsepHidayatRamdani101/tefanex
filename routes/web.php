@@ -13,6 +13,7 @@ use App\Http\Controllers\QualityController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\MateriController;
 use App\Http\Controllers\KelasController;
 use App\Http\Controllers\SchoolSettingController;
@@ -66,9 +67,12 @@ Route::resource('projects', ProjectController::class)
 Route::get('projects-data', [ProjectController::class, 'data'])->name('projects.data');
 Route::get('projects-get-id', [ProjectController::class, 'getProjectId'])->name('projects.getProjectId');
 
-Route::resource('project-members', ProjectMemberController::class)
-    ->middleware('role:guru|super_admin|kepala_tefa');
-Route::get('project-members-data', [ProjectMemberController::class, 'data'])->name('project-members.data');
+// Project Members Routes - Custom routes must be BEFORE resource route
+Route::middleware('role:guru|super_admin|kepala_tefa')->group(function () {
+    Route::get('project-members/get-students', [ProjectMemberController::class, 'getStudentsByClass'])->name('project-members.get-students');
+    Route::resource('project-members', ProjectMemberController::class);
+    Route::get('project-members-data', [ProjectMemberController::class, 'data'])->name('project-members.data');
+});
 Route::get('projects/{project}/members', 
     [ProjectMemberController::class, 'data']
 )->name('projects.members.data');
@@ -97,6 +101,8 @@ Route::put('masspro/{id}/status', [MassProController::class, 'updateStatus'])->n
 Route::resource('invoices', InvoiceController::class)
     ->middleware('role:siswa|guru|super_admin|kepala_tefa');
 Route::get('invoices-data', [InvoiceController::class, 'data'])->name('invoices.data');
+Route::get('invoices-rekap', [InvoiceController::class, 'rekap'])->name('invoices.rekap')->middleware('role:siswa|guru|super_admin|kepala_tefa');
+Route::get('invoices-rekap-data', [InvoiceController::class, 'rekapData'])->name('invoices.rekap.data')->middleware('role:siswa|guru|super_admin|kepala_tefa');
 
 Route::post('attendances/bulk', [AttendanceController::class, 'bulk'])->name('attendances.bulk')->middleware('role:siswa|guru|super_admin|kepala_tefa');
 Route::get('attendances-rekap', [AttendanceController::class, 'rekap'])->name('attendances.rekap')->middleware('role:siswa|guru|super_admin|kepala_tefa');
@@ -105,6 +111,10 @@ Route::get('attendances-rekap-export', [AttendanceController::class, 'exportReka
 Route::resource('attendances', AttendanceController::class)
     ->middleware('role:siswa|guru|super_admin|kepala_tefa');
 Route::get('attendances-data', [AttendanceController::class, 'data'])->name('attendances.data');
+
+// Payments (Pengeluaran)
+Route::resource('payments', PaymentController::class)->middleware('role:guru|super_admin|kepala_tefa|bendahara');
+Route::get('payments-data', [PaymentController::class, 'data'])->name('payments.data');
 
 Route::post('materi/bulk', [MateriController::class, 'bulk'])->name('materi.bulk')->middleware('role:guru|super_admin|kepala_tefa');
 

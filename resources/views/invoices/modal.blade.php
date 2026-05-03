@@ -15,18 +15,30 @@
                         <select name="project_id" id="project_id" class="form-control">
                             <option value="">Pilih Project</option>
                             @foreach ($projects as $project)
-                                <option value="{{ $project->id }}">{{ $project->judul }}</option>
+                                <option value="{{ $project->id }}" data-budget="{{ $project->designBrief?->budget ?? 0 }}">
+                                    {{ $project->judul }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Invoice Number</label>
-                        <input type="text" name="invoice_number" id="invoice_number" class="form-control"
-                            placeholder="INV-001">
+                        <input type="text" id="invoice_number_display" class="form-control" readonly>
+                        <small class="text-muted">Nomor invoice digenerate otomatis saat disimpan.</small>
                     </div>
                     <div class="form-group">
-                        <label>Jumlah</label>
-                        <input type="text" name="amount" id="amount" class="form-control" >
+                        <label>Total Budget</label>
+                        <input type="text" name="amount" id="amount" class="form-control" readonly>
+                        <small class="text-muted">Diambil otomatis dari budget design brief.</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Jumlah Bayar</label>
+                        <input type="text" name="payment_amount" id="payment_amount" class="form-control" placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Sisa Pembayaran</label>
+                        <input type="text" id="remaining_amount" class="form-control" readonly>
+                        <small class="text-muted">Sisa = total budget dikurangi jumlah bayar.</small>
                     </div>
                     <div class="form-group">
                         <label>Status</label>

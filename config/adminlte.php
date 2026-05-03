@@ -316,6 +316,12 @@ return [
                     'icon' => 'fas fa-project-diagram',
                     'can' => 'guru|super_admin|kepala_tefa'
                 ],
+                [
+                    'text' => 'Anggota Project',
+                    'url' => 'project-members',
+                    'icon' => 'fas fa-users',
+                    'can' => 'guru|super_admin|kepala_tefa'
+                ],
 
                 [
                     'text' => 'Design Brief',
@@ -358,6 +364,12 @@ return [
                     'url' => 'invoices',
                     'icon' => 'fas fa-file-invoice',
                     'can' => 'guru|kepala_tefa|bendahara'
+                ],
+                [
+                    'text' => 'Rekap Invoice',
+                    'url' => 'invoices-rekap',
+                    'icon' => 'fas fa-receipt',
+                    'can' => 'guru|kepala_tefa|bendahara|super_admin'
                 ],
 
 
@@ -443,6 +455,12 @@ return [
                     'url' => 'kelas',
                     'icon' => 'fas fa-school',
                     'can' => 'guru|super_admin|kepala_tefa'
+                ],
+                [
+                    'text' => 'Pengeluaran',
+                    'url' => 'payments',
+                    'icon' => 'fas fa-money-bill-wave',
+                    'can' => 'guru|super_admin|kepala_tefa|bendahara'
                 ],
                 [
                     'text' => 'Siswa',

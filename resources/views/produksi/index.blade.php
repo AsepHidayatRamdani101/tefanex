@@ -1,4 +1,24 @@
+
 @extends('adminlte::page')
+
+@push('css')
+    <style>
+        .file-list {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .file-list a {
+            display: inline-block;
+            padding: 5px 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 240px;
+        }
+    </style>
+@endpush
 
 @section('title', 'Produksi')
 
@@ -32,8 +52,8 @@
 
     </div>
 
-    @include('produksi.modal');
-    @include('produksi.revisi');
+    @include('produksi.modal')
+    @include('produksi.revisi')
 
 
 @stop
@@ -61,62 +81,40 @@
                 serverSide: true,
                 responsive: true,
                 ajax: "{{ route('produksi.data') }}",
-                columns: [{
+                columns: [
+                    {
                         data: 'project',
                         name: 'project'
                     },
                     {
-
                         data: 'deskripsi',
                         name: 'deskripsi',
-                        data: 'deskripsi',
-                        data: function(row) {
-                            if (row.deskripsi === '-') {
-                                return {
-                                    judul: '-',
-                                    lama_pengerjaan: '-',
-                                    dimensi: '-',
-                                    warna: '-',
-                                    font: '-',
-                                    tagline: '-',
-                                };
-                            }
-
-                            let deskripsiArray = row.deskripsi.split('\n');
-                            return {
-                                judul: deskripsiArray[0],
-                                lama_pengerjaan: deskripsiArray[1],
-                                dimensi: deskripsiArray[2],
-                                warna: deskripsiArray[3],
-                                font: deskripsiArray[4],
-                                tagline: deskripsiArray[5],
-                            };
-                        },
                         render: function(data) {
-                            return `
-                                <p><b>Judul</b> : ${data.judul} </p>
-                                <p><b>Lama Pengerjaan</b> : ${data.lama_pengerjaan}</p>
-                                <p><b>Dimensi</b> : ${data.dimensi} </p>
-                                <p><b>Font</b> : ${data.font} </p>
-                                <p><b>Warna</b> : ${data.warna} </p>
-                                <p><b>Tagline</b> : ${data.tagline} </p>
-                            `;
+                            return data ? data.replace(/\n/g, '<br>') : '-';
                         }
                     },
                     {
                         data: 'file',
                         name: 'file',
+                        orderable: false,
+                        searchable: false,
                         render: function(data) {
-                            return `
-                                        <a href="${data}" class="btn btn-sm btn-primary" target="_blank">Lihat File</a>
-                                    `;
+                            return data || '<span class="badge badge-secondary">Tidak ada file</span>';
                         }
                     },
                     {
                         data: 'waktu',
                         name: 'waktu',
                         render: function(data) {
+                            if (!data) {
+                                return '-';
+                            }
+
                             let date = new Date(data);
+                            if (isNaN(date.getTime())) {
+                                return data;
+                            }
+
                             return date.toLocaleDateString('id-ID', {
                                 day: '2-digit',
                                 month: 'long',
@@ -132,8 +130,6 @@
                         data: 'revisi',
                         name: 'revisi'
                     },
-
-
                     {
                         data: 'action',
                         name: 'action',

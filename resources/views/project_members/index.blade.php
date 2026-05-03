@@ -65,10 +65,17 @@
 @section('plugins.Datatables', true)
 @section('plugins.DatatablesPlugins', true)
 
+@push('css')
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+@endpush
+
 @section('js')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         let table;
+        let originalUsers = {!! json_encode($users->map(fn($u) => ['id' => $u->id, 'name' => $u->name])->toArray()) !!};
         
         $(function() {
             // Initialize DataTable
@@ -117,6 +124,51 @@
                 }
             });
 
+            // Handle modal show event to initialize Select2
+            $('#projectMemberModal').on('shown.bs.modal', function() {
+                if (!$('#anggota_id').hasClass('select2-hidden-accessible')) {
+                    initializeSelect2();
+                }
+            });
+
+            // Handle Kelas filter change
+            $('#kelas_filter').change(function() {
+                let kelasId = $(this).val();
+                console.log('Kelas selected:', kelasId);
+
+                if (!kelasId) {
+                    // Reset to original users
+                    populateAnggotaDropdown(originalUsers);
+                    return;
+                }
+
+                // Fetch students by class
+                $.ajax({
+                    url: "{{ route('project-members.get-students') }}",
+                    type: 'GET',
+                    data: { kelas_id: kelasId },
+                    dataType: 'json',
+                    success: function(students) {
+                        console.log('Students loaded:', students);
+                        if (Array.isArray(students)) {
+                            populateAnggotaDropdown(students);
+                        } else {
+                            console.error('Invalid response format:', students);
+                            Swal.fire('Error!', 'Format data tidak valid', 'error');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX Error:', status, error);
+                        console.error('Response:', xhr.responseText);
+                        let errorMsg = 'Gagal memuat data siswa';
+                        if (xhr.responseJSON && xhr.responseJSON.error) {
+                            errorMsg = xhr.responseJSON.error;
+                        }
+                        Swal.fire('Error!', errorMsg, 'error');
+                    }
+                });
+            });
+
             $('#addProjectMemberBtn').click(function() {
                 let projectId = $('#projectFilter').val();
                 
@@ -127,6 +179,7 @@
                 
                 $('#projectMemberForm')[0].reset();
                 $('#project_id').val(projectId);
+                $('#anggota_id').val(null).trigger('change');
                 $('#projectMemberModal').modal('show');
             });
 
@@ -169,10 +222,11 @@
                 let id = $(this).data('id');
                 
                 $.get('/project-members/' + id + '/edit', function(data) {
-                    $('#anggota_id').val(data.user_id);
+                    $('#anggota_id').val(data.user_id).trigger('change');
                     $('#project_id').val(data.project_id);
                     $('#tugas').val(data.role_in_project);
                     $('#projectMember_id').val(data.id);
+                    $('#kelas_filter').val('').trigger('change');
                     $('#projectMemberModal').modal('show');
                 });
             });
@@ -202,5 +256,46 @@
             });
 
         });
+
+        function populateAnggotaDropdown(users) {
+            let anggotaSelect = $('#anggota_id');
+            let currentValue = anggotaSelect.val();
+            
+            // Destroy existing Select2
+            if (anggotaSelect.hasClass('select2-hidden-accessible')) {
+                anggotaSelect.select2('destroy');
+            }
+            
+            anggotaSelect.empty();
+            anggotaSelect.append('<option value="">-- Pilih Anggota --</option>');
+            
+            if (users.length > 0) {
+                users.forEach(user => {
+                    let option = $('<option>')
+                        .val(user.id)
+                        .text(user.name);
+                    anggotaSelect.append(option);
+                });
+            } else {
+                anggotaSelect.append('<option value="" disabled>Tidak ada data</option>');
+            }
+            
+            // Reinitialize Select2
+            initializeSelect2();
+        }
+
+        function initializeSelect2() {
+            $('#anggota_id').select2({
+                theme: 'bootstrap-5',
+                allowClear: true,
+                placeholder: 'Cari anggota...',
+                dropdownParent: $('#projectMemberModal'),
+                language: {
+                    noResults: function() {
+                        return 'Anggota tidak ditemukan';
+                    }
+                }
+            });
+        }
     </script>
 @endsection

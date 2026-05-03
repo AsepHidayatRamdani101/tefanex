@@ -26,9 +26,11 @@ class QualityController extends Controller
             ->join('mockups', 'projects.id', '=', 'mockups.project_id')
             ->join('timelines', 'projects.id', '=', 'timelines.project_id')
             ->where('design_briefs.approval_status', 'approved')
-            ->select('projects.judul as project_nama', 
+            ->select('projects.judul as project_nama',
             'projects.id as pr',
             'design_briefs.description as deskripsi', 
+                        'design_briefs.reference_files',
+                        'design_briefs.reference_file',
             'timelines.end_date as waktu',
             'quality_controls.status as status',
             'quality_controls.note as revisi',
@@ -44,7 +46,41 @@ class QualityController extends Controller
                 return $produksi->deskripsi ? $produksi->deskripsi : '-';
             })
             ->addColumn('file', function ($produksi) {
-                return $produksi->file ? $produksi->file : '-';
+                $files = [];
+                
+                // Check if there are multiple reference files (stored as JSON array)
+                if (!empty($produksi->reference_files)) {
+                    $referenceFiles = is_string($produksi->reference_files) 
+                        ? json_decode($produksi->reference_files, true) 
+                        : $produksi->reference_files;
+                    
+                    if (is_array($referenceFiles)) {
+                        $files = $referenceFiles;
+                    }
+                }
+                
+                // Fallback to single reference file if no array
+                if (empty($files) && !empty($produksi->reference_file)) {
+                    $files = [$produksi->reference_file];
+                }
+                
+                // Generate HTML for all files
+                if (empty($files)) {
+                    return '<span class="badge badge-secondary">Tidak ada file</span>';
+                }
+                
+                $html = '<div class="file-list">';
+                foreach ($files as $file) {
+                    if (!empty($file)) {
+                        $filename = basename($file);
+                        $html .= '<a href="' . $file . '" class="btn btn-sm btn-primary mb-1" target="_blank">'
+                                . '<i class="fas fa-download"></i> ' . substr($filename, 0, 20) . ''
+                                . (strlen($filename) > 20 ? '...' : '') . '</a><br/>';
+                    }
+                }
+                $html .= '</div>';
+                
+                return $html;
             })
             ->addColumn('waktu', function ($produksi) {
                 return $produksi->waktu ? $produksi->waktu : '-';
@@ -62,7 +98,7 @@ class QualityController extends Controller
                         <button class="btn btn-sm btn-info lihatBtn" data-id="' . $produksi->pr . '">Lihat</button>
                         ';
             })
-            ->rawColumns(['action'])
+            ->rawColumns(['action', 'file'])
             ->make(true);
     }
 

@@ -25,7 +25,9 @@
                         <tr>
                             <th>Invoice</th>
                             <th>Project</th>
-                            <th>Jumlah</th>
+                            <th>Total Budget</th>
+                            <th>Jumlah Bayar</th>
+                            <th>Sisa Bayar</th>
                             <th>Status</th>
                             <th>Dibuat</th>
                             <th>Aksi</th>
@@ -75,6 +77,14 @@
                         name: 'amount'
                     },
                     {
+                        data: 'payment_amount',
+                        name: 'payment_amount'
+                    },
+                    {
+                        data: 'remaining_amount',
+                        name: 'remaining_amount'
+                    },
+                    {
                         data: 'status',
                         name: 'status'
                     },
@@ -91,33 +101,50 @@
                 ]
             });
 
+            function formatRupiah(value) {
+                // Convert to integer to properly handle decimal values like "100000.00"
+                 // Use parseFloat to properly handle decimal values
+                 let numericValue = parseFloat(String(value || '').trim()) || 0;
+                 numericValue = Math.round(numericValue);
+                return numericValue ? 'Rp ' + numericValue.toLocaleString('id-ID') : '';
+            }
+
+            function parseNumeric(value) {
+                 // Extract numeric value using parseFloat for decimal safety
+                 let numValue = parseFloat(String(value || '').trim()) || 0;
+                 return Math.round(numValue);
+            }
+
+            function updateInvoicePreview() {
+                const selectedBudget = $('#project_id option:selected').data('budget');
+                const budgetValue = selectedBudget ? parseFloat(selectedBudget) : 0;
+                const paymentValue = parseNumeric($('#payment_amount').val());
+                const remainingValue = Math.max(budgetValue - paymentValue, 0);
+
+                $('#amount').val(budgetValue ? formatRupiah(budgetValue) : '');
+                $('#remaining_amount').val(budgetValue ? formatRupiah(remainingValue) : '');
+            }
+
             $('#addInvoiceBtn').click(function() {
                 $('#invoiceForm')[0].reset();
                 $('#invoice_id').val('');
                 $('#invoiceModalLabel').text('Tambah Invoice');
+                $('#invoice_number_display').val('Akan digenerate otomatis');
+                updateInvoicePreview();
                 $('#invoiceModal').modal('show');
             });
 
+            $('#project_id').on('change', function() {
+                updateInvoicePreview();
+            });
 
-
-            //convert to rupiah format ketika input
-            function convertToRupiah(angka) {
-                var rupiah = '';
-                var angkarev = angka.toString().split('').reverse().join('');
-                for (var i = 0; i < angkarev.length; i++)
-                    if (i % 3 == 0) rupiah += angkarev.substr(i, 3) + '.';
-                return 'Rp. ' + rupiah.split('', rupiah.length - 1).reverse().join('');
-            }
-
-            $('#amount').on('input', function() {
-                let amount = $(this).val();
-                console.log(amount);
-                if (amount) {
-                    $(this).val(convertToRupiah(amount.replace(/\D/g, '')));
-                } else {
-                    $(this).val('');
+            $('#payment_amount').on('input', function() {
+                const value = $(this).val();
+                if (value) {
+                    $(this).val(formatRupiah(value));
                 }
-                
+
+                updateInvoicePreview();
             });
 
             $('#invoiceForm').submit(function(e) {
@@ -126,7 +153,6 @@
                 let id = $('#invoice_id').val();
                 let url = id ? '/invoices/' + id : '/invoices';
                 let method = id ? 'PUT' : 'POST';
-                let amount = $('#amount').val().replace(/\D/g, ''); // hapus semua karakter non-digit
 
                 $.ajax({
                     url: url,
@@ -134,8 +160,7 @@
                     data: {
                         _token: "{{ csrf_token() }}",
                         project_id: $('#project_id').val(),
-                        invoice_number: $('#invoice_number').val(),
-                        amount: amount,
+                        payment_amount: parseNumeric($('#payment_amount').val()),
                         status: $('#status').val(),
                     },
                     success: function() {
@@ -158,9 +183,14 @@
                 $.get('/invoices/' + id + '/edit', function(data) {
                     $('#invoice_id').val(data.id);
                     $('#project_id').val(data.project_id);
-                    $('#invoice_number').val(data.invoice_number);
-                    $('#amount').val(data.amount);
+                    $('#invoice_number_display').val(data.invoice_number);
+                    $('#payment_amount').val(formatRupiah(data.payment_amount));
                     $('#status').val(data.status);
+                    $('#amount').val(formatRupiah(data.amount));
+                    const currentTotal = parseNumeric(data.amount);
+                    const currentPayment = parseNumeric(data.payment_amount);
+                    $('#remaining_amount').val(formatRupiah(Math.max(currentTotal - currentPayment, 0)));
+                    updateInvoicePreview();
                     $('#invoiceModalLabel').text('Ubah Invoice');
                     $('#invoiceModal').modal('show');
                 });

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Production;
 use App\Models\Project;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
@@ -29,12 +30,14 @@ class ProduksiController extends Controller
 
         $produksi = Project::leftJoin('productions', 'projects.id', '=', 'productions.project_id')
             ->join('design_briefs', 'projects.id', '=', 'design_briefs.project_id')
-            ->join('mockups', 'projects.id', '=', 'mockups.project_id')
-            ->join('timelines', 'projects.id', '=', 'timelines.project_id')
+            ->leftJoin('mockups', 'projects.id', '=', 'mockups.project_id')
+            ->leftJoin('timelines', 'projects.id', '=', 'timelines.project_id')
             ->where('design_briefs.approval_status', 'approved')
             ->select(
                 'projects.judul as project_nama',
                 'design_briefs.description as deskripsi',
+                'design_briefs.reference_files',
+                'design_briefs.reference_file',
                 'mockups.file_path as mockup_file',
                 'productions.id as id',
                 'timelines.end_date as waktu',
@@ -55,7 +58,41 @@ class ProduksiController extends Controller
             })
 
             ->addColumn('file', function ($produksi) {
-                return $produksi->mockup_file ? $produksi->mockup_file : '-';
+                $files = [];
+                
+                // Check if there are multiple reference files (stored as JSON array)
+                if (!empty($produksi->reference_files)) {
+                    $referenceFiles = is_string($produksi->reference_files) 
+                        ? json_decode($produksi->reference_files, true) 
+                        : $produksi->reference_files;
+                    
+                    if (is_array($referenceFiles)) {
+                        $files = $referenceFiles;
+                    }
+                }
+                
+                // Fallback to single reference file if no array
+                if (empty($files) && !empty($produksi->reference_file)) {
+                    $files = [$produksi->reference_file];
+                }
+                
+                // Generate HTML for all files
+                if (empty($files)) {
+                    return '<span class="badge badge-secondary">Tidak ada file</span>';
+                }
+                
+                $html = '<div class="file-list">';
+                foreach ($files as $file) {
+                    if (!empty($file)) {
+                        $filename = basename($file);
+                        $html .= '<a href="' . $file . '" class="btn btn-sm btn-primary mb-1" target="_blank">'
+                                . '<i class="fas fa-download"></i> ' . substr($filename, 0, 20) . ''
+                                . (strlen($filename) > 20 ? '...' : '') . '</a><br/>';
+                    }
+                }
+                $html .= '</div>';
+                
+                return $html;
             })
 
             ->addColumn('status', function ($produksi) {
@@ -79,7 +116,7 @@ class ProduksiController extends Controller
                     ';
                 
             })
-            ->rawColumns(['action'])
+            ->rawColumns(['action', 'file'])
             ->make(true);
     }
 
