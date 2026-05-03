@@ -124,7 +124,7 @@
                 const selectedBudget = $('#project_id option:selected').data('budget');
                 const budgetValue = selectedBudget ? parseFloat(selectedBudget) : 0;
                 const paymentValue = parseNumeric($('#payment_amount').val());
-                const remainingValue = Math.max(budgetValue - paymentValue, 0);
+                const remainingValue = budgetValue - paymentValue;
 
                 $('#amount').val(formatRupiah(budgetValue));
                 $('#remaining_amount').val(formatRupiah(remainingValue));
@@ -196,7 +196,6 @@
                     $('#payment_amount').val(formatRupiah(data.payment_amount ?? 0));
                     $('#status').val(data.status);
                     $('#amount').val(formatRupiah(data.amount));
-                    $('#remaining_amount').val(formatRupiah(0));
                     $('#remaining_amount').val(formatRupiah(data.remaining_amount ?? 0));
                     updateInvoicePreview();
                     $('#invoiceModalLabel').text('Ubah Invoice');

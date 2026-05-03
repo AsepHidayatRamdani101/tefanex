@@ -40,7 +40,7 @@ class InvoiceController extends Controller
                 $totalBudget = (float) ($invoice->project?->designBrief?->budget ?? $invoice->amount ?? 0);
                 $paymentAmount = (float) ($invoice->payment_amount ?? 0);
 
-                return number_format(max($totalBudget - $paymentAmount, 0), 2, ',', '.');
+                return number_format($totalBudget - $paymentAmount, 2, ',', '.');
             })
             ->editColumn('status', function (Invoice $invoice) {
                 $badge = match ($invoice->status) {
@@ -201,12 +201,6 @@ class InvoiceController extends Controller
         $budget = (float) ($project->designBrief?->budget ?? 0);
         $paymentAmount = (float) $validated['payment_amount'];
 
-        if ($paymentAmount > $budget) {
-            return response()->json([
-                'message' => 'Jumlah bayar tidak boleh melebihi budget design brief.',
-            ], 422);
-        }
-
         $validated['invoice_number'] = $this->generateInvoiceNumber();
         $validated['amount'] = $budget;
 
@@ -232,7 +226,7 @@ class InvoiceController extends Controller
         $budget = (float) ($invoice->project?->designBrief?->budget ?? $invoice->amount ?? 0);
         $paymentAmount = (float) ($invoice->payment_amount ?? 0);
 
-        $invoice->remaining_amount = max($budget - $paymentAmount, 0);
+        $invoice->remaining_amount = $budget - $paymentAmount;
 
         return $invoice;
     }
@@ -253,12 +247,6 @@ class InvoiceController extends Controller
         $project = Project::with('designBrief')->findOrFail($validated['project_id']);
         $budget = (float) ($project->designBrief?->budget ?? 0);
         $paymentAmount = (float) $validated['payment_amount'];
-
-        if ($paymentAmount > $budget) {
-            return response()->json([
-                'message' => 'Jumlah bayar tidak boleh melebihi budget design brief.',
-            ], 422);
-        }
 
         $validated['amount'] = $budget;
         $validated['invoice_number'] = $invoice->invoice_number;

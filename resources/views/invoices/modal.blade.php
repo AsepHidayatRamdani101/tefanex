@@ -38,7 +38,7 @@
                     <div class="form-group">
                         <label>Sisa Pembayaran</label>
                         <input type="text" id="remaining_amount" class="form-control" readonly value="Rp 0,00">
-                        <small class="text-muted">Sisa = total budget dikurangi jumlah bayar.</small>
+                        <small class="text-muted">Sisa = total budget dikurangi jumlah bayar. Nilai negatif berarti kelebihan pembayaran.</small>
                     </div>
                     <div class="form-group">
                         <label>Status</label>
