@@ -111,6 +111,14 @@
                 return 'Rp ' + formatted;
             }
 
+            function formatTableAmount(value) {
+                let s = String(value || '').replace(/[^0-9,.-]/g, '');
+                s = s.replace(/\./g, '');
+                s = s.replace(/,/g, '.');
+                let numericValue = parseFloat(s) || 0;
+                return new Intl.NumberFormat('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(numericValue);
+            }
+
             function parseNumeric(value) {
                   // Remove any non-numeric characters and parse to float preserving decimals
                   let s = String(value || '').replace(/[^0-9,.-]/g, '');
@@ -136,7 +144,7 @@
                 $('#invoiceModalLabel').text('Tambah Invoice');
                 $('#invoice_number_display').val('Akan digenerate otomatis');
                 // default payment amount to 0 so remaining shows the full budget
-                $('#payment_amount').val(formatRupiah(0));
+                $('#payment_amount').val(formatTableAmount(0));
                 $('#remaining_amount').val(formatRupiah(0));
                 updateInvoicePreview();
                 $('#invoiceModal').modal('show');
@@ -149,7 +157,7 @@
             $('#payment_amount').on('input', function() {
                 const value = $(this).val();
                 if (value) {
-                    $(this).val(formatRupiah(value));
+                    $(this).val(formatTableAmount(value));
                 }
 
                 updateInvoicePreview();
@@ -193,7 +201,7 @@
                     $('#project_id').val(data.project_id);
                     $('#invoice_number_display').val(data.invoice_number);
                     // when payment_amount is null, default to 0 so remaining displays
-                    $('#payment_amount').val(formatRupiah(data.payment_amount ?? 0));
+                    $('#payment_amount').val(formatTableAmount(data.payment_amount ?? 0));
                     $('#status').val(data.status);
                     $('#amount').val(formatRupiah(data.amount));
                     $('#remaining_amount').val(formatRupiah(data.remaining_amount ?? 0));
