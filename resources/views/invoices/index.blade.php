@@ -104,15 +104,19 @@
             function formatRupiah(value) {
                 // Convert to integer to properly handle decimal values like "100000.00"
                  // Use parseFloat to properly handle decimal values
-                 let numericValue = parseFloat(String(value || '').trim()) || 0;
+                 let numericValue = parseFloat(String(value || '').replace(/[^0-9,.-]/g, '').replace(/\./g, '').replace(/,/g, '.')) || 0;
                  numericValue = Math.round(numericValue);
-                return numericValue ? 'Rp ' + numericValue.toLocaleString('id-ID') : '';
+                 return numericValue ? 'Rp ' + numericValue.toLocaleString('id-ID') : '';
             }
 
             function parseNumeric(value) {
-                 // Extract numeric value using parseFloat for decimal safety
-                 let numValue = parseFloat(String(value || '').trim()) || 0;
-                 return Math.round(numValue);
+                  // Remove any non-numeric characters (like 'Rp', spaces, dots) and parse
+                  let s = String(value || '').replace(/[^0-9,.-]/g, '');
+                  // Remove thousand separators (dots) and normalize decimal comma to dot
+                  s = s.replace(/\./g, '');
+                  s = s.replace(/,/g, '.');
+                  let numValue = parseFloat(s) || 0;
+                  return Math.round(numValue);
             }
 
             function updateInvoicePreview() {
