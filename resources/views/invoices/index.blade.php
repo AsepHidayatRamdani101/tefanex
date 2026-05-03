@@ -107,8 +107,8 @@
                 s = s.replace(/\./g, '');
                 s = s.replace(/,/g, '.');
                 let numericValue = parseFloat(s) || 0;
-                const formatted = numericValue ? new Intl.NumberFormat('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(numericValue) : '';
-                return formatted ? 'Rp ' + formatted : '';
+                const formatted = new Intl.NumberFormat('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(numericValue);
+                return 'Rp ' + formatted;
             }
 
             function parseNumeric(value) {
@@ -126,8 +126,8 @@
                 const paymentValue = parseNumeric($('#payment_amount').val());
                 const remainingValue = Math.max(budgetValue - paymentValue, 0);
 
-                $('#amount').val(budgetValue ? formatRupiah(budgetValue) : '');
-                $('#remaining_amount').val(budgetValue ? formatRupiah(remainingValue) : '');
+                $('#amount').val(formatRupiah(budgetValue));
+                $('#remaining_amount').val(formatRupiah(remainingValue));
             }
 
             $('#addInvoiceBtn').click(function() {
