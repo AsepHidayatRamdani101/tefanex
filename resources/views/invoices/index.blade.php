@@ -102,21 +102,22 @@
             });
 
             function formatRupiah(value) {
-                // Convert to integer to properly handle decimal values like "100000.00"
-                 // Use parseFloat to properly handle decimal values
-                 let numericValue = parseFloat(String(value || '').replace(/[^0-9,.-]/g, '').replace(/\./g, '').replace(/,/g, '.')) || 0;
-                 numericValue = Math.round(numericValue);
-                 return numericValue ? 'Rp ' + numericValue.toLocaleString('id-ID') : '';
+                // Normalize input then format with 2 decimals for consistency with server
+                let s = String(value || '').replace(/[^0-9,.-]/g, '');
+                s = s.replace(/\./g, '');
+                s = s.replace(/,/g, '.');
+                let numericValue = parseFloat(s) || 0;
+                const formatted = numericValue ? new Intl.NumberFormat('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(numericValue) : '';
+                return formatted ? 'Rp ' + formatted : '';
             }
 
             function parseNumeric(value) {
-                  // Remove any non-numeric characters (like 'Rp', spaces, dots) and parse
+                  // Remove any non-numeric characters and parse to float preserving decimals
                   let s = String(value || '').replace(/[^0-9,.-]/g, '');
-                  // Remove thousand separators (dots) and normalize decimal comma to dot
                   s = s.replace(/\./g, '');
                   s = s.replace(/,/g, '.');
                   let numValue = parseFloat(s) || 0;
-                  return Math.round(numValue);
+                  return Number(numValue.toFixed(2));
             }
 
             function updateInvoicePreview() {
