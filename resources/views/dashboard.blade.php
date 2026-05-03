@@ -10,14 +10,7 @@
 
 {{-- ================= GURU ================= --}}
 @role('guru')
-<div class="row">
-    <div class="col-md-4">
-        <x-adminlte-small-box title="12" text="Total Project" icon="fas fa-project-diagram" theme="info"/>
-    </div>
-    <div class="col-md-4">
-        <x-adminlte-small-box title="30" text="Total Siswa Aktif" icon="fas fa-users" theme="success"/>
-    </div>
-</div>
+    @include('dashboard._guru_content')
 @endrole
 
 
