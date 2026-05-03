@@ -135,6 +135,8 @@
                 $('#invoice_id').val('');
                 $('#invoiceModalLabel').text('Tambah Invoice');
                 $('#invoice_number_display').val('Akan digenerate otomatis');
+                // default payment amount to 0 so remaining shows the full budget
+                $('#payment_amount').val(formatRupiah(0));
                 updateInvoicePreview();
                 $('#invoiceModal').modal('show');
             });
@@ -189,11 +191,12 @@
                     $('#invoice_id').val(data.id);
                     $('#project_id').val(data.project_id);
                     $('#invoice_number_display').val(data.invoice_number);
-                    $('#payment_amount').val(formatRupiah(data.payment_amount));
+                    // when payment_amount is null, default to 0 so remaining displays
+                    $('#payment_amount').val(formatRupiah(data.payment_amount ?? 0));
                     $('#status').val(data.status);
                     $('#amount').val(formatRupiah(data.amount));
                     const currentTotal = parseNumeric(data.amount);
-                    const currentPayment = parseNumeric(data.payment_amount);
+                    const currentPayment = parseNumeric(data.payment_amount ?? 0);
                     $('#remaining_amount').val(formatRupiah(Math.max(currentTotal - currentPayment, 0)));
                     updateInvoicePreview();
                     $('#invoiceModalLabel').text('Ubah Invoice');
