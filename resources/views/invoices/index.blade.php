@@ -103,29 +103,44 @@
 
             function formatRupiah(value) {
                 // Normalize input then format without decimals for rupiah display
-                let s = String(value || '').replace(/[^0-9,.-]/g, '');
-                s = s.replace(/\./g, '');
-                s = s.replace(/,/g, '.');
-                let numericValue = parseFloat(s) || 0;
+                const numericValue = parseMoney(value);
                 const formatted = new Intl.NumberFormat('id-ID', {maximumFractionDigits: 0}).format(Math.round(numericValue));
                 return 'Rp ' + formatted;
             }
 
             function formatTableAmount(value) {
-                let s = String(value || '').replace(/[^0-9,.-]/g, '');
-                s = s.replace(/\./g, '');
-                s = s.replace(/,/g, '.');
-                let numericValue = parseFloat(s) || 0;
+                const numericValue = parseMoney(value);
                 return new Intl.NumberFormat('id-ID', {maximumFractionDigits: 0}).format(Math.round(numericValue));
             }
 
             function parseNumeric(value) {
-                  // Remove any non-numeric characters and parse to float preserving decimals
-                  let s = String(value || '').replace(/[^0-9,.-]/g, '');
-                  s = s.replace(/\./g, '');
-                  s = s.replace(/,/g, '.');
-                  let numValue = parseFloat(s) || 0;
-                return Math.round(numValue);
+                  return Math.round(parseMoney(value));
+            }
+
+            function parseMoney(value) {
+                const raw = String(value ?? '').trim();
+
+                if (!raw) {
+                    return 0;
+                }
+
+                if (typeof value === 'number') {
+                    return value;
+                }
+
+                // If it already uses comma as decimal separator, normalize it first.
+                if (raw.includes(',')) {
+                    return parseFloat(raw.replace(/\./g, '').replace(/,/g, '.')) || 0;
+                }
+
+                // If there is exactly one dot and 1-2 digits after it, treat it as a decimal point.
+                const dotParts = raw.split('.');
+                if (dotParts.length === 2 && dotParts[1].length > 0 && dotParts[1].length <= 2) {
+                    return parseFloat(raw.replace(/[^0-9.\-]/g, '')) || 0;
+                }
+
+                // Otherwise, treat dots as thousand separators.
+                return parseFloat(raw.replace(/[^0-9\-]/g, '').replace(/\./g, '')) || 0;
             }
 
             function updateInvoicePreview(budgetValue) {
