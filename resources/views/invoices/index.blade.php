@@ -195,9 +195,7 @@
                     $('#payment_amount').val(formatRupiah(data.payment_amount ?? 0));
                     $('#status').val(data.status);
                     $('#amount').val(formatRupiah(data.amount));
-                    const currentTotal = parseNumeric(data.amount);
-                    const currentPayment = parseNumeric(data.payment_amount ?? 0);
-                    $('#remaining_amount').val(formatRupiah(Math.max(currentTotal - currentPayment, 0)));
+                    $('#remaining_amount').val(formatRupiah(data.remaining_amount ?? 0));
                     updateInvoicePreview();
                     $('#invoiceModalLabel').text('Ubah Invoice');
                     $('#invoiceModal').modal('show');

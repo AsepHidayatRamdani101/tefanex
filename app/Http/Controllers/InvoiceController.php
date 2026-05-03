@@ -228,7 +228,13 @@ class InvoiceController extends Controller
      */
     public function edit(string $id)
     {
-        return Invoice::with(['project.designBrief'])->findOrFail($id);
+        $invoice = Invoice::with(['project.designBrief'])->findOrFail($id);
+        $budget = (float) ($invoice->project?->designBrief?->budget ?? $invoice->amount ?? 0);
+        $paymentAmount = (float) ($invoice->payment_amount ?? 0);
+
+        $invoice->remaining_amount = max($budget - $paymentAmount, 0);
+
+        return $invoice;
     }
 
     /**
