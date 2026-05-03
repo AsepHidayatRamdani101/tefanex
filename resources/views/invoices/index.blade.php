@@ -102,12 +102,12 @@
             });
 
             function formatRupiah(value) {
-                // Normalize input then format with 2 decimals for consistency with server
+                // Normalize input then format without decimals for rupiah display
                 let s = String(value || '').replace(/[^0-9,.-]/g, '');
                 s = s.replace(/\./g, '');
                 s = s.replace(/,/g, '.');
                 let numericValue = parseFloat(s) || 0;
-                const formatted = new Intl.NumberFormat('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(numericValue);
+                const formatted = new Intl.NumberFormat('id-ID', {maximumFractionDigits: 0}).format(Math.round(numericValue));
                 return 'Rp ' + formatted;
             }
 
@@ -116,7 +116,7 @@
                 s = s.replace(/\./g, '');
                 s = s.replace(/,/g, '.');
                 let numericValue = parseFloat(s) || 0;
-                return new Intl.NumberFormat('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(numericValue);
+                return new Intl.NumberFormat('id-ID', {maximumFractionDigits: 0}).format(Math.round(numericValue));
             }
 
             function parseNumeric(value) {
@@ -125,7 +125,7 @@
                   s = s.replace(/\./g, '');
                   s = s.replace(/,/g, '.');
                   let numValue = parseFloat(s) || 0;
-                  return Number(numValue.toFixed(2));
+                return Math.round(numValue);
             }
 
             function updateInvoicePreview(budgetValue) {

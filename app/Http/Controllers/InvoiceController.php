@@ -31,16 +31,16 @@ class InvoiceController extends Controller
             ->editColumn('amount', function (Invoice $invoice) {
                 $totalBudget = $invoice->project?->designBrief?->budget ?? $invoice->amount;
 
-                return $totalBudget !== null ? number_format((float) $totalBudget, 2, ',', '.') : '-';
+                return $totalBudget !== null ? number_format((float) $totalBudget, 0, ',', '.') : '-';
             })
             ->editColumn('payment_amount', function (Invoice $invoice) {
-                return $invoice->payment_amount !== null ? number_format((float) $invoice->payment_amount, 2, ',', '.') : '-';
+                return $invoice->payment_amount !== null ? number_format((float) $invoice->payment_amount, 0, ',', '.') : '-';
             })
             ->addColumn('remaining_amount', function (Invoice $invoice) {
                 $totalBudget = (float) ($invoice->project?->designBrief?->budget ?? $invoice->amount ?? 0);
                 $paymentAmount = (float) ($invoice->payment_amount ?? 0);
 
-                return number_format($totalBudget - $paymentAmount, 2, ',', '.');
+                return number_format($totalBudget - $paymentAmount, 0, ',', '.');
             })
             ->editColumn('status', function (Invoice $invoice) {
                 $badge = match ($invoice->status) {
@@ -164,7 +164,7 @@ class InvoiceController extends Controller
                 return $row['description'];
             })
             ->addColumn('amount', function ($row) {
-                return number_format((float) $row['amount'], 2, ',', '.');
+                return number_format((float) $row['amount'], 0, ',', '.');
             })
             ->make(true);
     }
