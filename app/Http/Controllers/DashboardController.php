@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\Project_Member;
 use App\Models\Attendance;
+use App\Models\Invoice;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -123,11 +125,20 @@ class DashboardController extends Controller
 
         $studentActivityCount = Project_Member::count();
 
+        // Finance metrics: outstanding invoices count and total unpaid amount
+        $outstandingInvoicesCount = Invoice::whereColumn('payment_amount', '<', 'amount')->count();
+        $outstandingTotal = (float) Invoice::whereColumn('payment_amount', '<', 'amount')
+            ->select(DB::raw('SUM(amount - COALESCE(payment_amount,0)) as total'))
+            ->value('total') ?? 0;
+
         return view('dashboard.kepala_tefa', [
             'totalProjects' => $totalProjects,
             'activeProjects' => $activeProjects,
             'studentActivityCount' => $studentActivityCount,
             'projects' => $projectsWithProgress,
+            'showFinance' => true,
+            'outstandingInvoicesCount' => $outstandingInvoicesCount,
+            'outstandingTotal' => $outstandingTotal,
         ]);
     }
 }

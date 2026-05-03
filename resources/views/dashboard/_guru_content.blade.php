@@ -53,6 +53,22 @@
           </a>
         </div>
       </div>
+            @if($showFinance ?? false)
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-secondary">
+                    <div class="inner">
+                        <h3>{{ $outstandingInvoicesCount ?? 0 }}</h3>
+                        <p>Invoice Outstanding</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <a href="{{ route('invoices.index') }}" class="small-box-footer">
+                        Rp {{ number_format($outstandingTotal ?? 0, 0, ',', '.') }} <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+            @endif
     </div>
 
     <!-- Project Progress Section -->
