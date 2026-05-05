@@ -202,6 +202,8 @@
                                 Swal.fire('Terhapus!', response.message, 'success');
                             },
                             error: function(xhr) {
+                            console.log(xhr.responseText);
+                            
                                 let error = 'Tidak dapat menghapus data';
                                 if (xhr.responseJSON && xhr.responseJSON.message) {
                                     error = xhr.responseJSON.message;
