@@ -179,7 +179,8 @@
                 
                 $('#projectMemberForm')[0].reset();
                 $('#project_id').val(projectId);
-                $('#anggota_id').val(null).trigger('change');
+                $('#kelas_filter').val('');
+                populateAnggotaDropdown(originalUsers);
                 $('#projectMemberModal').modal('show');
             });
 
@@ -188,20 +189,22 @@
               
                 let id = $('#projectMember_id').val();
                 let url = id ? '/project-members/' + id : '/project-members';
+                let method = 'POST'; // selalu POST
                 let data = {
                     _token: "{{ csrf_token() }}",
+                    _method: id ? 'PUT' : 'POST', // ini kuncinya
                     anggota_id: $('#anggota_id').val(),
                     project_id: $('#project_id').val(),
                     tugas: $('#tugas').val()
                 };
 
-                if (id) {
-                    data._method = 'PUT';
-                }
+             
+                
+                
 
                 $.ajax({
                     url: url,
-                    type: 'POST',
+                    type: 'post',
                     data: data,
                     success: function() {
                         $('#projectMemberModal').modal('hide');
@@ -218,13 +221,16 @@
 
             $(document).on('click', '.editBtnMember', function() {
                 let id = $(this).data('id');
+                console.log('Edit clicked, id:', id);
                 
                 $.get('/project-members/' + id + '/edit', function(data) {
-                    $('#anggota_id').val(data.user_id).trigger('change');
+                    console.log('Edit data received:', data);
                     $('#project_id').val(data.project_id);
+                    populateAnggotaDropdown(originalUsers, data.user_id);
                     $('#tugas').val(data.role_in_project);
                     $('#projectMember_id').val(data.id);
-                    $('#kelas_filter').val('').trigger('change');
+                    console.log('projectMember_id set to:', $('#projectMember_id').val());
+                    $('#kelas_filter').val(data.kelas_id || '');
                     $('#projectMemberModal').modal('show');
                 });
             });
@@ -255,9 +261,8 @@
 
         });
 
-        function populateAnggotaDropdown(users) {
+        function populateAnggotaDropdown(users, selectedValue = null) {
             let anggotaSelect = $('#anggota_id');
-            let currentValue = anggotaSelect.val();
             
             // Destroy existing Select2
             if (anggotaSelect.hasClass('select2-hidden-accessible')) {
@@ -280,6 +285,10 @@
             
             // Reinitialize Select2
             initializeSelect2();
+            
+            if (selectedValue) {
+                anggotaSelect.val(selectedValue).trigger('change');
+            }
         }
 
         function initializeSelect2() {

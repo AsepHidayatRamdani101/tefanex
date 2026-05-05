@@ -138,8 +138,15 @@ class ProjectMemberController extends Controller
      */
     public function edit(string $id)
     {
-        $projectMember = Project_Member::with('user', 'project')->findOrFail($id);
-        return response()->json($projectMember);
+        $projectMember = Project_Member::with(['user.siswa', 'project'])->findOrFail($id);
+
+        return response()->json([
+            'id' => $projectMember->id,
+            'project_id' => $projectMember->project_id,
+            'user_id' => $projectMember->user_id,
+            'kelas_id' => $projectMember->user->siswa ? $projectMember->user->siswa->kelas_id : null,
+            'role_in_project' => $projectMember->role_in_project,
+        ]);
     }
 
     /**

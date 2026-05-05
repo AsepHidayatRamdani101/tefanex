@@ -35,7 +35,7 @@
                                     @php
                                         $bgColor = $colors[$task['type']] ?? '#2ecc71';
                                         $icon = $icons[$task['type']] ?? 'fa-tasks';
-                                        $statusClass = $task['status'] === 'completed' ? 'success' : ($task['status'] === 'in_progress' ? 'warning' : 'info');
+                                        $statusClass = $task['status'] === 'approved' ? 'pending' : ($task['status'] === 'in_progress' ? 'warning' : 'info');
                                     @endphp
                                     <div class="col-md-6 mb-4">
                                         <div class="card card-outline" style="border-top: 3px solid {{ $bgColor }};">
@@ -47,9 +47,10 @@
                                                                 <i class="fas fa-user"></i> {{ $task['role'] }}
                                                             </span>
                                                             <span class="badge badge-{{ $statusClass }}">
-                                                                {{ ucfirst($task['status']) }}
+                                                                {{ ($task['status']) }}
                                                             </span>
                                                         </div>
+                                                        
                                                         <div class="col text-right">
                                                             <span class="badge badge-pill" style="background-color: {{ $bgColor }}; color: #fff;">
                                                                 {{ $task['created_at']->format('d-m-Y') }}

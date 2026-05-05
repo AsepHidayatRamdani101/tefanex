@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Design_Brief;
 use App\Models\Project;
 use App\Models\User;
+use App\Models\Kelas;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -20,7 +21,8 @@ class ProjectController extends Controller
         $gurus = User::role('guru')->get();
         $users = User::all();
         $projects = Project::all();
-        return view('projects.index', compact('gurus', 'users', 'projects'));
+        $kelas = Kelas::all();
+        return view('projects.index', compact('gurus', 'users', 'projects', 'kelas'));
     }
 
     public function data()

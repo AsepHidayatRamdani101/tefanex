@@ -61,12 +61,13 @@
             }
 
             function parseNumber(value) {
-                // Convert to string first, then extract digits before decimal
+                // Convert to string first, then extract only digits
                 let strValue = String(value || '').trim();
-                // Convert to number to normalize (handles "1250000.00" → 1250000)
-                let numValue = parseFloat(strValue) || 0;
-                // Round to handle any floating point errors
-                return Math.round(numValue);
+                // Remove all non-digit characters (Rp, spaces, commas, etc.)
+                strValue = strValue.replace(/[^\d]/g, '');
+                // Convert to integer
+                let numValue = parseInt(strValue) || 0;
+                return numValue;
             }
 
             let table = $('#designBriefTable').DataTable({
@@ -386,7 +387,7 @@
 
             $(document).on('input', '#harga_satuan_display, #quantity', syncBudget);
 
-            $(document).on('input', '#harga_satuan_display', function() {
+            $(document).on('blur', '#harga_satuan_display', function() {
                 let raw = parseNumber($(this).val() || 0);
                 $(this).val(formatRupiah(raw));
                 $('#harga_satuan').val(raw);

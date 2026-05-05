@@ -237,12 +237,13 @@
                 e.preventDefault();
 
                 let id = $.trim($('#projectMember_id').val());
-                let projectId = $.trim($('#project_id_member').val());
+                let projectId = $.trim($('#project_id').val());
                 let url = id ? '/project-members/' + id : '/project-members';
-                let ajaxType = id ? 'POST' : 'POST';
+               let method = 'POST'; // selalu POST
                 let payload = {
                     _token: "{{ csrf_token() }}",
                     anggota_id: $('#anggota_id').val(),
+                    _method: id ? 'PUT' : 'POST',
                     project_id: projectId,
                     tugas: $('#tugas').val()
                 };
@@ -251,11 +252,10 @@
                     payload._method = 'PUT';
                 }
 
-                console.log('projectMember submit', {id, url, payload});
 
                 $.ajax({
                     url: url,
-                    type: ajaxType,
+                    type: 'post',
                     data: payload,
                     success: function() {
                         $('#projectMemberModal').modal('hide');
@@ -279,10 +279,12 @@
                 console.log('edit member id', id);
 
                 $.get('/project-members/' + id + '/edit', function(data) {
-                    console.log('edit member data', data);
+                    // console.log('edit member data', data);
 
                     $('#anggota_id').val(data.user_id);
-                    $('#project_id_member').val(data.project_id);
+                    $('#project_id').val(data.project_id).trigger('change');
+                    $('#project_id_member').val(data.id);
+                    $('#kelas_filter').val(data.kelas_id);
                     $('#tugas').val(data.role_in_project);
                     $('#projectMember_id').val(data.id);
                     $('#lihatAnggotaModal').modal('hide');
