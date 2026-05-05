@@ -187,24 +187,22 @@
                 e.preventDefault();
               
                 let id = $('#projectMember_id').val();
-               if(id){
-                    var url = '/project-members/' + id;
-                    var method = 'PUT';
-                } else {
-                    var url = '/project-members';
-                    var method = 'POST';
+                let url = id ? '/project-members/' + id : '/project-members';
+                let data = {
+                    _token: "{{ csrf_token() }}",
+                    anggota_id: $('#anggota_id').val(),
+                    project_id: $('#project_id').val(),
+                    tugas: $('#tugas').val()
+                };
+
+                if (id) {
+                    data._method = 'PUT';
                 }
-                
+
                 $.ajax({
                     url: url,
-                    type: method,
-                    data: {
-                        _token: "{{ csrf_token() }}",
-                        anggota_id: $('#anggota_id').val(),
-                        project_id: $('#project_id').val(),
-                        tugas: $('#tugas').val()
-
-                    },
+                    type: 'POST',
+                    data: data,
                     success: function() {
                         $('#projectMemberModal').modal('hide');
                         table.ajax.reload();
