@@ -11,7 +11,7 @@ class UserController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('role:super_admin|guru');
+        $this->middleware('role:super_admin|guru|admin');
     }
     /**
      * Display a listing of the resource.

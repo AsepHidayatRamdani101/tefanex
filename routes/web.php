@@ -145,6 +145,9 @@ Route::middleware('role:guru|super_admin|kepala_tefa|admin')->group(function () 
     Route::get('kelas-data', [KelasController::class, 'data'])->name('kelas.data');
     Route::get('setting-sekolah', [SchoolSettingController::class, 'index'])->name('school-settings.index');
     Route::put('setting-sekolah', [SchoolSettingController::class, 'update'])->name('school-settings.update');
+    // Alias route untuk pengaturan
+    Route::get('pengaturan', [SchoolSettingController::class, 'index'])->name('pengaturan.index');
+    Route::put('pengaturan', [SchoolSettingController::class, 'update'])->name('pengaturan.update');
 });
 Route::resource('kelas', KelasController::class)
     ->middleware('role:guru|super_admin|kepala_tefa|admin');
