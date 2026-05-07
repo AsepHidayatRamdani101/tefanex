@@ -17,6 +17,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\MateriController;
 use App\Http\Controllers\KelasController;
 use App\Http\Controllers\SchoolSettingController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\StudentTestController;
 use App\Http\Controllers\StudentMaterialController;
@@ -146,8 +147,9 @@ Route::middleware('role:guru|super_admin|kepala_tefa|admin')->group(function () 
     Route::get('setting-sekolah', [SchoolSettingController::class, 'index'])->name('school-settings.index');
     Route::put('setting-sekolah', [SchoolSettingController::class, 'update'])->name('school-settings.update');
     // Alias route untuk pengaturan
-    Route::get('pengaturan', [SchoolSettingController::class, 'index'])->name('pengaturan.index');
-    Route::put('pengaturan', [SchoolSettingController::class, 'update'])->name('pengaturan.update');
+    Route::get('pengaturan', [SettingsController::class, 'index'])->name('pengaturan.index');
+    Route::post('pengaturan/backup', [SettingsController::class, 'backup'])->name('pengaturan.backup');
+    Route::post('pengaturan/delete', [SettingsController::class, 'delete'])->name('pengaturan.delete');
 });
 Route::resource('kelas', KelasController::class)
     ->middleware('role:guru|super_admin|kepala_tefa|admin');
