@@ -47,7 +47,7 @@
             <!-- small card -->
             <div class="small-box bg-warning">
               <div class="inner">
-                <h3>{{ \App\Models\Student::count() }}</h3>
+                <h3>{{ \App\Models\Siswa::count() }}</h3>
 
                 <p>Aktivitas siswa</p>
               </div>

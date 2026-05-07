@@ -21,7 +21,7 @@ class DashboardController extends Controller
             abort(403);
         }
 
-        if ($user->hasRole('super_admin')) {
+        if ($user->hasRole('admin')) {
             return view('dashboard.admin');
         } else if ($user->hasRole('guru')) {
             return $this->guruDashboard($user);

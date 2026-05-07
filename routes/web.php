@@ -55,20 +55,20 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth'])
     ->name('dashboard');
 
-Route::resource('users', UserController::class)->middleware('role:guru|super_admin');
+Route::resource('users', UserController::class)->middleware('role:guru|super_admin|admin');
 Route::get('users-data', [UserController::class, 'data'])->name('users.data');
 
 Route::resource('roles', RoleController::class)
-    ->middleware('role:super_admin');
+    ->middleware('role:super_admin|admin');
 Route::get('roles-data', [RoleController::class, 'data'])->name('roles.data');
 
 Route::resource('projects', ProjectController::class)
-    ->middleware('role:guru|super_admin|kepala_tefa|siswa');
+    ->middleware('role:guru|super_admin|kepala_tefa|siswa|admin');
 Route::get('projects-data', [ProjectController::class, 'data'])->name('projects.data');
 Route::get('projects-get-id', [ProjectController::class, 'getProjectId'])->name('projects.getProjectId');
 
 // Project Members Routes - Custom routes must be BEFORE resource route
-Route::middleware('role:guru|super_admin|kepala_tefa')->group(function () {
+Route::middleware('role:guru|super_admin|kepala_tefa|admin')->group(function () {
     Route::get('project-members/get-students', [ProjectMemberController::class, 'getStudentsByClass'])->name('project-members.get-students');
     Route::resource('project-members', ProjectMemberController::class);
     Route::get('project-members-data', [ProjectMemberController::class, 'data'])->name('project-members.data');
@@ -77,46 +77,46 @@ Route::get('projects/{project}/members',
     [ProjectMemberController::class, 'data']
 )->name('projects.members.data');
 Route::resource('design-brief', DesignBriefController::class)
-    ->middleware('role:siswa|guru|super_admin|kepala_tefa');
+    ->middleware('role:siswa|guru|super_admin|kepala_tefa|admin');
 Route::get('design-brief-data', [DesignBriefController::class, 'data'])->name('design-brief.data');
-Route::put('design-brief/{id}/status', [DesignBriefController::class, 'updateStatus'])->name('design-brief.status')->middleware('role:kepala_tefa');
+Route::put('design-brief/{id}/status', [DesignBriefController::class, 'updateStatus'])->name('design-brief.status')->middleware('role:kepala_tefa|admin');
 Route::resource('timeline', TimelineController::class)
-    ->middleware('role:siswa|guru|super_admin|kepala_tefa');
+    ->middleware('role:siswa|guru|super_admin|kepala_tefa|admin');
 Route::get('timeline-data', [TimelineController::class, 'data'])->name('timeline.data');
 Route::resource('mockup', MockupController::class)
-    ->middleware('role:siswa|guru|super_admin|kepala_tefa');
+    ->middleware('role:siswa|guru|super_admin|kepala_tefa|admin');
 Route::get('mockup-data', [MockupController::class, 'data'])->name('mockup.data');
-Route::put('mockup/{id}/status', [MockupController::class, 'updateStatus'])->name('mockup.status')->middleware('role:kepala_tefa');
+Route::put('mockup/{id}/status', [MockupController::class, 'updateStatus'])->name('mockup.status')->middleware('role:kepala_tefa|admin');
 Route::resource('produksi', ProduksiController::class)
-    ->middleware('role:siswa|guru|super_admin|kepala_tefa');
+    ->middleware('role:siswa|guru|super_admin|kepala_tefa|admin');
 Route::get('produksi-data', [ProduksiController::class, 'data'])->name('produksi.data');
-Route::put('produksi/{id}/status', [ProduksiController::class, 'updateStatus'])->name('produksi.status')->middleware('role:kepala_tefa');
-Route::put('produksi/{id}/revisi', [ProduksiController::class, 'revisi'])->name('produksi.revisi')->middleware('role:kepala_tefa');
+Route::put('produksi/{id}/status', [ProduksiController::class, 'updateStatus'])->name('produksi.status')->middleware('role:kepala_tefa|admin');
+Route::put('produksi/{id}/revisi', [ProduksiController::class, 'revisi'])->name('produksi.revisi')->middleware('role:kepala_tefa|admin');
 
 Route::resource('masspro', MassProController::class)
-    ->middleware('role:siswa|guru|super_admin|kepala_tefa');
+    ->middleware('role:siswa|guru|super_admin|kepala_tefa|admin');
 Route::get('masspro-data', [MassProController::class, 'data'])->name('masspro.data');
-Route::put('masspro/{id}/status', [MassProController::class, 'updateStatus'])->name('masspro.status')->middleware('role:kepala_tefa');
+Route::put('masspro/{id}/status', [MassProController::class, 'updateStatus'])->name('masspro.status')->middleware('role:kepala_tefa|admin');
 
 Route::resource('invoices', InvoiceController::class)
-    ->middleware('role:siswa|guru|super_admin|kepala_tefa');
+    ->middleware('role:siswa|guru|super_admin|kepala_tefa|admin');
 Route::get('invoices-data', [InvoiceController::class, 'data'])->name('invoices.data');
-Route::get('invoices-rekap', [InvoiceController::class, 'rekap'])->name('invoices.rekap')->middleware('role:siswa|guru|super_admin|kepala_tefa');
-Route::get('invoices-rekap-data', [InvoiceController::class, 'rekapData'])->name('invoices.rekap.data')->middleware('role:siswa|guru|super_admin|kepala_tefa');
+Route::get('invoices-rekap', [InvoiceController::class, 'rekap'])->name('invoices.rekap')->middleware('role:siswa|guru|super_admin|kepala_tefa|admin');
+Route::get('invoices-rekap-data', [InvoiceController::class, 'rekapData'])->name('invoices.rekap.data')->middleware('role:siswa|guru|super_admin|kepala_tefa|admin');
 
-Route::post('attendances/bulk', [AttendanceController::class, 'bulk'])->name('attendances.bulk')->middleware('role:siswa|guru|super_admin|kepala_tefa');
-Route::get('attendances-rekap', [AttendanceController::class, 'rekap'])->name('attendances.rekap')->middleware('role:siswa|guru|super_admin|kepala_tefa');
-Route::get('attendances-rekap-data', [AttendanceController::class, 'rekapData'])->name('attendances.rekap.data')->middleware('role:siswa|guru|super_admin|kepala_tefa');
-Route::get('attendances-rekap-export', [AttendanceController::class, 'exportRekap'])->name('attendances.rekap.export')->middleware('role:siswa|guru|super_admin|kepala_tefa');
+Route::post('attendances/bulk', [AttendanceController::class, 'bulk'])->name('attendances.bulk')->middleware('role:siswa|guru|super_admin|kepala_tefa|admin');
+Route::get('attendances-rekap', [AttendanceController::class, 'rekap'])->name('attendances.rekap')->middleware('role:siswa|guru|super_admin|kepala_tefa|admin');
+Route::get('attendances-rekap-data', [AttendanceController::class, 'rekapData'])->name('attendances.rekap.data')->middleware('role:siswa|guru|super_admin|kepala_tefa|admin');
+Route::get('attendances-rekap-export', [AttendanceController::class, 'exportRekap'])->name('attendances.rekap.export')->middleware('role:siswa|guru|super_admin|kepala_tefa|admin');
 Route::resource('attendances', AttendanceController::class)
-    ->middleware('role:siswa|guru|super_admin|kepala_tefa');
+    ->middleware('role:siswa|guru|super_admin|kepala_tefa|admin');
 Route::get('attendances-data', [AttendanceController::class, 'data'])->name('attendances.data');
 
 // Payments (Pengeluaran)
-Route::resource('payments', PaymentController::class)->middleware('role:guru|super_admin|kepala_tefa|bendahara');
+Route::resource('payments', PaymentController::class)->middleware('role:guru|super_admin|kepala_tefa|bendahara|admin');
 Route::get('payments-data', [PaymentController::class, 'data'])->name('payments.data');
 
-Route::post('materi/bulk', [MateriController::class, 'bulk'])->name('materi.bulk')->middleware('role:guru|super_admin|kepala_tefa');
+Route::post('materi/bulk', [MateriController::class, 'bulk'])->name('materi.bulk')->middleware('role:guru|super_admin|kepala_tefa|admin');
 
 // DEBUG ROUTE - Remove after testing
 Route::get('debug/attendance', function () {
@@ -134,11 +134,11 @@ Route::get('debug/attendance', function () {
 });
 
 Route::resource('materi', MateriController::class)
-    ->middleware('role:guru|super_admin|kepala_tefa');
+    ->middleware('role:guru|super_admin|kepala_tefa|admin');
 Route::get('materi-data', [MateriController::class, 'data'])->name('materi.data');
 
 // Custom kelas routes BEFORE resource to avoid route conflicts
-Route::middleware('role:guru|super_admin|kepala_tefa')->group(function () {
+Route::middleware('role:guru|super_admin|kepala_tefa|admin')->group(function () {
     Route::get('kelas/export', [KelasController::class, 'export'])->name('kelas.export');
     Route::get('kelas/download-template', [KelasController::class, 'downloadTemplate'])->name('kelas.downloadTemplate');
     Route::post('kelas/import', [KelasController::class, 'import'])->name('kelas.import');
@@ -147,55 +147,55 @@ Route::middleware('role:guru|super_admin|kepala_tefa')->group(function () {
     Route::put('setting-sekolah', [SchoolSettingController::class, 'update'])->name('school-settings.update');
 });
 Route::resource('kelas', KelasController::class)
-    ->middleware('role:guru|super_admin|kepala_tefa');
+    ->middleware('role:guru|super_admin|kepala_tefa|admin');
 
 // Custom siswa routes BEFORE resource to avoid route conflicts
-Route::middleware('role:guru|super_admin|kepala_tefa')->group(function () {
+Route::middleware('role:guru|super_admin|kepala_tefa|admin')->group(function () {
     Route::get('siswa/export', [SiswaController::class, 'export'])->name('siswa.export');
     Route::get('siswa/download-template', [SiswaController::class, 'downloadTemplate'])->name('siswa.downloadTemplate');
     Route::post('siswa/import', [SiswaController::class, 'import'])->name('siswa.import');
     Route::get('siswa-data', [SiswaController::class, 'data'])->name('siswa.data');
 });
 Route::resource('siswa', SiswaController::class)
-    ->middleware('role:guru|super_admin|kepala_tefa');
+    ->middleware('role:guru|super_admin|kepala_tefa|admin');
 
 Route::resource('test', TestController::class)
-    ->middleware('role:guru|super_admin|kepala_tefa');
+    ->middleware('role:guru|super_admin|kepala_tefa|admin');
 Route::get('test-data', [TestController::class, 'data'])->name('test.data');
 Route::get('nilai', [TestController::class, 'gradeIndex'])
-    ->middleware('role:guru|super_admin|kepala_tefa')
+    ->middleware('role:guru|super_admin|kepala_tefa|admin')
     ->name('grades.index');
 Route::get('nilai-data', [TestController::class, 'gradeData'])
-    ->middleware('role:guru|super_admin|kepala_tefa')
+    ->middleware('role:guru|super_admin|kepala_tefa|admin')
     ->name('grades.data');
 Route::get('nilai-export', [TestController::class, 'exportGrades'])
-    ->middleware('role:guru|super_admin|kepala_tefa')
+    ->middleware('role:guru|super_admin|kepala_tefa|admin')
     ->name('grades.export');
 Route::put('nilai/update', [TestController::class, 'gradeUpdate'])
-    ->middleware('role:guru|super_admin|kepala_tefa')
+    ->middleware('role:guru|super_admin|kepala_tefa|admin')
     ->name('grades.update');
 Route::delete('nilai/delete', [TestController::class, 'gradeDestroy'])
-    ->middleware('role:guru|super_admin|kepala_tefa')
+    ->middleware('role:guru|super_admin|kepala_tefa|admin')
     ->name('grades.destroy');
 
 Route::get('cetak-laporan', [ReportController::class, 'index'])
-    ->middleware('role:guru|super_admin|kepala_tefa')
+    ->middleware('role:guru|super_admin|kepala_tefa|admin')
     ->name('report.index');
 Route::get('cetak-laporan/{siswa}', [ReportController::class, 'show'])
-    ->middleware('role:guru|super_admin|kepala_tefa')
+    ->middleware('role:guru|super_admin|kepala_tefa|admin')
     ->name('report.show');
 
 Route::resource('question', QuestionController::class)
-    ->middleware('role:guru|super_admin|kepala_tefa');
+    ->middleware('role:guru|super_admin|kepala_tefa|admin');
 Route::get('question-data', [QuestionController::class, 'data'])->name('question.data');
 Route::post('question/import/excel', [QuestionController::class, 'importExcel'])->name('question.import.excel');
 Route::post('question/import/word', [QuestionController::class, 'importWord'])->name('question.import.word');
 
 Route::resource('quality-control', QualityController::class)
-    ->middleware('role:siswa|guru|super_admin|kepala_tefa');
+    ->middleware('role:siswa|guru|super_admin|kepala_tefa|admin');
 Route::get('quality-control-data', [QualityController::class, 'data'])->name('quality.data');
-Route::put('quality-control/{id}/status', [QualityController::class, 'updateStatus'])->name('quality-control.status')->middleware('role:kepala_tefa');
-Route::put('quality-control/{id}/revisi', [QualityController::class, 'revisi'])->name('quality-control.revisi')->middleware('role:kepala_tefa');
+Route::put('quality-control/{id}/status', [QualityController::class, 'updateStatus'])->name('quality-control.status')->middleware('role:kepala_tefa|admin');
+Route::put('quality-control/{id}/revisi', [QualityController::class, 'revisi'])->name('quality-control.revisi')->middleware('role:kepala_tefa|admin');
 
 // Student Test Routes
 Route::middleware('role:siswa')->group(function () {
@@ -209,12 +209,12 @@ Route::middleware('role:siswa')->group(function () {
     Route::get('student/material/{material}', [StudentMaterialController::class, 'showMaterial'])->name('student.material.detail');
 });
 
-Route::group(['middleware' => 'role:siswa|guru|super_admin|kepala_tefa'], function () {
+Route::group(['middleware' => 'role:siswa|guru|super_admin|kepala_tefa|admin'], function () {
     Route::get('student/test/result/{result}', [StudentTestController::class, 'showResult'])->name('student.test.result');
 });
 
 Route::put('student/test/result/{result}', [StudentTestController::class, 'updateEvaluation'])
-    ->middleware('role:guru|super_admin|kepala_tefa')
+    ->middleware('role:guru|super_admin|kepala_tefa|admin')
     ->name('student.test.result.update');
 
 
