@@ -7,6 +7,9 @@
             <h1>Selamat Datang di Dashboard Siswa</h1>
             <p>Ini adalah halaman dashboard untuk siswa. Di sini Anda dapat melihat informasi terkait proyek, materi, tugas, dan absensi Anda.</p>
         </div>
+
+        @include('components.dashboard-info')
+
         <div class="row">
             <div class="col-lg-3 col-6">
                 <!-- small card -->

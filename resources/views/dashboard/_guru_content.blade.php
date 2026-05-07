@@ -3,6 +3,8 @@
         <h1>Selamat Datang di Dashboard Guru</h1>
         <p>Ini adalah halaman dashboard untuk guru. Di sini Anda dapat melihat informasi terkait proyek, materi, tugas, dan absensi siswa Anda.</p>
     </div>
+
+    @include('components.dashboard-info')
     
     <!-- Statistics Cards -->
     <div class="row mb-4">

@@ -6,6 +6,8 @@
         <h1 class="mb-4">Selamat Datang di Dashboard Admin</h1>
         <p class="mb-8">Ini adalah halaman dashboard untuk admin. Di sini Anda dapat melihat informasi terkait proyek, materi, tugas, dan absensi siswa Anda.</p>
 
+        @include('components.dashboard-info')
+
         <div class="row">
           <div class="col-lg-3 col-6">
             <!-- small card -->
