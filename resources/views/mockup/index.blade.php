@@ -13,6 +13,11 @@
             </div>
         </div>
         <div class="card-body">
+            @if(!empty($designBriefStatus) && strtolower($designBriefStatus) !== 'approved')
+                <div class="alert alert-warning">
+                    Design Brief belum disetujui, jadi upload mockup belum bisa dilakukan.
+                </div>
+            @endif
             <div class="table-responsive">
                 <table class="table table-bordered" id="projectTable">
                     <thead>
@@ -104,6 +109,23 @@
                     {
                         data: 'status',
                         name: 'status'
+                        ,render: function(data) {
+                            const normalized = String(data || '').toLowerCase();
+
+                            if (!normalized) {
+                                return '<span class="badge badge-secondary">Design Brief belum disetujui</span>';
+                            }
+
+                            if (normalized === 'approved') {
+                                return '<span class="badge badge-success">Design Brief disetujui</span>';
+                            }
+
+                            if (normalized === 'rejected') {
+                                return '<span class="badge badge-danger">Design Brief belum disetujui</span>';
+                            }
+
+                            return '<span class="badge badge-warning">Design Brief belum disetujui</span>';
+                        }
                     },
                     {
                         data: 'revisi',
@@ -148,6 +170,15 @@
                     formData.append('_method', 'PUT');
                 }
 
+                Swal.fire({
+                    title: 'Mengupload file...',
+                    text: 'Mohon tunggu sebentar',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
 
                 $.ajax({
                     url: url,
@@ -156,12 +187,14 @@
                     contentType: false,
                     processData: false,
                     success: function(response) {
+                        Swal.close();
 
                         $('#uploadModal').modal('hide');
                         table.ajax.reload();
                         Swal.fire('Berhasil!', 'File berhasil diupload', 'success');
                     },
                     error: function(xhr) {
+                        Swal.close();
                         console.log(xhr.responseText);
                         Swal.fire('Gagal!', 'Terjadi kesalahan saat mengirim request', 'error');
                     }
@@ -190,12 +223,12 @@
 
             });
 
-            let queryParams = new URLSearchParams(window.location.search);
-            let mockupProjectId = queryParams.get('project_id');
-            if (mockupProjectId) {
-                $("#mockup_id").val(mockupProjectId);
-                $("#uploadForm")[0].reset();
-                $("#uploadModal").modal("show");
+            let mockupProjectId = @json($selectedProjectId ?? null);
+            let designBriefStatus = @json($designBriefStatus ?? null);
+            if (mockupProjectId && String(designBriefStatus || '').toLowerCase() === 'approved') {
+                $('#mockup_id').val(mockupProjectId);
+                $('#uploadForm')[0].reset();
+                $('#uploadModal').modal('show');
             }
 
             $(document).on('click', '.approveBtn', function() {

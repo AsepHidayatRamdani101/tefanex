@@ -83,9 +83,10 @@ class StudentMaterialController extends Controller
                         'project_name' => $project->judul,
                         'title' => 'Design Brief',
                         'task_description' => 'Lengkapi Design Brief untuk project ini dengan detail target pasar, budget, dan referensi visual.',
-                        'description' => $designBrief->deskripsi ?? '-',
-                        'status' => $designBrief->status ?? $project->status,
-                        'created_at' => $designBrief->created_at,
+                        'description' => $designBrief->description ?? '-',
+                        'status' => $designBrief->approval_status ?? $project->status,
+                        'created_at' => $designBrief->created_at ?? $project->created_at,
+                        'keterangan' => $designBrief->keterangan ?? null,
                         'data' => $designBrief
                     ]);
                 }
@@ -94,57 +95,63 @@ class StudentMaterialController extends Controller
             // Designer: Mockup
             if (in_array($role, ['designer', 'desain'])) {
                 $mockups = $project->mockups ?? collect();
-                foreach ($mockups as $mockup) {
-                    $tasks->push([
-                        'type' => 'Mockup',
-                        'role' => $member->role_in_project,
-                        'project_id' => $project->id,
-                        'project_name' => $project->judul,
-                        'title' => 'Desain Mockup',
-                        'task_description' => 'Upload hasil mockup desain sesuai dengan brief project dan pastikan file dapat ditinjau oleh tim.',
-                        'description' => $mockup->deskripsi ?? '-',
-                        'status' => $mockup->status ?? $project->status,
-                        'created_at' => $mockup->created_at,
-                        'data' => $mockup
-                    ]);
+                if ($mockups && $mockups->isNotEmpty()) {
+                    foreach ($mockups as $mockup) {
+                        $tasks->push([
+                            'type' => 'Mockup',
+                            'role' => $member->role_in_project,
+                            'project_id' => $project->id,
+                            'project_name' => $project->judul,
+                            'title' => 'Desain Mockup',
+                            'task_description' => 'Upload hasil mockup desain sesuai dengan brief project dan pastikan file dapat ditinjau oleh tim.',
+                            'description' => $mockup->deskripsi ?? '-',
+                            'status' => $mockup->status ?? $project->status,
+                            'created_at' => $mockup->created_at ?? now(),
+                            'data' => $mockup
+                        ]);
+                    }
                 }
             }
 
             // Operator Produksi: Production
             if (in_array($role, ['operator produksi', 'operator_produksi', 'produksi'])) {
                 $productions = $project->productions ?? collect();
-                foreach ($productions as $production) {
-                    $tasks->push([
-                        'type' => 'Produksi',
-                        'role' => $member->role_in_project,
-                        'project_id' => $project->id,
-                        'project_name' => $project->judul,
-                        'title' => 'Proses Produksi',
-                        'task_description' => 'Upload hasil produksi dan laporkan progress sesuai spesifikasi project.',
-                        'description' => $production->deskripsi ?? '-',
-                        'status' => $production->status ?? $project->status,
-                        'created_at' => $production->created_at,
-                        'data' => $production
-                    ]);
+                if ($productions && $productions->isNotEmpty()) {
+                    foreach ($productions as $production) {
+                        $tasks->push([
+                            'type' => 'Produksi',
+                            'role' => $member->role_in_project,
+                            'project_id' => $project->id,
+                            'project_name' => $project->judul,
+                            'title' => 'Proses Produksi',
+                            'task_description' => 'Upload hasil produksi dan laporkan progress sesuai spesifikasi project.',
+                            'description' => $production->deskripsi ?? '-',
+                            'status' => $production->status ?? $project->status,
+                            'created_at' => $production->created_at ?? now(),
+                            'data' => $production
+                        ]);
+                    }
                 }
             }
 
             // QC: Quality Control
             if (in_array($role, ['qc', 'quality control', 'quality_control', 'kontrol kualitas'])) {
                 $qualityControls = $project->qualityControls ?? collect();
-                foreach ($qualityControls as $qc) {
-                    $tasks->push([
-                        'type' => 'Quality Control',
-                        'role' => $member->role_in_project,
-                        'project_id' => $project->id,
-                        'project_name' => $project->judul,
-                        'title' => 'Pemeriksaan Kualitas',
-                        'task_description' => 'Lakukan pemeriksaan kualitas pada hasil desain atau produksi, dan catat semua revisi yang diperlukan.',
-                        'description' => $qc->deskripsi ?? '-',
-                        'status' => $qc->status ?? $project->status,
-                        'created_at' => $qc->created_at,
-                        'data' => $qc
-                    ]);
+                if ($qualityControls && $qualityControls->isNotEmpty()) {
+                    foreach ($qualityControls as $qc) {
+                        $tasks->push([
+                            'type' => 'Quality Control',
+                            'role' => $member->role_in_project,
+                            'project_id' => $project->id,
+                            'project_name' => $project->judul,
+                            'title' => 'Pemeriksaan Kualitas',
+                            'task_description' => 'Lakukan pemeriksaan kualitas pada hasil desain atau produksi, dan catat semua revisi yang diperlukan.',
+                            'description' => $qc->deskripsi ?? '-',
+                            'status' => $qc->status ?? $project->status,
+                            'created_at' => $qc->created_at ?? now(),
+                            'data' => $qc
+                        ]);
+                    }
                 }
             }
         }

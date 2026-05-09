@@ -7,6 +7,7 @@ use App\Models\Project;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
 class MockupController extends Controller
@@ -14,9 +15,18 @@ class MockupController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return view('mockup.index');
+        $selectedProjectId = $request->query('project_id');
+        $designBriefStatus = null;
+
+        if ($selectedProjectId) {
+            $designBriefStatus = DB::table('design_briefs')
+                ->where('project_id', $selectedProjectId)
+                ->value('approval_status');
+        }
+
+        return view('mockup.index', compact('selectedProjectId', 'designBriefStatus'));
     }
 
     /**
@@ -39,15 +49,39 @@ class MockupController extends Controller
         if (!$user) {
             abort(403);
         }
-       $projects = Mockup::join('design_briefs', 'mockups.project_id', '=', 'design_briefs.project_id')
-            ->join('timelines', 'mockups.project_id', '=', 'timelines.project_id')
+        
+        // First, check if there's a project_id filter in the request
+        $projectId = $request->get('project_id');
+        
+        // Get design brief records with approved status, then left join with mockup
+        $query = DB::table('design_briefs')
+            ->leftJoin('mockups', 'design_briefs.project_id', '=', 'mockups.project_id')
+            ->join('timelines', 'design_briefs.project_id', '=', 'timelines.project_id')
             ->join('projects', 'timelines.project_id', '=', 'projects.id')
-            ->select('mockups.*','timelines.start_date', 'timelines.end_date', 
-            'design_briefs.description as design_description', 'design_briefs.approval_status', 
-            'design_briefs.approved_by', 'design_briefs.description as deskripsi', 
-            'projects.judul as judul','design_briefs.reference_files', 'design_briefs.reference_file')
-            ->where('design_briefs.approval_status', 'approved')
-            ->get();
+            ->select(
+                DB::raw('COALESCE(mockups.id, 0) as id'),
+                'design_briefs.project_id',
+                'mockups.file_path',
+                'mockups.status',
+                'mockups.revision_note',
+                'timelines.start_date',
+                'timelines.end_date',
+                'design_briefs.description as design_description',
+                'design_briefs.approval_status',
+                'design_briefs.keterangan as design_brief_revisi',
+                'projects.judul',
+                'design_briefs.reference_files',
+                'design_briefs.reference_file',
+                DB::raw('COALESCE(mockups.created_at, NOW()) as created_at')
+            )
+            ->where('design_briefs.approval_status', 'approved');
+        
+        // If there's a project_id filter, apply it
+        if ($projectId) {
+            $query->where('design_briefs.project_id', $projectId);
+        }
+        
+        $projects = $query->get();
 
         return DataTables::of($projects)
             ->addIndexColumn()
@@ -95,7 +129,10 @@ class MockupController extends Controller
                 return $html;
             })
             ->addColumn('revisi', function ($project) {
-                return $project->revision_note ?? '';
+                return $project->revision_note ?: ($project->design_brief_revisi ?? '');
+            })
+            ->addColumn('status', function ($project) {
+                return strtolower((string) ($project->approval_status ?? 'pending'));
             })
              ->addColumn('hasil', function ($project) {
                 return $project->file_path ?? '';
@@ -103,14 +140,22 @@ class MockupController extends Controller
            
            
             ->addColumn('action', function ($project) use ($user) {
-               
-                    return '
+                $approvalStatus = strtolower((string) ($project->approval_status ?? ''));
+
+                if ($approvalStatus !== 'approved') {
+                    return '<button class="btn btn-sm btn-secondary" disabled title="Design Brief belum disetujui">Upload</button>';
+                }
+
+                // If mockup doesn't exist yet (id = 0 from COALESCE), show Upload button with project_id
+                // If mockup exists, show Upload, Approve, and View buttons with mockup id
+                if ($project->id == 0) {
+                    return '<button class="btn btn-sm btn-warning addBtn" data-id="' . $project->project_id . '" title="Upload mockup baru">Upload</button>';
+                }
+                return '
                     <button class="btn btn-sm btn-warning addBtn" data-id="' . $project->id . '">Upload</button>        
-                    
-                    <button class="btn btn-sm btn-success approveBtn" data-id="' . $project->id . '">approve</button>
-                    <button class="btn btn-sm btn-info lihatBtn" data-id="' . $project->id . '">lihat</button>
+                    <button class="btn btn-sm btn-success approveBtn" data-id="' . $project->id . '">Approve</button>
+                    <button class="btn btn-sm btn-info lihatBtn" data-id="' . $project->id . '">Lihat</button>
                     ';          
-                
             })
             ->rawColumns(['file', 'hasil', 'action'])
             ->make(true);

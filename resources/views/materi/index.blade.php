@@ -79,6 +79,7 @@
                 $('#video_link').val('');
                 $('#content').val('');
                 $('#file').val('');
+                $('#file').siblings('.custom-file-label').removeClass('selected').html('Pilih File PDF');
                 $('#materiModalLabel').text('Tambah Materi');
                 $('#fileInfo').hide();
                 $('#materiModal').modal('show');
@@ -98,6 +99,19 @@
                     formData.append('_method', 'PUT');
                 }
 
+                Swal.fire({
+                    title: 'Mengupload file PDF...',
+                    text: 'Mohon tunggu sebentar',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                let submitButton = $('#materiForm button[type="submit"]');
+                submitButton.prop('disabled', true);
+
                 $.ajax({
                     url: url,
                     type: 'POST',
@@ -105,11 +119,15 @@
                     processData: false,
                     contentType: false,
                     success: function() {
+                        Swal.close();
+                        submitButton.prop('disabled', false);
                         $('#materiModal').modal('hide');
                         table.ajax.reload();
                         Swal.fire('Berhasil!', 'Materi tersimpan', 'success');
                     },
                     error: function(xhr) {
+                        Swal.close();
+                        submitButton.prop('disabled', false);
                         console.log(xhr.responseText);
                         
                         let error = 'Terjadi kesalahan saat mengirimkan request ke server';
@@ -133,10 +151,14 @@
                     $('#content').val(data.content || '');
                     $('#project_id').val(data.project_id || '');
                     $('#video_link').val(data.video_link || '');
+                    $('#file').val('');
                     
                     if (data.file_path) {
+                        let fileName = data.file_path.split('/').pop();
+                        $('#file').siblings('.custom-file-label').addClass('selected').html(fileName);
                         $('#fileInfo').show().html('<p><small>File: <a href="/' + data.file_path + '" target="_blank">Lihat File</a></small></p>');
                     } else {
+                        $('#file').siblings('.custom-file-label').removeClass('selected').html('Pilih File PDF');
                         $('#fileInfo').hide();
                     }
                     

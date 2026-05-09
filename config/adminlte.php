@@ -384,20 +384,20 @@ return [
                     'text' => 'Materi',
                     'url' => 'materi',
                     'icon' => 'fas fa-book',
-                    'can' => 'guru'
+                    'can' => 'guru|admin'
 
                 ],
                 [
                     'text' => 'Test',
                     'url' => 'test',
                     'icon' => 'fas fa-file-alt',
-                    'can' => 'guru'
+                    'can' => 'guru|admin'
                 ],
                 [
                     'text' => 'Nilai',
                     'url' => 'nilai',
                     'icon' => 'fas fa-star',
-                    'can' => 'guru'
+                    'can' => 'guru|admin'
                 ],
                 [
                     'text' => 'Kerjakan Test',
@@ -421,7 +421,7 @@ return [
                     'text' => 'Pertanyaan',
                     'url' => 'question',
                     'icon' => 'fas fa-question-circle',
-                    'can' => 'guru'
+                    'can' => 'guru|admin'
                 ],
 
             ]

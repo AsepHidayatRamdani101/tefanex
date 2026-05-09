@@ -9,6 +9,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
+                    <input type="hidden" id="materi_id" name="materi_id">
                     <div class="form-group">
                         <label>Project <span class="text-muted">(Opsional)</span></label>
                         <select name="project_id" id="project_id" class="form-control">
@@ -78,9 +79,20 @@
 </style>
 
 <script>
-    // Update file label
-    $('#file').on('change', function() {
-        let fileName = $(this).val().split('\\\\').pop();
-        $(this).siblings('.custom-file-label').addClass("selected").html(fileName);
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.getElementById('file');
+        if (!fileInput) {
+            return;
+        }
+
+        fileInput.addEventListener('change', function() {
+            const fileName = this.files && this.files.length ? this.files[0].name : 'Pilih File PDF';
+            const label = this.parentElement.querySelector('.custom-file-label');
+
+            if (label) {
+                label.classList.add('selected');
+                label.textContent = fileName;
+            }
+        });
     });
 </script>

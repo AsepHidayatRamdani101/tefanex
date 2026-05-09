@@ -35,7 +35,35 @@
                                     @php
                                         $bgColor = $colors[$task['type']] ?? '#2ecc71';
                                         $icon = $icons[$task['type']] ?? 'fa-tasks';
-                                        $statusClass = $task['status'] === 'approved' ? 'pending' : ($task['status'] === 'in_progress' ? 'warning' : 'info');
+
+                                        // Map internal status to readable label and bootstrap badge color
+                                        switch ($task['status']) {
+                                            case 'approved':
+                                                $statusBadge = 'success';
+                                                $statusLabel = 'Disetujui';
+                                                $isRejected = false;
+                                                break;
+                                            case 'rejected':
+                                                $statusBadge = 'danger';
+                                                $statusLabel = 'Ditolak';
+                                                $isRejected = true;
+                                                break;
+                                            case 'in_progress':
+                                                $statusBadge = 'warning';
+                                                $statusLabel = 'Dalam Proses';
+                                                $isRejected = false;
+                                                break;
+                                            case 'pending':
+                                                $statusBadge = 'secondary';
+                                                $statusLabel = 'Menunggu';
+                                                $isRejected = false;
+                                                break;
+                                            default:
+                                                $statusBadge = 'light';
+                                                $statusLabel = 'Belum diisi';
+                                                $isRejected = false;
+                                                break;
+                                        }
                                     @endphp
                                     <div class="col-md-6 mb-4">
                                         <div class="card card-outline" style="border-top: 3px solid {{ $bgColor }};">
@@ -46,8 +74,8 @@
                                                             <span class="badge badge-secondary mr-1">
                                                                 <i class="fas fa-user"></i> {{ $task['role'] }}
                                                             </span>
-                                                            <span class="badge badge-{{ $statusClass }}">
-                                                                {{ ($task['status']) }}
+                                                            <span class="badge badge-{{ $statusBadge }}">
+                                                                {{ $statusLabel }}
                                                             </span>
                                                         </div>
                                                         
@@ -66,9 +94,24 @@
                                                 <p class="text-muted mb-2"><strong>Instruksi Tugas:</strong> {{ $task['task_description'] }}</p>
                                                 <p class="text-muted mb-3">{{ $task['description'] ?: '-' }}</p>
 
+                                                @if(!empty($task['keterangan']))
+                                                    <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                                                        <h5 class="alert-heading">
+                                                            <i class="fas fa-exclamation-circle"></i> Revisi Diperlukan
+                                                        </h5>
+                                                        <p class="mb-0">{{ $task['keterangan'] }}</p>
+                                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                @endif
+
                                                 <div class="mb-1">
                                                     @if($task['type'] === 'Design Brief')
-                                                        <a href="{{ route('design-brief.index', ['project_id' => $task['project_id']]) }}" class="btn btn-sm btn-primary">
+                                                                                                   php artisan tinker
+                                                        >>> $db = \App\Models\Design_Brief::find(3);
+                                                        >>> $db->approval_status
+                                                        >>> $db->keterangan             <a href="{{ route('design-brief.index', ['project_id' => $task['project_id']]) }}" class="btn btn-sm btn-primary">
                                                             <i class="fas fa-pencil-alt"></i> Kerjakan Design Brief
                                                         </a>
                                                     @elseif($task['type'] === 'Mockup')

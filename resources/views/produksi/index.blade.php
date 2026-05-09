@@ -176,6 +176,16 @@
                     formData.append('_method', 'PUT');
                 }
 
+                Swal.fire({
+                    title: 'Mengupload file...',
+                    text: 'Mohon tunggu sebentar',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
                 $.ajax({
                     url: url,
                     method: method,
@@ -183,6 +193,7 @@
                     contentType: false,
                     processData: false,
                     success: function(response) {
+                        Swal.close();
                         $('#uploadModal').modal('hide');
                         Swal.fire(
                             'Success',
@@ -192,6 +203,7 @@
                         table.ajax.reload();
                     },
                     error: function(xhr) {
+                        Swal.close();
                         Swal.fire(
                             'Error',
                             xhr.responseJSON.message,

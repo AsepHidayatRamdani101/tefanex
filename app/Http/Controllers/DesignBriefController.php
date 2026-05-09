@@ -35,15 +35,16 @@ class DesignBriefController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-        
+
+        $canSeeAll = $user->hasAnyRole(['guru', 'super_admin', 'kepala_tefa', 'admin']);
+
         $projectMember = Design_Brief::with(['project', 'user'])
             ->whereHas('project.project_members', function($query) use ($user) {
                 $query->where('user_id', $user->id);
             })->select('design_briefs.*');
 
-        if ($user->hasRole('guru|super_admin|kepala_tefa')) {
-             $projectMember = Design_Brief::with(['project', 'user'])->select('design_briefs.*');
-           
+        if ($canSeeAll) {
+            $projectMember = Design_Brief::with(['project', 'user'])->select('design_briefs.*');
         
         }
 
@@ -77,6 +78,13 @@ class DesignBriefController extends Controller
                     $btn = '<button class="btn btn-sm btn-primary tambahBtn" data-id="' . $projectMember->project->id . '">Tambah</button>';
                     $btn .= ' <button class="btn btn-sm btn-secondary lihatBtn" data-id="' . $projectMember->project->id . '">Lihat</button>';
                     $btn .= ' <button class="btn btn-sm btn-warning editBtn" data-id="' . $projectMember->project->id . '">Edit</button>';
+                    return $btn;
+                } else if ($user->hasRole('admin')) {
+                    $btn = '<button class="btn btn-sm btn-primary tambahBtn" data-id="' . $projectMember->project->id . '">Tambah</button>';
+                    $btn .= ' <button class="btn btn-sm btn-secondary lihatBtn" data-id="' . $projectMember->project->id . '">Lihat</button>';
+                    $btn .= ' <button class="btn btn-sm btn-warning editBtn" data-id="' . $projectMember->project->id . '">Edit</button>';
+                    $btn .= ' <button class="btn btn-sm btn-success approveBtn" data-id="' . $projectMember->id . '">Aprove</button>';
+                    $btn .= ' <button class="btn btn-sm btn-danger rejectBtn" data-id="' . $projectMember->id . '">Reject</button>';
                     return $btn;
                 } else if ($user->hasRole('kepala_tefa')) {
                     $btn = '<button class="btn btn-sm btn-secondary lihatBtn" data-id="' . $projectMember->project->id . '">Lihat</button>';

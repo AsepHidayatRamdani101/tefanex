@@ -54,20 +54,65 @@
     <script>
         $(function() {
 
-            // Define formatRupiah function early, before DataTable init
-            function formatRupiah(value) {
-                const number = parseNumber(value);
-                return number ? 'Rp ' + number.toLocaleString('id-ID') : '';
+            // Define formatRupiah and parseNumber functions early, before DataTable init
+            function parseNumber(value) {
+                if (value === null || value === undefined) return 0;
+                if (typeof value === 'number') return value;
+                let s = String(value).trim();
+                // Remove currency label and spaces
+                s = s.replace(/Rp\s?/gi, '').replace(/\s+/g, '');
+
+                // Keep only digits and separators
+                s = s.replace(/[^0-9.,-]/g, '');
+                if (s === '') return 0;
+
+                const hasDot = s.indexOf('.') !== -1;
+                const hasComma = s.indexOf(',') !== -1;
+
+                if (hasDot && hasComma) {
+                    // Both present -> decide by last occurrence
+                    const lastDot = s.lastIndexOf('.');
+                    const lastComma = s.lastIndexOf(',');
+                    if (lastDot > lastComma) {
+                        // dot is decimal separator
+                        s = s.replace(/,/g, '');
+                    } else {
+                        // comma is decimal separator
+                        s = s.replace(/\./g, '').replace(/,/g, '.');
+                    }
+                } else if (hasDot) {
+                    // Only dot present: decide if dot is thousand separator (e.g., 25.000)
+                    const parts = s.split('.');
+                    const lastPart = parts[parts.length - 1];
+                    if (lastPart.length === 3) {
+                        // likely thousand separators: remove all dots
+                        s = s.replace(/\./g, '');
+                    } else {
+                        // likely decimal separator: remove commas (none) and keep dot
+                        s = s.replace(/,/g, '');
+                    }
+                } else if (hasComma) {
+                    // Only comma present: decide if comma is thousand separator (e.g., 25,000)
+                    const parts = s.split(',');
+                    const lastPart = parts[parts.length - 1];
+                    if (lastPart.length === 3) {
+                        // thousand separators: remove all commas
+                        s = s.replace(/,/g, '');
+                    } else {
+                        // decimal separator: replace comma with dot
+                        s = s.replace(/\./g, '').replace(/,/g, '.');
+                    }
+                }
+
+                const f = parseFloat(s);
+                return isNaN(f) ? 0 : f;
             }
 
-            function parseNumber(value) {
-                // Convert to string first, then extract only digits
-                let strValue = String(value || '').trim();
-                // Remove all non-digit characters (Rp, spaces, commas, etc.)
-                strValue = strValue.replace(/[^\d]/g, '');
-                // Convert to integer
-                let numValue = parseInt(strValue) || 0;
-                return numValue;
+            function formatRupiah(value) {
+                const number = parseNumber(value);
+                if (!number) return '';
+                // Format without decimal places for display
+                return 'Rp ' + Math.round(number).toLocaleString('id-ID');
             }
 
             let table = $('#designBriefTable').DataTable({
@@ -160,6 +205,16 @@
                     formData.append('_method', 'PUT');
                 }
 
+                Swal.fire({
+                    title: 'Mengupload file...',
+                    text: 'Mohon tunggu sebentar',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
                 $.ajax({
                     url: url,
                     type: method,
@@ -167,11 +222,13 @@
                     processData: false,
                     contentType: false,
                     success: function() {
+                        Swal.close();
                         $('#designBriefModal').modal('hide');
                         table.ajax.reload();
                         Swal.fire('Berhasil!', 'Data tersimpan', 'success');
                     },
                     error: function(xhr) {
+                        Swal.close();
                         console.log(xhr.responseText);
                         Swal.fire('Gagal!', 'Terjadi kesalahan saat mengirim request');
                     }
@@ -307,12 +364,12 @@
                         _token: $('meta[name="csrf-token"]').attr('content'),
                         id: id,
                         status: 'rejected',
-                        keterangan: $('#keterangan').val()
+                        keterangan: $('#alasan').val()
                     },
                     success: function() {
                         table.ajax.reload();
                         $("#rejectModal").modal("hide");
-                        Swal.fire('Berhasil!', 'Design Brief disetujui', 'success');
+                        Swal.fire('Berhasil!', 'Design Brief ditolak', 'success');
                     },
                     error: function(xhr) {
                         console.log(xhr.responseText);
