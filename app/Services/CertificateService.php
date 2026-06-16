@@ -153,7 +153,7 @@ class CertificateService
         $certificateSubtitle = $setting->certificate_subtitle ?: 'Telah menyelesaikan seluruh alur pembelajaran dan tugas modul.';
         $certificateFooter = $setting->certificate_footer ?: 'Sertifikat ini berlaku sebagai bukti penyelesaian modul.';
         $certificateNumber = $setting->certificate_number ?: '';
-        $certificateLocation = $setting->certificate_location ?: '';
+        $certificateLocation = $setting->certificate_place ?: '';
 
         $projectText = count($moduleGrades) > 0
             ? implode(', ', array_unique(array_map(fn($grade) => $grade['project_name'], $moduleGrades)))
@@ -169,7 +169,20 @@ class CertificateService
             $templateUrl = asset('storage/' . $setting->certificate_template);
         }
 
-        $html = $this->renderCertificateHTML($schoolName, $certificateTitle, $certificateSubtitle, $studentName, $projectText, $certificateFooter, $principalName, $principalNip, $logoUrl, $certificateNumber, $certificateLocation, $templateUrl);
+        $html = $this->renderCertificateHTML(
+            $schoolName,
+            $certificateTitle,
+            $certificateSubtitle,
+            $studentName,
+            $projectText,
+            $certificateFooter,
+            $principalName,
+            $principalNip,
+            $logoUrl,
+            $certificateNumber,
+            $certificateLocation,
+            $templateUrl
+        );
 
         $pdf = Pdf::loadHTML($html)
             ->setPaper('a4', 'landscape')
@@ -183,226 +196,22 @@ class CertificateService
 
     private function renderCertificateHTML(string $schoolName, string $title, string $subtitle, string $studentName, string $projectText, string $footer, string $principalName, string $principalNip, string $logoUrl, string $certificateNumber = '', string $certificateLocation = '', string $templateUrl = ''): string
     {
-        $date = date('d F Y');
-        $logoImg = $logoUrl ? "<img src=\"$logoUrl\" class=\"logo\" />" : '';
-        $displayLocation = $certificateLocation ?: 'Bandung';
-        $templateBg = $templateUrl ? "background-image: url('$templateUrl'); background-size: cover; background-position: center;" : '';
-        $numberDisplay = $certificateNumber ? "<div class=\"certificate-number\">$certificateNumber</div>" : '';
+        $data = [
+            'schoolName' => $schoolName,
+            'title' => $title,
+            'subtitle' => $subtitle,
+            'studentName' => $studentName,
+            'projectText' => $projectText,
+            'footer' => $footer,
+            'principalName' => $principalName,
+            'principalNip' => $principalNip,
+            'logoUrl' => $logoUrl,
+            'certificateNumber' => $certificateNumber,
+            'certificateLocation' => $certificateLocation,
+            'templateUrl' => $templateUrl,
+            'date' => date('d F Y'),
+        ];
 
-        return "<!DOCTYPE html>
-<html lang=\"id\">
-<head>
-    <meta charset=\"UTF-8\">
-    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
-    <title>$title</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Times New Roman', serif;
-            width: 100%;
-            padding: 0;
-            margin: 0;
-            background: white;
-        }
-        .page {
-            width: 297mm;
-            height: 210mm;
-            margin: 0;
-            padding: 40px;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            $templateBg
-        }
-        .header-decoration {
-            display: flex;
-            gap: 0;
-            margin-bottom: 30px;
-        }
-        .header-decoration .box {
-            height: 15px;
-            flex: 1;
-        }
-        .yellow { background: #F1C40F; }
-        .red { background: #E74C3C; }
-        .teal { background: #1ABC9C; }
-        .blue { background: #2E86C1; }
-
-        .certificate-content {
-            border: 3px solid #CCCCCC;
-            padding: 40px;
-            text-align: center;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.95);
-        }
-
-        .certificate-number {
-            font-size: 11px;
-            color: #666;
-            text-align: right;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-
-        .school-name {
-            font-size: 16px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 15px;
-        }
-
-        .title {
-            font-size: 48px;
-            font-weight: bold;
-            color: #1F4E79;
-            margin-bottom: 10px;
-            letter-spacing: 2px;
-        }
-
-        .subtitle {
-            font-size: 14px;
-            font-style: italic;
-            color: #666;
-            margin-bottom: 30px;
-        }
-
-        .label {
-            font-size: 13px;
-            color: #555;
-            margin-top: 20px;
-            margin-bottom: 10px;
-        }
-
-        .student-name {
-            font-size: 50px;
-            font-family: 'Brush Script MT', 'Lucida Handwriting', cursive, serif;
-            color: #1F4E79;
-            font-style: italic;
-            margin: 15px 0;
-            font-weight: normal;
-        }
-
-        .project-name {
-            font-size: 15px;
-            font-weight: bold;
-            color: #333;
-            margin: 15px 0;
-        }
-
-        .signature-area {
-            display: flex;
-            justify-content: flex-end;
-            gap: 60px;
-            margin-top: 40px;
-        }
-
-        .signature-box {
-            width: 180px;
-            text-align: center;
-        }
-
-        .signature-line {
-            border-top: 1px solid #333;
-            margin: 40px 0 5px 0;
-            height: 1px;
-        }
-
-        .signature-name {
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .signature-nip {
-            font-size: 11px;
-            color: #666;
-        }
-
-        .date-location {
-            text-align: right;
-            font-size: 12px;
-            color: #666;
-            margin-top: 10px;
-        }
-
-        .logo {
-            width: 60px;
-            height: 60px;
-            margin: 20px auto 0;
-        }
-
-        .footer-text {
-            font-size: 10px;
-            color: #999;
-            margin-top: 20px;
-            font-style: italic;
-        }
-
-        .footer-decoration {
-            display: flex;
-            gap: 0;
-            margin-top: 30px;
-        }
-        .footer-decoration .box {
-            height: 12px;
-            flex: 1;
-        }
-
-        @media print {
-            body {
-                margin: 0;
-                padding: 0;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class=\"page\">
-        <div class=\"header-decoration\">
-            <div class=\"box yellow\" style=\"flex: 0.45;\"></div>
-            <div class=\"box red\" style=\"flex: 0.55;\"></div>
-        </div>
-
-        <div class=\"certificate-content\">
-            $numberDisplay
-            <div class=\"school-name\">$schoolName</div>
-            <div class=\"title\">$title</div>
-            <div class=\"subtitle\">$subtitle</div>
-
-            <div class=\"label\">Diberikan kepada:</div>
-            <div class=\"student-name\">$studentName</div>
-
-            <div class=\"label\">Untuk:</div>
-            <div class=\"project-name\">$projectText</div>
-
-            <div class=\"date-location\">$displayLocation, $date</div>
-
-            <div class=\"signature-area\">
-                <div class=\"signature-box\">
-                    <div class=\"signature-line\"></div>
-                    <div class=\"signature-name\">$principalName</div>
-                    <div class=\"signature-nip\">$principalNip</div>
-                </div>
-            </div>
-
-            $logoImg
-
-            <div class=\"footer-text\">$footer</div>
-        </div>
-
-        <div class=\"footer-decoration\">
-            <div class=\"box teal\" style=\"flex: 0.55;\"></div>
-            <div class=\"box blue\" style=\"flex: 0.45;\"></div>
-        </div>
-    </div>
-</body>
-</html>";
+        return view('certificates.template', $data)->render();
     }
 }

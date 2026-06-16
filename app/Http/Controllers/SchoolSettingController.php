@@ -21,46 +21,41 @@ class SchoolSettingController extends Controller
                 'certificate_title' => 'Sertifikat Penyelesaian Modul',
                 'certificate_subtitle' => 'Telah menyelesaikan seluruh alur pembelajaran dan tugas modul.',
                 'certificate_footer' => 'Sertifikat ini berlaku sebagai bukti penyelesaian modul.',
+                'certificate_number' => 'No. -',
+                'certificate_place' => 'Bandung',
+                'certificate_template' => null,
             ]
         );
 
-        return view('settings.school', compact('setting'));
+        return view('setting-sekolah.index', compact('setting'));
     }
 
     public function update(Request $request)
     {
-        $setting = SchoolSetting::firstOrCreate(
-            ['id' => 1],
-            [
-                'school_name' => '',
-                'principal_name' => '',
-                'principal_nip' => '',
-                'school_logo' => null,
-            ]
-        );
+        $setting = SchoolSetting::firstOrCreate(['id' => 1]);
 
         $validated = $request->validate([
-            'school_name' => 'required|string|max:255',
-            'principal_name' => 'required|string|max:255',
-            'principal_nip' => 'required|string|max:100',
-            'certificate_number' => 'nullable|string|max:100',
-            'certificate_location' => 'nullable|string|max:255',
-            'certificate_template' => 'nullable|image|max:5120|mimes:jpeg,jpg,png',
-            'school_logo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'certificate_enabled' => 'nullable|boolean',
-            'certificate_title' => 'nullable|string|max:255',
-            'certificate_subtitle' => 'nullable|string|max:1000',
-            'certificate_footer' => 'nullable|string|max:1000',
+            'school_name' => ['nullable', 'string', 'max:255'],
+            'principal_name' => ['nullable', 'string', 'max:255'],
+            'principal_nip' => ['nullable', 'string', 'max:255'],
+            'school_logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'certificate_enabled' => ['nullable', 'boolean'],
+            'certificate_title' => ['nullable', 'string'],
+            'certificate_subtitle' => ['nullable', 'string'],
+            'certificate_footer' => ['nullable', 'string'],
+            'certificate_number' => ['nullable', 'string', 'max:255'],
+            'certificate_place' => ['nullable', 'string', 'max:255'],
+            'certificate_template' => ['nullable', 'image', 'mimes:jpg,jpeg', 'max:4096'],
         ]);
 
-        $validated['certificate_enabled'] = $request->has('certificate_enabled');
+        $validated['certificate_enabled'] = $request->boolean('certificate_enabled');
 
         if ($request->hasFile('school_logo')) {
             if ($setting->school_logo && Storage::disk('public')->exists($setting->school_logo)) {
                 Storage::disk('public')->delete($setting->school_logo);
             }
 
-            $validated['school_logo'] = $request->file('school_logo')->store('school_logos', 'public');
+            $validated['school_logo'] = $request->file('school_logo')->store('school-logos', 'public');
         }
 
         if ($request->hasFile('certificate_template')) {
@@ -68,11 +63,13 @@ class SchoolSettingController extends Controller
                 Storage::disk('public')->delete($setting->certificate_template);
             }
 
-            $validated['certificate_template'] = $request->file('certificate_template')->store('certificate_templates', 'public');
+            $validated['certificate_template'] = $request->file('certificate_template')->store('certificate-templates', 'public');
         }
 
         $setting->update($validated);
 
-        return back()->with('success', 'Setting sekolah berhasil disimpan.');
+        return redirect()
+            ->route('school-settings.index')
+            ->with('success', 'Setting sekolah berhasil diperbarui.');
     }
 }

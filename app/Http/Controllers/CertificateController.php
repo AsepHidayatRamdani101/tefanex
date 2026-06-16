@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\SchoolSetting;
 use App\Models\Siswa;
 use App\Services\CertificateService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class CertificateController extends Controller
@@ -30,6 +29,9 @@ class CertificateController extends Controller
                 'certificate_title' => 'Sertifikat Penyelesaian Modul',
                 'certificate_subtitle' => 'Telah menyelesaikan seluruh alur pembelajaran dan tugas modul.',
                 'certificate_footer' => 'Sertifikat ini berlaku sebagai bukti penyelesaian modul.',
+                'certificate_number' => 'No. -',
+                'certificate_place' => 'Bandung',
+                'certificate_template' => null,
             ]
         );
 
@@ -38,7 +40,7 @@ class CertificateController extends Controller
             [
                 [
                     'project_name' => 'Seluruh Modul',
-                    'material_title' => 'Seluruh Modul',
+                    'material_name' => 'Seluruh Modul',
                     'pretest_score' => null,
                     'posttest_score' => null,
                     'task_score' => null,
@@ -58,7 +60,7 @@ class CertificateController extends Controller
         $user = Auth::user();
         $siswa = Siswa::where('user_id', $user->id)->first();
 
-        if (!$siswa) {
+        if (! $siswa) {
             abort(403, 'Data siswa tidak ditemukan.');
         }
 
@@ -73,10 +75,13 @@ class CertificateController extends Controller
                 'certificate_title' => 'Sertifikat Penyelesaian Modul',
                 'certificate_subtitle' => 'Telah menyelesaikan seluruh alur pembelajaran dan tugas modul.',
                 'certificate_footer' => 'Sertifikat ini berlaku sebagai bukti penyelesaian modul.',
+                'certificate_number' => 'No. -',
+                'certificate_place' => 'Bandung',
+                'certificate_template' => null,
             ]
         );
 
-        if (!$setting->certificate_enabled) {
+        if (! $setting->certificate_enabled) {
             abort(403, 'Sertifikat belum diaktifkan oleh administrator.');
         }
 
@@ -96,6 +101,8 @@ class CertificateController extends Controller
 
         $fileName = sprintf('sertifikat-%s-%s.pdf', str()->slug($siswa->nama), date('Ymd'));
 
-        return response()->download($filePath, $fileName)->deleteFileAfterSend(true);
+        return response()->download($filePath, $fileName, [
+            'Content-Type' => 'application/pdf',
+        ])->deleteFileAfterSend(true);
     }
 }

@@ -18,5 +18,8 @@ class SchoolSetting extends Model
         'certificate_title',
         'certificate_subtitle',
         'certificate_footer',
+        'certificate_number',
+        'certificate_place',
+        'certificate_template',
     ];
 }
