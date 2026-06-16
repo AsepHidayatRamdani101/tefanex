@@ -14,24 +14,45 @@
                     </div>
 
                     <div class="card-body">
-                        @if($tasks->count() > 0)
+                        @if ($tasks->count() > 0)
+                            @if (!empty($certificateReady) && $certificateReady)
+                                @if (!empty($certificateEnabled) && $certificateEnabled)
+                                    <div class="alert alert-success" role="alert">
+                                        <strong>Sertifikat sudah tersedia!</strong> Anda telah menyelesaikan seluruh alur
+                                        modul.
+                                        <a href="{{ route('student.certificate.download') }}"
+                                            class="btn btn-sm btn-success ml-2">
+                                            <i class="fas fa-download"></i> Download Sertifikat
+                                        </a>
+                                    </div>
+                                @else
+                                    <div class="alert alert-warning" role="alert">
+                                        <strong>Sertifikat sudah siap, tetapi belum diaktifkan oleh administrator.</strong>
+                                        Silakan minta admin untuk mengaktifkan fitur sertifikat.
+                                    </div>
+                                @endif
+                            @else
+                                <div class="alert alert-info" role="alert">
+                                    Selesaikan seluruh alur modul untuk melihat tombol unduh sertifikat.
+                                </div>
+                            @endif
                             <div class="row">
                                 @php
                                     $colors = [
                                         'Design Brief' => '#3498db',
                                         'Mockup' => '#9b59b6',
                                         'Produksi' => '#e67e22',
-                                        'Quality Control' => '#1abc9c'
+                                        'Quality Control' => '#1abc9c',
                                     ];
                                     $icons = [
                                         'Design Brief' => 'fa-pencil-alt',
                                         'Mockup' => 'fa-drafting-compass',
                                         'Produksi' => 'fa-industry',
-                                        'Quality Control' => 'fa-check-circle'
+                                        'Quality Control' => 'fa-check-circle',
                                     ];
                                 @endphp
 
-                                @foreach($tasks as $task)
+                                @foreach ($tasks as $task)
                                     @php
                                         $bgColor = $colors[$task['type']] ?? '#2ecc71';
                                         $icon = $icons[$task['type']] ?? 'fa-tasks';
@@ -78,9 +99,10 @@
                                                                 {{ $statusLabel }}
                                                             </span>
                                                         </div>
-                                                        
+
                                                         <div class="col text-right">
-                                                            <span class="badge badge-pill" style="background-color: {{ $bgColor }}; color: #fff;">
+                                                            <span class="badge badge-pill"
+                                                                style="background-color: {{ $bgColor }}; color: #fff;">
                                                                 {{ $task['created_at']->format('d-m-Y') }}
                                                             </span>
                                                         </div>
@@ -91,39 +113,43 @@
                                                 </div>
                                             </div>
                                             <div class="card-body">
-                                                <p class="text-muted mb-2"><strong>Instruksi Tugas:</strong> {{ $task['task_description'] }}</p>
+                                                <p class="text-muted mb-2"><strong>Instruksi Tugas:</strong>
+                                                    {{ $task['task_description'] }}</p>
                                                 <p class="text-muted mb-3">{{ $task['description'] ?: '-' }}</p>
 
-                                                @if(!empty($task['keterangan']))
-                                                    <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                                                @if (!empty($task['keterangan']))
+                                                    <div class="alert alert-danger alert-dismissible fade show mb-3"
+                                                        role="alert">
                                                         <h5 class="alert-heading">
                                                             <i class="fas fa-exclamation-circle"></i> Revisi Diperlukan
                                                         </h5>
                                                         <p class="mb-0">{{ $task['keterangan'] }}</p>
-                                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                        <button type="button" class="close" data-dismiss="alert"
+                                                            aria-label="Close">
                                                             <span aria-hidden="true">&times;</span>
                                                         </button>
                                                     </div>
                                                 @endif
 
                                                 <div class="mb-1">
-                                                    @if($task['type'] === 'Design Brief')
-                                                                                                   php artisan tinker
-                                                        >>> $db = \App\Models\Design_Brief::find(3);
-                                                        >>> $db->approval_status
-                                                        >>> $db->keterangan             <a href="{{ route('design-brief.index', ['project_id' => $task['project_id']]) }}" class="btn btn-sm btn-primary">
+                                                    @if ($task['type'] === 'Design Brief')
+                                                        <a href="{{ route('design-brief.index', ['project_id' => $task['project_id']]) }}"
+                                                            class="btn btn-sm btn-primary">
                                                             <i class="fas fa-pencil-alt"></i> Kerjakan Design Brief
                                                         </a>
                                                     @elseif($task['type'] === 'Mockup')
-                                                        <a href="{{ route('mockup.index', ['project_id' => $task['project_id']]) }}" class="btn btn-sm btn-primary">
+                                                        <a href="{{ route('mockup.index', ['project_id' => $task['project_id']]) }}"
+                                                            class="btn btn-sm btn-primary">
                                                             <i class="fas fa-file-upload"></i> Upload Mockup
                                                         </a>
                                                     @elseif($task['type'] === 'Produksi')
-                                                        <a href="{{ route('produksi.index', ['project_id' => $task['project_id']]) }}" class="btn btn-sm btn-primary">
+                                                        <a href="{{ route('produksi.index', ['project_id' => $task['project_id']]) }}"
+                                                            class="btn btn-sm btn-primary">
                                                             <i class="fas fa-industry"></i> Upload Produksi
                                                         </a>
                                                     @elseif($task['type'] === 'Quality Control')
-                                                        <a href="{{ route('quality-control.index', ['project_id' => $task['project_id']]) }}" class="btn btn-sm btn-secondary">
+                                                        <a href="{{ route('quality-control.index', ['project_id' => $task['project_id']]) }}"
+                                                            class="btn btn-sm btn-secondary">
                                                             <i class="fas fa-check-circle"></i> Lihat QC
                                                         </a>
                                                     @endif

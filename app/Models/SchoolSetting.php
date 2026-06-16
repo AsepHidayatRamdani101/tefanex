@@ -14,5 +14,9 @@ class SchoolSetting extends Model
         'principal_name',
         'principal_nip',
         'school_logo',
+        'certificate_enabled',
+        'certificate_title',
+        'certificate_subtitle',
+        'certificate_footer',
     ];
 }

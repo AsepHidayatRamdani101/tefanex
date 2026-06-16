@@ -7,6 +7,7 @@ use App\Models\Siswa;
 use App\Models\Project;
 use App\Models\Material;
 use App\Models\Project_Member;
+use App\Services\CertificateService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -65,9 +66,13 @@ class StudentMaterialController extends Controller
             }])
             ->get();
 
+        $certificateReady = (new CertificateService())->isStudentCompleted($user);
+        $schoolSetting =     \App\Models\SchoolSetting::first();
+        $certificateEnabled = $schoolSetting ? $schoolSetting->certificate_enabled : false;
+
         // Collect tasks based on role
         $tasks = collect();
-        
+
         foreach ($projectMembers as $member) {
             $project = $member->project;
             $role = strtolower($member->role_in_project);
@@ -168,7 +173,7 @@ class StudentMaterialController extends Controller
 
         $selectedProjectId = $request->input('project_id');
 
-        return view('student.materials.tasks', compact('tasks', 'siswa', 'projectMembers', 'selectedProjectId'));
+        return view('student.materials.tasks', compact('tasks', 'siswa', 'projectMembers', 'selectedProjectId', 'certificateReady', 'certificateEnabled'));
     }
 
     /**

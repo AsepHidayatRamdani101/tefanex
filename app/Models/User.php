@@ -54,4 +54,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(Siswa::class, 'user_id');
     }
+
+    public function projectMembers()
+    {
+        return $this->hasMany(Project_Member::class, 'user_id');
+    }
 }

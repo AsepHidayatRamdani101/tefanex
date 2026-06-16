@@ -21,6 +21,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\StudentTestController;
 use App\Http\Controllers\StudentMaterialController;
+use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\ReportController;
@@ -74,7 +75,8 @@ Route::middleware('role:guru|super_admin|kepala_tefa|admin')->group(function () 
     Route::resource('project-members', ProjectMemberController::class);
     Route::get('project-members-data', [ProjectMemberController::class, 'data'])->name('project-members.data');
 });
-Route::get('projects/{project}/members', 
+Route::get(
+    'projects/{project}/members',
     [ProjectMemberController::class, 'data']
 )->name('projects.members.data');
 Route::resource('design-brief', DesignBriefController::class)
@@ -123,9 +125,9 @@ Route::post('materi/bulk', [MateriController::class, 'bulk'])->name('materi.bulk
 Route::get('debug/attendance', function () {
     $attendanceCount = \App\Models\Attendance::count();
     $siswaCount = \App\Models\Siswa::whereNotNull('user_id')->count();
-    
+
     $sample = \App\Models\Attendance::with('user.siswa')->first();
-    
+
     return response()->json([
         'total_attendance' => $attendanceCount,
         'total_siswa' => $siswaCount,
@@ -146,6 +148,7 @@ Route::middleware('role:guru|super_admin|kepala_tefa|admin')->group(function () 
     Route::get('kelas-data', [KelasController::class, 'data'])->name('kelas.data');
     Route::get('setting-sekolah', [SchoolSettingController::class, 'index'])->name('school-settings.index');
     Route::put('setting-sekolah', [SchoolSettingController::class, 'update'])->name('school-settings.update');
+    Route::get('setting-sekolah/sertifikat/download', [CertificateController::class, 'downloadAdminCertificate'])->name('school-settings.certificate.download');
     // Alias route untuk pengaturan
     Route::get('pengaturan', [SettingsController::class, 'index'])->name('pengaturan.index');
     Route::post('pengaturan/backup', [SettingsController::class, 'backup'])->name('pengaturan.backup');
@@ -207,7 +210,7 @@ Route::middleware('role:siswa')->group(function () {
     Route::get('student/tests', [StudentTestController::class, 'listTests'])->name('student.tests.list');
     Route::get('student/test/{test}', [StudentTestController::class, 'showTest'])->name('student.test.show');
     Route::post('student/test/{test}/submit', [StudentTestController::class, 'submitTest'])->name('student.test.submit');
-    
+
     // Student Materials and Tasks Routes
     Route::get('student/materials', [StudentMaterialController::class, 'materials'])->name('student.materials.index');
     Route::get('student/tasks', [StudentMaterialController::class, 'tasks'])->name('student.tasks.index');
@@ -217,6 +220,10 @@ Route::middleware('role:siswa')->group(function () {
 Route::group(['middleware' => 'role:siswa|guru|super_admin|kepala_tefa|admin'], function () {
     Route::get('student/test/result/{result}', [StudentTestController::class, 'showResult'])->name('student.test.result');
 });
+
+Route::get('student/certificate/download', [CertificateController::class, 'downloadStudentCertificate'])
+    ->middleware('role:siswa')
+    ->name('student.certificate.download');
 
 Route::put('student/test/result/{result}', [StudentTestController::class, 'updateEvaluation'])
     ->middleware('role:guru|super_admin|kepala_tefa|admin')
